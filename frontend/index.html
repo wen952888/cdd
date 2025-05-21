@@ -11,7 +11,7 @@
     <div id="app-container">
 
         <!-- 登录/注册视图 -->
-        <div id="auth-view" class="view"> <!-- ID: auth-view -->
+        <div id="auth-view" class="view"> <!-- HTML ID: auth-view -->
             <h2>用户登录/注册</h2>
             <div id="auth-message" class="message-area"></div>
             <div class="auth-form">
@@ -29,7 +29,7 @@
         </div>
 
         <!-- 大厅视图 (登录后显示) -->
-        <div id="lobby-view" class="view"> <!-- ID: lobby-view -->
+        <div id="lobby-view" class="view"> <!-- HTML ID: lobby-view -->
             <h2>游戏大厅</h2>
             <p>欢迎, <span id="lobbyUsername"></span>! <button id="logoutButton">退出登录</button></p>
             <div id="lobby-message" class="message-area"></div>
@@ -37,7 +37,7 @@
         </div>
 
         <!-- 游戏房间视图 (进入房间后显示) -->
-        <div id="room-view" class="view"> <!-- ID: room-view -->
+        <div id="room-view" class="view"> <!-- HTML ID: room-view -->
             <h2>游戏房间: <span id="roomNameDisplay"></span></h2>
             <p><em>游戏界面将在后续阶段添加...</em></p>
         </div>
@@ -46,8 +46,8 @@
 
     <!-- 脚本放在 body 底部 -->
     <script src="js/api_config.js"></script>
-    <script src="js/ui.js"></script>
-    <script src="js/auth.js"></script>
-    <script src="js/app.js"></script>
+    <script src="js/ui.js"></script>          <!-- ui.js 提供了 switchToView 和 initViews -->
+    <script src="js/auth.js"></script>       <!-- auth.js 会调用 switchToView -->
+    <script src="js/app.js"></script>         <!-- app.js 会调用 initViews 和 auth.js 中的函数 -->
 </body>
 </html>
