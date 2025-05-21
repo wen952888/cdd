@@ -1,40 +1,70 @@
 // frontend/js/app.js
 
-let currentAppRoomId = null; // 在 app.js 级别也追踪一下当前房间ID
+let currentAppRoomId = null;
 
 document.addEventListener('DOMContentLoaded', () => {
     console.log('App DOM Loaded. Initializing...');
-    initViews();
+    initViews(); // from ui.js
 
     // --- 认证按钮 ---
     const regBtn = document.getElementById('registerButton');
     const loginBtn = document.getElementById('loginButton');
-    const logoutBtn = document.getElementById('logoutButton');
-    if (regBtn) regBtn.addEventListener('click', handleRegister);
-    else console.warn('Register button not found');
-    if (loginBtn) loginBtn.addEventListener('click', handleLogin);
-    else console.warn('Login button not found');
-    if (logoutBtn) logoutBtn.addEventListener('click', handleLogout);
-    else console.warn('Logout button not found');
+    const logoutBtn = document.getElementById('logoutButton'); // ID 确认
+
+    // 确保 auth.js 中的函数已加载并可用
+    if (typeof handleRegister === 'function') {
+        if (regBtn) regBtn.addEventListener('click', handleRegister);
+        else console.warn('App: Register button not found in DOM.');
+    } else console.error('App Error: handleRegister function is not defined. Check auth.js loading.');
+
+    if (typeof handleLogin === 'function') {
+        if (loginBtn) loginBtn.addEventListener('click', handleLogin);
+        else console.warn('App: Login button not found in DOM.');
+    } else console.error('App Error: handleLogin function is not defined. Check auth.js loading.');
+
+    if (typeof handleLogout === 'function') { // 确保 handleLogout 已定义
+        if (logoutBtn) logoutBtn.addEventListener('click', handleLogout);
+        else console.warn('App: Logout button not found in DOM.');
+    } else console.error('App Error: handleLogout function is not defined. Check auth.js loading.');
+
 
     // --- 大厅按钮 ---
     const createRoomBtn = document.getElementById('createRoomButton');
     const refreshRoomsBtn = document.getElementById('refreshRoomListButton');
-    if (createRoomBtn) createRoomBtn.addEventListener('click', handleCreateRoom); // handleCreateRoom 在 lobby.js
-    else console.warn('Create Room button not found');
-    if (refreshRoomsBtn) refreshRoomsBtn.addEventListener('click', fetchAndRenderRoomList); // fetchAndRenderRoomList 在 lobby.js
-    else console.warn('Refresh Room List button not found');
+
+    if (typeof handleCreateRoom === 'function') { // from lobby.js
+        if (createRoomBtn) createRoomBtn.addEventListener('click', handleCreateRoom);
+        else console.warn('App: Create Room button not found.');
+    } else console.error('App Error: handleCreateRoom function is not defined. Check lobby.js loading.');
+
+    if (typeof fetchAndRenderRoomList === 'function') { // from lobby.js
+        if (refreshRoomsBtn) refreshRoomsBtn.addEventListener('click', fetchAndRenderRoomList);
+        else console.warn('App: Refresh Room List button not found.');
+    } else console.error('App Error: fetchAndRenderRoomList function is not defined. Check lobby.js loading.');
+
 
     // --- 房间按钮 ---
     const playerReadyBtn = document.getElementById('playerReadyButton');
     const leaveRoomBtn = document.getElementById('leaveRoomButton');
-    if(playerReadyBtn) playerReadyBtn.addEventListener('click', handlePlayerReady); // handlePlayerReady 在 room.js
-    else console.warn('Player Ready button not found');
-    if(leaveRoomBtn) leaveRoomBtn.addEventListener('click', handleLeaveRoom); // handleLeaveRoom 在 room.js
-    else console.warn('Leave Room button not found');
+
+    if (typeof handlePlayerReady === 'function') { // from room.js
+        if(playerReadyBtn) playerReadyBtn.addEventListener('click', handlePlayerReady);
+        else console.warn('App: Player Ready button not found.');
+    } else console.error('App Error: handlePlayerReady function is not defined. Check room.js loading.');
+
+    if (typeof handleLeaveRoom === 'function') { // from room.js
+        if(leaveRoomBtn) leaveRoomBtn.addEventListener('click', handleLeaveRoom);
+        else console.warn('App: Leave Room button not found.');
+    } else console.error('App Error: handleLeaveRoom function is not defined. Check room.js loading.');
 
 
-    checkAuthStatusOnLoad(); // 这会决定初始视图 (auth or lobby)
+    // 检查用户当前的登录状态 (这将决定初始显示的视图)
+    if (typeof checkAuthStatusOnLoad === 'function') { // from auth.js
+        checkAuthStatusOnLoad();
+    } else {
+        console.error('App Error: checkAuthStatusOnLoad function is not defined. Cannot determine initial view.');
+        switchToView('auth'); // Fallback to auth view if check function is missing
+    }
 
     console.log('App initialized.');
 });
@@ -43,27 +73,11 @@ document.addEventListener('DOMContentLoaded', () => {
 function enterRoom(roomId) {
     if (!roomId) return;
     console.log(`App: Entering room ${roomId}`);
-    currentAppRoomId = roomId; // 更新 app 级别的房间ID
-    switchToView('room');    // 切换到房间视图
-    startRoomPolling(roomId); // room.js 中的函数，开始轮询该房间的状态
+    currentAppRoomId = roomId;
+    if (typeof switchToView === 'function' && typeof startRoomPolling === 'function') {
+        switchToView('room');    // from ui.js
+        startRoomPolling(roomId); // from room.js
+    } else {
+        console.error('App Error: switchToView or startRoomPolling not defined for enterRoom.');
+    }
 }
-
-// 在 auth.js 的 handleLogin 成功后，以及 checkAuthStatusOnLoad 发现已登录时，
-// 需要调用 fetchAndRenderRoomList() 来加载大厅的房间列表。
-// 可以在 switchToView('lobby') 之后直接调用，或者在 auth.js 中调用。
-// 我们在 auth.js 中修改，使其在切换到 lobby 后调用。
-// frontend/js/auth.js 修改:
-// ...
-// if (result.success) {
-//     ...
-//     switchToView('lobby');
-//     if (typeof fetchAndRenderRoomList === 'function') fetchAndRenderRoomList(); // 添加此行
-// }
-// ...
-// 在 checkAuthStatusOnLoad 中类似:
-// if (result.success && result.data.loggedIn) {
-//     ...
-//     switchToView('lobby');
-//     if (typeof fetchAndRenderRoomList === 'function') fetchAndRenderRoomList(); // 添加此行
-// }
-// ...
