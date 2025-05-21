@@ -11,21 +11,22 @@
 </head>
 <body>
     <div id="app-container">
+
         <!-- 登录/注册视图 -->
         <div id="auth-view" class="view">
             <h2>用户登录/注册</h2>
-            <div id="auth-message" class="message-area"></div> <!-- 确保这个ID存在 -->
+            <div id="auth-message" class="message-area"></div>
             <div class="auth-form">
                 <h3>注册新用户</h3>
                 <input type="text" id="regUsername" placeholder="用户名 (3-50字符)">
                 <input type="password" id="regPassword" placeholder="密码 (至少6字符)">
-                <button id="registerButton">注册</button> <!-- ID: registerButton -->
+                <button id="registerButton">注册</button>
             </div>
             <div class="auth-form">
                 <h3>用户登录</h3>
                 <input type="text" id="loginUsername" placeholder="用户名">
                 <input type="password" id="loginPassword" placeholder="密码">
-                <button id="loginButton">登录</button> <!-- ID: loginButton -->
+                <button id="loginButton">登录</button>
             </div>
         </div>
 
@@ -33,19 +34,25 @@
         <div id="lobby-view" class="view hidden">
             <div class="lobby-header">
                 <h2>游戏大厅</h2>
-                <p>欢迎, <span id="lobbyUsername"></span>! <button id="logoutButton" class="small-btn">退出</button></p> <!-- ID: logoutButton -->
+                <p>欢迎, <span id="lobbyUsername"></span>! <button id="logoutButton" class="small-btn">退出</button></p>
             </div>
+            <!-- 大厅消息区域 -->
             <div id="lobby-message" class="message-area"></div>
+
             <div class="lobby-actions">
                 <h3>创建新房间</h3>
-                <input type="text" id="createRoomNameInput" placeholder="房间名称">
-                <input type="password" id="createRoomPasswordInput" placeholder="房间密码 (可选)">
-                <button id="createRoomButton">创建房间</button> <!-- ID: createRoomButton -->
+                <input type="text" id="createRoomNameInput" placeholder="房间名称 (1-30字符)">
+                <input type="password" id="createRoomPasswordInput" placeholder="房间密码 (可选, 4-20字符)">
+                <button id="createRoomButton">创建房间</button>
             </div>
+
             <div class="room-list-container">
                 <h3>房间列表 (等待中)</h3>
-                <button id="refreshRoomListButton">刷新列表</button> <!-- ID: refreshRoomListButton -->
-                <div id="roomList"></div>
+                <button id="refreshRoomListButton">刷新列表</button>
+                <div id="roomList">
+                    <!-- 房间列表将由JS动态填充 -->
+                    <p>正在加载房间列表...</p>
+                </div>
             </div>
         </div>
 
@@ -54,9 +61,11 @@
             <div class="room-header">
                 <h2 id="roomNameDisplay">房间名称</h2>
                 <span id="roomIdDisplay" class="room-id-display">ID:</span>
-                <button id="leaveRoomButton" class="small-btn">离开房间</button> <!-- ID: leaveRoomButton -->
+                <button id="leaveRoomButton" class="small-btn">离开房间</button>
             </div>
+            <!-- 房间消息区域 -->
             <div id="room-message" class="message-area"></div>
+
             <div id="game-area">
                 <div class="player-slots-container">
                     <div class="player-slot" id="player-slot-0">等待玩家...</div>
@@ -64,20 +73,23 @@
                     <div class="player-slot" id="player-slot-2">等待玩家...</div>
                     <div class="player-slot" id="player-slot-3">等待玩家...</div>
                 </div>
-                <div id="game-board" class="hidden"></div>
+                <div id="game-board" class="hidden">
+                    <p>游戏板内容 (阶段三)</p>
+                </div>
             </div>
+
             <div id="room-actions" class="room-actions-bar">
-                 <button id="playerReadyButton">准备</button> <!-- ID: playerReadyButton -->
+                 <button id="playerReadyButton">准备</button>
             </div>
         </div>
     </div>
 
     <!-- 脚本加载顺序 -->
-    <script src="js/api_config.js"></script> <!-- 1. API配置 (定义 API_BASE_URL) -->
-    <script src="js/ui.js"></script>       <!-- 2. UI工具函数 (定义 switchToView, initViews) -->
-    <script src="js/auth.js"></script>      <!-- 3. 认证逻辑 (定义 handleRegister, handleLogin, handleLogout, apiRequest, displayAuthMessage, checkAuthStatusOnLoad) -->
-    <script src="js/lobby.js"></script>     <!-- 4. 大厅逻辑 (定义 handleCreateRoom, fetchAndRenderRoomList, handleJoinRoom, displayLobbyMessage) -->
-    <script src="js/room.js"></script>      <!-- 5. 房间逻辑 (定义 handlePlayerReady, handleLeaveRoom, startRoomPolling, displayRoomMessage) -->
-    <script src="js/app.js"></script>        <!-- 6. 应用主入口 (调用其他JS文件中的函数，绑定事件) -->
+    <script src="js/api_config.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/lobby.js"></script>
+    <script src="js/room.js"></script>
+    <script src="js/app.js"></script>
 </body>
 </html>
