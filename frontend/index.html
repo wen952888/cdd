@@ -3,31 +3,56 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>锄大地</title>
+    <title>HTML5 Big Two (鋤大地)</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
     <div id="game-container">
-        <div id="player-area">
-            <!-- 玩家手牌将在这里动态生成 -->
+        <h1>Big Two Game</h1>
+
+        <div id="controls-area">
+            <input type="text" id="playerName" placeholder="Enter Your Name">
+            <input type="text" id="gameIdInput" placeholder="Game ID (for joining)">
+            <button id="createGameBtn">Create Game</button>
+            <button id="joinGameBtn">Join Game</button>
         </div>
-        <div id="table-area">
-            <!-- 当前打出的牌 -->
-        </div>
-        <div id="action-buttons">
-            <button id="play-button">出牌</button>
-            <button id="pass-button">Pass</button>
-        </div>
+
         <div id="game-info">
-            <!-- 游戏状态信息 -->
+            <p>Status: <span id="statusText">Waiting for action...</span></p>
+            <p>Game ID: <span id="gameIdDisplay">-</span> | Your Player ID: <span id="playerIdDisplay">-</span></p>
+            <p>Current Turn: <span id="currentPlayerName">-</span></p>
         </div>
+
+        <div id="other-players-area">
+            <!-- Other players' info will appear here -->
+        </div>
+
+        <div id="table-area">
+            <h2>Table</h2>
+            <div id="played-cards-display">
+                <!-- Last played cards -->
+            </div>
+        </div>
+
+        <div id="my-hand-area">
+            <h2>Your Hand</h2>
+            <div id="player-cards-display">
+                <!-- Your cards will appear here -->
+            </div>
+        </div>
+
+        <div id="action-buttons">
+            <button id="playCardsBtn" disabled>Play Selected Cards</button>
+            <button id="passBtn" disabled>Pass</button>
+        </div>
+
     </div>
 
     <script src="js/api.js"></script>
     <script src="js/ui.js"></script>
     <script src="js/game.js"></script>
     <script>
-        // 初始化游戏
+        // Initialize the game interactions
         Game.init();
     </script>
 </body>
