@@ -4,24 +4,22 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>在线锄大地</title>
-    <link rel="stylesheet" href="css/style.css"> <!-- 你现有的CSS -->
-    <link rel="stylesheet" href="css/auth.css"> <!-- 登录注册CSS (新建) -->
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/auth.css">
 </head>
 <body>
     <div id="app-container">
 
         <!-- 登录/注册视图 -->
-        <div id="auth-view" class="view">
+        <div id="auth-view" class="view"> <!-- ID: auth-view -->
             <h2>用户登录/注册</h2>
             <div id="auth-message" class="message-area"></div>
-            <!-- 注册表单 -->
             <div class="auth-form">
                 <h3>注册新用户</h3>
                 <input type="text" id="regUsername" placeholder="用户名 (3-50字符)">
                 <input type="password" id="regPassword" placeholder="密码 (至少6字符)">
                 <button id="registerButton">注册</button>
             </div>
-            <!-- 登录表单 -->
             <div class="auth-form">
                 <h3>用户登录</h3>
                 <input type="text" id="loginUsername" placeholder="用户名">
@@ -31,26 +29,25 @@
         </div>
 
         <!-- 大厅视图 (登录后显示) -->
-        <div id="lobby-view" class="view hidden">
+        <div id="lobby-view" class="view"> <!-- ID: lobby-view -->
             <h2>游戏大厅</h2>
             <p>欢迎, <span id="lobbyUsername"></span>! <button id="logoutButton">退出登录</button></p>
             <div id="lobby-message" class="message-area"></div>
-            <!-- 房间列表和创建房间功能将在这里添加 -->
             <p><em>房间功能将在下一阶段添加...</em></p>
         </div>
 
         <!-- 游戏房间视图 (进入房间后显示) -->
-        <div id="room-view" class="view hidden">
+        <div id="room-view" class="view"> <!-- ID: room-view -->
             <h2>游戏房间: <span id="roomNameDisplay"></span></h2>
-            <!-- 游戏界面将在这里 -->
-             <p><em>游戏界面将在后续阶段添加...</em></p>
+            <p><em>游戏界面将在后续阶段添加...</em></p>
         </div>
 
     </div>
 
-    <script src="js/api_config.js"></script> <!-- 新建: 存放API_BASE_URL -->
-    <script src="js/auth.js"></script>    <!-- 新建: 处理认证逻辑 -->
-    <script src="js/ui.js"></script>      <!-- 修改: 控制视图显示 -->
-    <script src="js/app.js"></script>     <!-- 新建或修改game.js: 应用主逻辑 -->
+    <!-- 脚本放在 body 底部 -->
+    <script src="js/api_config.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/app.js"></script>
 </body>
 </html>
