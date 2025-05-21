@@ -6,48 +6,78 @@
     <title>在线锄大地</title>
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/auth.css">
+    <link rel="stylesheet" href="css/lobby.css"> <!-- 新建: 大厅CSS -->
+    <link rel="stylesheet" href="css/room.css">  <!-- 新建: 房间CSS -->
 </head>
 <body>
     <div id="app-container">
 
-        <!-- 登录/注册视图 -->
-        <div id="auth-view" class="view"> <!-- HTML ID: auth-view -->
+        <!-- 登录/注册视图 (不变) -->
+        <div id="auth-view" class="view">
             <h2>用户登录/注册</h2>
-            <div id="auth-message" class="message-area"></div>
-            <div class="auth-form">
-                <h3>注册新用户</h3>
-                <input type="text" id="regUsername" placeholder="用户名 (3-50字符)">
-                <input type="password" id="regPassword" placeholder="密码 (至少6字符)">
-                <button id="registerButton">注册</button>
-            </div>
-            <div class="auth-form">
-                <h3>用户登录</h3>
-                <input type="text" id="loginUsername" placeholder="用户名">
-                <input type="password" id="loginPassword" placeholder="密码">
-                <button id="loginButton">登录</button>
-            </div>
+            <!-- ...表单内容... -->
         </div>
 
-        <!-- 大厅视图 (登录后显示) -->
-        <div id="lobby-view" class="view"> <!-- HTML ID: lobby-view -->
-            <h2>游戏大厅</h2>
-            <p>欢迎, <span id="lobbyUsername"></span>! <button id="logoutButton">退出登录</button></p>
+        <!-- 大厅视图 -->
+        <div id="lobby-view" class="view hidden">
+            <div class="lobby-header">
+                <h2>游戏大厅</h2>
+                <p>欢迎, <span id="lobbyUsername"></span>! <button id="logoutButton" class="small-btn">退出</button></p>
+            </div>
             <div id="lobby-message" class="message-area"></div>
-            <p><em>房间功能将在下一阶段添加...</em></p>
+
+            <div class="lobby-actions">
+                <h3>创建新房间</h3>
+                <input type="text" id="createRoomNameInput" placeholder="房间名称">
+                <input type="password" id="createRoomPasswordInput" placeholder="房间密码 (可选)">
+                <button id="createRoomButton">创建房间</button>
+            </div>
+
+            <div class="room-list-container">
+                <h3>房间列表 (等待中)</h3>
+                <button id="refreshRoomListButton">刷新列表</button>
+                <div id="roomList">
+                    <p>正在加载房间列表...</p>
+                </div>
+            </div>
         </div>
 
-        <!-- 游戏房间视图 (进入房间后显示) -->
-        <div id="room-view" class="view"> <!-- HTML ID: room-view -->
-            <h2>游戏房间: <span id="roomNameDisplay"></span></h2>
-            <p><em>游戏界面将在后续阶段添加...</em></p>
-        </div>
+        <!-- 游戏房间视图 (等待和游戏界面) -->
+        <div id="room-view" class="view hidden">
+            <div class="room-header">
+                <h2 id="roomNameDisplay">房间名称</h2>
+                <span id="roomIdDisplay" class="room-id-display">ID:</span>
+                <button id="leaveRoomButton" class="small-btn">离开房间</button>
+            </div>
+            <div id="room-message" class="message-area"></div>
 
+            <div id="game-area">
+                <!-- 玩家位置区域 (简化版) -->
+                <div class="player-slots-container">
+                    <div class="player-slot" id="player-slot-0">等待玩家...</div>
+                    <div class="player-slot" id="player-slot-1">等待玩家...</div>
+                    <div class="player-slot" id="player-slot-2">等待玩家...</div>
+                    <div class="player-slot" id="player-slot-3">等待玩家...</div>
+                </div>
+
+                <div id="game-board" class="hidden">
+                    <!-- 桌面牌、手牌、操作按钮等 (阶段三) -->
+                    <p>游戏板内容</p>
+                </div>
+            </div>
+
+            <div id="room-actions" class="room-actions-bar">
+                 <button id="playerReadyButton">准备</button>
+                 <!-- 游戏开始后，这里会是出牌/Pass按钮 -->
+            </div>
+        </div>
     </div>
 
-    <!-- 脚本放在 body 底部 -->
     <script src="js/api_config.js"></script>
-    <script src="js/ui.js"></script>          <!-- ui.js 提供了 switchToView 和 initViews -->
-    <script src="js/auth.js"></script>       <!-- auth.js 会调用 switchToView -->
-    <script src="js/app.js"></script>         <!-- app.js 会调用 initViews 和 auth.js 中的函数 -->
+    <script src="js/ui.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/lobby.js"></script> <!-- 新建: 处理大厅逻辑 -->
+    <script src="js/room.js"></script>  <!-- 新建: 处理房间逻辑 -->
+    <script src="js/app.js"></script>
 </body>
 </html>
