@@ -1,0 +1,10 @@
+# Prevent directory listing for the API folder itself
+Options -Indexes
+
+# If you want to use URL rewriting like api/create_game instead of api/create_game.php
+# you would add RewriteRules here. For now, we'll use direct .php file access.
+# Example (not used in current setup):
+# RewriteEngine On
+# RewriteCond %{REQUEST_FILENAME} !-f
+# RewriteCond %{REQUEST_FILENAME} !-d
+# RewriteRule ^([a-zA-Z0-9_-]+)$ $1.php [L]
