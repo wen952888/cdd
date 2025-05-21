@@ -11,10 +11,10 @@
 </head>
 <body>
     <div id="app-container">
-
+        <!-- 登录/注册视图 -->
         <div id="auth-view" class="view">
             <h2>用户登录/注册</h2>
-            <div id="auth-message" class="message-area"></div>
+            <div id="auth-message" class="message-area"></div> <!-- 确保这个ID存在 -->
             <div class="auth-form">
                 <h3>注册新用户</h3>
                 <input type="text" id="regUsername" placeholder="用户名 (3-50字符)">
@@ -29,25 +29,55 @@
             </div>
         </div>
 
+        <!-- 大厅视图 -->
         <div id="lobby-view" class="view hidden">
             <div class="lobby-header">
                 <h2>游戏大厅</h2>
                 <p>欢迎, <span id="lobbyUsername"></span>! <button id="logoutButton" class="small-btn">退出</button></p> <!-- ID: logoutButton -->
             </div>
-            <!-- ... 其他 lobby 内容 ... -->
+            <div id="lobby-message" class="message-area"></div>
+            <div class="lobby-actions">
+                <h3>创建新房间</h3>
+                <input type="text" id="createRoomNameInput" placeholder="房间名称">
+                <input type="password" id="createRoomPasswordInput" placeholder="房间密码 (可选)">
+                <button id="createRoomButton">创建房间</button> <!-- ID: createRoomButton -->
+            </div>
+            <div class="room-list-container">
+                <h3>房间列表 (等待中)</h3>
+                <button id="refreshRoomListButton">刷新列表</button> <!-- ID: refreshRoomListButton -->
+                <div id="roomList"></div>
+            </div>
         </div>
 
+        <!-- 游戏房间视图 -->
         <div id="room-view" class="view hidden">
-            <!-- ... room 内容 ... -->
+            <div class="room-header">
+                <h2 id="roomNameDisplay">房间名称</h2>
+                <span id="roomIdDisplay" class="room-id-display">ID:</span>
+                <button id="leaveRoomButton" class="small-btn">离开房间</button> <!-- ID: leaveRoomButton -->
+            </div>
+            <div id="room-message" class="message-area"></div>
+            <div id="game-area">
+                <div class="player-slots-container">
+                    <div class="player-slot" id="player-slot-0">等待玩家...</div>
+                    <div class="player-slot" id="player-slot-1">等待玩家...</div>
+                    <div class="player-slot" id="player-slot-2">等待玩家...</div>
+                    <div class="player-slot" id="player-slot-3">等待玩家...</div>
+                </div>
+                <div id="game-board" class="hidden"></div>
+            </div>
+            <div id="room-actions" class="room-actions-bar">
+                 <button id="playerReadyButton">准备</button> <!-- ID: playerReadyButton -->
+            </div>
         </div>
     </div>
 
-    <!-- 脚本顺序至关重要 -->
-    <script src="js/api_config.js"></script> <!-- 全局配置 -->
-    <script src="js/ui.js"></script>       <!-- UI 切换函数 -->
-    <script src="js/auth.js"></script>      <!-- 认证函数 (handleRegister, handleLogin, handleLogout) -->
-    <script src="js/lobby.js"></script>     <!-- 大厅函数 (handleCreateRoom, fetchAndRenderRoomList, handleJoinRoom) -->
-    <script src="js/room.js"></script>      <!-- 房间函数 (handlePlayerReady, handleLeaveRoom) -->
-    <script src="js/app.js"></script>        <!-- 应用主入口，绑定事件 -->
+    <!-- 脚本加载顺序 -->
+    <script src="js/api_config.js"></script> <!-- 1. API配置 (定义 API_BASE_URL) -->
+    <script src="js/ui.js"></script>       <!-- 2. UI工具函数 (定义 switchToView, initViews) -->
+    <script src="js/auth.js"></script>      <!-- 3. 认证逻辑 (定义 handleRegister, handleLogin, handleLogout, apiRequest, displayAuthMessage, checkAuthStatusOnLoad) -->
+    <script src="js/lobby.js"></script>     <!-- 4. 大厅逻辑 (定义 handleCreateRoom, fetchAndRenderRoomList, handleJoinRoom, displayLobbyMessage) -->
+    <script src="js/room.js"></script>      <!-- 5. 房间逻辑 (定义 handlePlayerReady, handleLeaveRoom, startRoomPolling, displayRoomMessage) -->
+    <script src="js/app.js"></script>        <!-- 6. 应用主入口 (调用其他JS文件中的函数，绑定事件) -->
 </body>
 </html>
