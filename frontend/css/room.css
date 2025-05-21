@@ -1,0 +1,48 @@
+/* frontend/css/room.css */
+.room-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #eee;
+}
+.room-header h2 { margin: 0; flex-grow: 1; }
+.room-id-display { font-size: 0.8em; color: #777; margin-left: 10px; }
+
+#game-area {
+    /* 更多游戏区域样式将在阶段三添加 */
+    padding: 10px;
+    background-color: #e8f5e9; /* 淡绿色背景 */
+    min-height: 300px;
+    border-radius: 5px;
+    margin-bottom: 15px;
+}
+.player-slots-container {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); /* 简单2x2布局 */
+    gap: 10px;
+    margin-bottom: 20px;
+}
+.player-slot {
+    padding: 15px;
+    border: 1px dashed #ccc;
+    border-radius: 4px;
+    text-align: center;
+    background-color: #fff;
+}
+.player-slot.occupied {
+    border-style: solid;
+    border-color: #a5d6a7;
+    background-color: #f1f8e9;
+}
+.player-slot .username { font-weight: bold; }
+.player-slot .status { font-size: 0.9em; color: #555; }
+.player-slot .status.ready { color: green; }
+
+
+.room-actions-bar {
+    text-align: center;
+    padding-top: 15px;
+    border-top: 1px solid #eee;
+}
