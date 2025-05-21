@@ -24,17 +24,15 @@ async function apiRequest(endpoint, method = 'POST', data = null) {
     if (data) options.body = JSON.stringify(data);
 
     try {
-        // credentials 'include' is important for sending/receiving session cookies
         const response = await fetch(API_BASE_URL + endpoint, {...options, credentials: 'include'});
         const responseData = await response.json();
         if (!response.ok) {
-            // 如果响应状态码不是 2xx，也尝试从 responseData 中获取 message
             throw new Error(responseData.message || `HTTP error ${response.status}`);
         }
         return responseData;
     } catch (error) {
         console.error(`API request to ${endpoint} failed:`, error);
-        throw error; // Re-throw to be caught by caller
+        throw error;
     }
 }
 
@@ -46,7 +44,6 @@ async function handleRegister() {
         displayAuthMessage('请输入用户名和密码。', true);
         return;
     }
-    // 可以在这里添加更多前端验证
 
     registerButton.disabled = true;
     try {
@@ -55,7 +52,6 @@ async function handleRegister() {
         if (result.success) {
             regUsernameInput.value = '';
             regPasswordInput.value = '';
-            // 可选：注册成功后自动尝试登录或提示用户登录
         }
     } catch (error) {
         displayAuthMessage(error.message || '注册失败，请检查网络或联系管理员。', true);
@@ -79,9 +75,7 @@ async function handleLogin() {
             currentUser = { userId: result.userId, username: result.username };
             if (lobbyUsernameEl) lobbyUsernameEl.textContent = currentUser.username;
             displayAuthMessage('登录成功！', false, true);
-            // 调用 UI 函数切换到大厅视图
-            switchToView('lobby-view');
-            // TODO: 在下一阶段，这里会加载房间列表
+            switchToView('lobby'); // <--- 参数是 'lobby' (ui.js 中的键名)
         } else {
             displayAuthMessage(result.message || '登录失败。', true);
         }
@@ -95,22 +89,20 @@ async function handleLogin() {
 async function handleLogout() {
     logoutButton.disabled = true;
     try {
-        const result = await apiRequest('auth_logout.php', 'POST'); // Logout通常是POST
+        const result = await apiRequest('auth_logout.php', 'POST');
         if (result.success) {
             currentUser = null;
-            displayAuthMessage('已退出登录。'); // 可以在登录视图显示
-            // 调用 UI 函数切换到登录视图
-            switchToView('auth-view');
-            loginUsernameInput.value = ''; // 清空登录表单
+            // displayAuthMessage('已退出登录。'); // 消息现在由 auth-view 自己管理
+            switchToView('auth'); // <--- 参数是 'auth' (ui.js 中的键名)
+            loginUsernameInput.value = '';
             loginPasswordInput.value = '';
         } else {
-            // 一般来说logout总会成功清除session，即使后端有小问题
             displayAuthMessage(result.message || '退出登录时发生错误。', true);
-             switchToView('auth-view'); // 无论如何都尝试切换
+            switchToView('auth'); // <--- 参数是 'auth'
         }
     } catch (error) {
         displayAuthMessage(error.message || '退出请求失败。', true);
-        switchToView('auth-view'); // 发生网络错误也尝试切换
+        switchToView('auth'); // <--- 参数是 'auth'
     } finally {
         logoutButton.disabled = false;
     }
@@ -123,16 +115,15 @@ async function checkAuthStatusOnLoad() {
             currentUser = { userId: result.data.userId, username: result.data.username };
             if (lobbyUsernameEl) lobbyUsernameEl.textContent = currentUser.username;
             console.log('User already logged in:', currentUser.username);
-            switchToView('lobby-view');
-            // TODO: 在下一阶段，这里会加载房间列表
+            switchToView('lobby'); // <--- 参数是 'lobby' (ui.js 中的键名)
         } else {
-            console.log('User not logged in.');
-            switchToView('auth-view');
+            console.log('User not logged in.'); // 这个日志你看到了
+            switchToView('auth');  // <--- 修改这里！参数改为 'auth'
         }
     } catch (error) {
         console.error('Failed to check auth status:', error);
         displayAuthMessage('无法连接到服务器检查登录状态。', true);
-        switchToView('auth-view'); // 如果检查失败，默认显示登录
+        switchToView('auth');      // <--- 修改这里！参数改为 'auth'
     }
 }
 
@@ -140,13 +131,8 @@ async function checkAuthStatusOnLoad() {
 function displayAuthMessage(message, isError = false, isSuccess = false) {
     if (authMessageEl) {
         authMessageEl.textContent = message;
-        authMessageEl.className = 'message-area'; // Reset classes
+        authMessageEl.className = 'message-area';
         if (isError) authMessageEl.classList.add('error');
         if (isSuccess) authMessageEl.classList.add('success');
     }
 }
-
-// --- Event Listeners (将在 app.js 中统一管理) ---
-// registerButton?.addEventListener('click', handleRegister);
-// loginButton?.addEventListener('click', handleLogin);
-// logoutButton?.addEventListener('click', handleLogout);
