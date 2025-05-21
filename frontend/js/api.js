@@ -1,7 +1,7 @@
 // frontend/js/api.js
 
 // IMPORTANT: Replace this with your actual backend API URL on Serv00
-const API_BASE_URL = 'https://YOUR_SERV00_USERNAME.serv00.net/path/to/backend/api/';
+const API_BASE_URL = 'https://wenge.cloudns.ch/backend/api/';
 // Example: const API_BASE_URL = 'https://myuser.serv00.net/bigtwo_api/api/';
 
 
