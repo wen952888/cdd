@@ -1,69 +1,82 @@
 // frontend/js/ui.js
 
-let currentViewId = null;
+let currentViewId = null; // 用来追踪当前显示的视图的ID (例如 'auth', 'lobby', 'room')
 
 /**
  * 切换到指定的视图。
- * @param {string} viewId 要切换到的视图的ID ('auth', 'lobby', 'room')
+ * @param {string} viewIdKey 要切换到的视图的键名 ('auth', 'lobby', 'room')
  */
-function switchToView(viewId) {
-    // 动态获取所有视图的 DOM 元素引用
-    const viewElements = {
-        auth: document.getElementById('auth-view'),
-        lobby: document.getElementById('lobby-view'),
-        room: document.getElementById('room-view')
-        // 如果将来有其他视图，在这里添加
+function switchToView(viewIdKey) {
+    console.log(`UI: Attempting to switch to view with key: ${viewIdKey}`);
+
+    // 定义一个从键名到实际 HTML ID 的映射
+    const viewIdMapping = {
+        'auth': 'auth-view',
+        'lobby': 'lobby-view',
+        'room': 'room-view'
+        // 如果将来有其他视图，在这里添加映射
     };
 
-    // 检查目标视图元素是否存在
-    const targetViewElement = viewElements[viewId];
+    const targetHtmlId = viewIdMapping[viewIdKey]; // 获取目标视图的 HTML ID
 
-    // Debugging logs
-    // console.log(`Attempting to switch to view: ${viewId}`);
-    // console.log(`Element for 'auth-view':`, viewElements.auth);
-    // console.log(`Element for 'lobby-view':`, viewElements.lobby);
-    // console.log(`Element for 'room-view':`, viewElements.room);
-    // console.log(`Target element for '${viewId}':`, targetViewElement);
+    if (!targetHtmlId) {
+        console.error(`UI Error: No HTML ID mapping found for view key "${viewIdKey}".`);
+        return;
+    }
 
+    // 动态获取所有需要控制的视图的 DOM 元素引用
+    const authViewEl = document.getElementById('auth-view');
+    const lobbyViewEl = document.getElementById('lobby-view');
+    const roomViewEl = document.getElementById('room-view');
 
-    if (currentViewId === viewId && targetViewElement && !targetViewElement.classList.contains('hidden')) {
-        // console.log(`Already on view: ${viewId}`);
-        return; // 如果已经是当前视图且可见，则不执行任何操作
+    const allViewElements = [authViewEl, lobbyViewEl, roomViewEl]; // 将所有视图元素放入数组
+    const targetViewElement = document.getElementById(targetHtmlId); // 获取目标视图元素
+
+    // 调试日志
+    // console.log(`UI: HTML ID for key "${viewIdKey}" is "${targetHtmlId}"`);
+    // console.log(`UI: Target element for "${targetHtmlId}":`, targetViewElement);
+
+    if (currentViewId === viewIdKey && targetViewElement && !targetViewElement.classList.contains('hidden')) {
+        // console.log(`UI: Already on view: ${viewIdKey}`);
+        return;
     }
 
     // 隐藏所有已知的视图
-    for (const id in viewElements) {
-        if (viewElements[id]) { // 确保元素存在才操作
-            viewElements[id].classList.add('hidden');
-        } else {
-            // console.warn(`UI: Element for view '${id}' not found when trying to hide.`);
+    allViewElements.forEach(el => {
+        if (el) { // 确保元素存在才操作
+            el.classList.add('hidden');
         }
-    }
+    });
 
     // 显示目标视图
     if (targetViewElement) {
         targetViewElement.classList.remove('hidden');
-        currentViewId = viewId;
-        // console.log(`Successfully switched to view: ${viewId}`);
+        currentViewId = viewIdKey; // 更新当前显示的视图的键名
+        console.log(`UI: Successfully switched to view: ${viewIdKey} (HTML ID: ${targetHtmlId})`);
     } else {
-        console.error(`UI Error: View element with id key "${viewId}" (maps to HTML id "${viewId}-view") not found in DOM or in viewElements mapping.`);
+        // 这个错误会在 HTML 中确实没有对应 ID 的元素时触发
+        console.error(`UI Error: HTML Element with ID "${targetHtmlId}" (for view key "${viewIdKey}") not found in DOM.`);
     }
 }
 
 /**
  * 初始化视图，确保在应用加载时所有视图都被隐藏。
- * 这个函数应该在 DOMContentLoaded之后，但在任何 switchToView 调用之前被调用。
  */
 function initViews() {
-    // console.log('UI: Initializing views (hiding all).');
-    // 动态获取并隐藏
-    const viewAuth = document.getElementById('auth-view');
-    const viewLobby = document.getElementById('lobby-view');
-    const viewRoom = document.getElementById('room-view');
+    console.log('UI: Initializing views (hiding all).');
 
-    if (viewAuth) viewAuth.classList.add('hidden');
-    if (viewLobby) viewLobby.classList.add('hidden');
-    if (viewRoom) viewRoom.classList.add('hidden');
+    const authViewEl = document.getElementById('auth-view');
+    const lobbyViewEl = document.getElementById('lobby-view');
+    const roomViewEl = document.getElementById('room-view');
 
-    currentViewId = null; // 重置当前视图ID
+    if (authViewEl) authViewEl.classList.add('hidden');
+    else console.warn("UI init: 'auth-view' element not found.");
+
+    if (lobbyViewEl) lobbyViewEl.classList.add('hidden');
+    else console.warn("UI init: 'lobby-view' element not found.");
+
+    if (roomViewEl) roomViewEl.classList.add('hidden');
+    else console.warn("UI init: 'room-view' element not found.");
+
+    currentViewId = null;
 }
