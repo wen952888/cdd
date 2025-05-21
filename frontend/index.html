@@ -1,59 +1,56 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HTML5 Big Two (鋤大地)</title>
-    <link rel="stylesheet" href="css/style.css">
+    <title>在线锄大地</title>
+    <link rel="stylesheet" href="css/style.css"> <!-- 你现有的CSS -->
+    <link rel="stylesheet" href="css/auth.css"> <!-- 登录注册CSS (新建) -->
 </head>
 <body>
-    <div id="game-container">
-        <h1>Big Two Game</h1>
+    <div id="app-container">
 
-        <div id="controls-area">
-            <input type="text" id="playerName" placeholder="Enter Your Name">
-            <input type="text" id="gameIdInput" placeholder="Game ID (for joining)">
-            <button id="createGameBtn">Create Game</button>
-            <button id="joinGameBtn">Join Game</button>
-        </div>
-
-        <div id="game-info">
-            <p>Status: <span id="statusText">Waiting for action...</span></p>
-            <p>Game ID: <span id="gameIdDisplay">-</span> | Your Player ID: <span id="playerIdDisplay">-</span></p>
-            <p>Current Turn: <span id="currentPlayerName">-</span></p>
-        </div>
-
-        <div id="other-players-area">
-            <!-- Other players' info will appear here -->
-        </div>
-
-        <div id="table-area">
-            <h2>Table</h2>
-            <div id="played-cards-display">
-                <!-- Last played cards -->
+        <!-- 登录/注册视图 -->
+        <div id="auth-view" class="view">
+            <h2>用户登录/注册</h2>
+            <div id="auth-message" class="message-area"></div>
+            <!-- 注册表单 -->
+            <div class="auth-form">
+                <h3>注册新用户</h3>
+                <input type="text" id="regUsername" placeholder="用户名 (3-50字符)">
+                <input type="password" id="regPassword" placeholder="密码 (至少6字符)">
+                <button id="registerButton">注册</button>
+            </div>
+            <!-- 登录表单 -->
+            <div class="auth-form">
+                <h3>用户登录</h3>
+                <input type="text" id="loginUsername" placeholder="用户名">
+                <input type="password" id="loginPassword" placeholder="密码">
+                <button id="loginButton">登录</button>
             </div>
         </div>
 
-        <div id="my-hand-area">
-            <h2>Your Hand</h2>
-            <div id="player-cards-display">
-                <!-- Your cards will appear here -->
-            </div>
+        <!-- 大厅视图 (登录后显示) -->
+        <div id="lobby-view" class="view hidden">
+            <h2>游戏大厅</h2>
+            <p>欢迎, <span id="lobbyUsername"></span>! <button id="logoutButton">退出登录</button></p>
+            <div id="lobby-message" class="message-area"></div>
+            <!-- 房间列表和创建房间功能将在这里添加 -->
+            <p><em>房间功能将在下一阶段添加...</em></p>
         </div>
 
-        <div id="action-buttons">
-            <button id="playCardsBtn" disabled>Play Selected Cards</button>
-            <button id="passBtn" disabled>Pass</button>
+        <!-- 游戏房间视图 (进入房间后显示) -->
+        <div id="room-view" class="view hidden">
+            <h2>游戏房间: <span id="roomNameDisplay"></span></h2>
+            <!-- 游戏界面将在这里 -->
+             <p><em>游戏界面将在后续阶段添加...</em></p>
         </div>
 
     </div>
 
-    <script src="js/api.js"></script>
-    <script src="js/ui.js"></script>
-    <script src="js/game.js"></script>
-    <script>
-        // Initialize the game interactions
-        Game.init();
-    </script>
+    <script src="js/api_config.js"></script> <!-- 新建: 存放API_BASE_URL -->
+    <script src="js/auth.js"></script>    <!-- 新建: 处理认证逻辑 -->
+    <script src="js/ui.js"></script>      <!-- 修改: 控制视图显示 -->
+    <script src="js/app.js"></script>     <!-- 新建或修改game.js: 应用主逻辑 -->
 </body>
 </html>
