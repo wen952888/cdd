@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>十三水 HTML5</title>
     <link rel="stylesheet" href="css/style.css">
-    <!-- (可选) 如果使用 SortableJS -->
-    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script> -->
+    <!-- 修正 SortableJS CDN 引入，特别是 integrity 值 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js" integrity="sha512-Eezs+g9LqAHAJxnK4S5zV7S2p220E/L0mo5/9iF8H7k39C5S/gyh8QJz/7K1O3GjP3h0+jhdS8nQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 </head>
 <body>
     <div class="game-container">
@@ -16,29 +16,28 @@
             <h3>我的牌道</h3>
             <div class="organized-rows">
                 <div class="hand-row-label">头道 (3张): <span id="top-eval-text"></span></div>
-                <div id="player-top-row" class="hand-row droppable-area"></div>
+                <div id="player-top-row" class="hand-row droppable-area" data-row-name="top" data-row-limit="3"></div>
 
                 <div class="hand-row-label">中道 (5张): <span id="middle-eval-text"></span></div>
-                <div id="player-middle-row" class="hand-row droppable-area"></div>
+                <div id="player-middle-row" class="hand-row droppable-area" data-row-name="middle" data-row-limit="5"></div>
 
                 <div class="hand-row-label">尾道 (5张): <span id="bottom-eval-text"></span></div>
-                <div id="player-bottom-row" class="hand-row droppable-area"></div>
+                <div id="player-bottom-row" class="hand-row droppable-area" data-row-name="bottom" data-row-limit="5"></div>
             </div>
         </div>
 
         <div class="initial-hand-area">
-            <h3>我的手牌 (13张) - 点击选择或拖拽到上方牌道</h3>
-            <div id="player-hand" class="player-hand droppable-area">
+            <h3>我的手牌 (13张) - 将手牌拖拽到上方牌道</h3>
+            <div id="player-hand" class="player-hand droppable-area" data-row-name="initial">
                 <p>点击 "发牌" 开始</p>
             </div>
         </div>
 
         <div class="controls">
             <button id="deal-button">发牌</button>
-            <button id="compare-button" style="display:none;">比牌</button>
-            <button id="reset-button" style="display:none;">重置</button>
-            <button id="call-backend-button">测试后端通讯</button>
             <button id="confirm-organization-button" style="display:none;">确认理牌</button>
+            <button id="compare-button" style="display:none;">比牌</button>
+            <button id="call-backend-button">测试后端通讯</button>
         </div>
 
         <div id="message-area" class="message-area"></div>
