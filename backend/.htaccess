@@ -1,0 +1,28 @@
+# This .htaccess assumes it's in a directory that is the base for /api/ path
+# e.g., if wenge.cloudns.ch points to a dir, and you have an 'api' subdir,
+# and this .htaccess is in that 'api' subdir.
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Redirect Trailing Slashes If Not A Folder...
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{REQUEST_URI} (.+)/$
+    RewriteRule ^ %1 [L,R=301]
+
+    # Handle Front Controller...
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteRule ^ index.php [L]
+
+    # Example for action=hello mapped to /hello
+    # RewriteCond %{REQUEST_FILENAME} !-d
+    # RewriteCond %{REQUEST_FILENAME} !-f
+    # RewriteRule ^hello/?$ index.php?action=hello [L,QSA]
+
+</IfModule>
+
+# For security, deny access to .htaccess itself
+<Files .htaccess>
+    Require all denied
+</Files>
