@@ -53,26 +53,26 @@ h1 {
     position: relative;
     font-family: 'Georgia', serif;
     overflow: hidden;
-    display: flex; /* 使用 Flexbox 布局 */
-    flex-direction: column; /* 主轴垂直，以放置角标和中心内容 */
-    justify-content: center; /* 垂直居中中心内容 */
-    align-items: center;   /* 水平居中中心内容 */
-    padding: 5px; /* 为角标留出空间 */
-    box-sizing: border-box; /* 边框和内边距包含在宽高内 */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 5px;
+    box-sizing: border-box;
 }
 
 /* 左上角的点数和花色 */
 .card-css::before {
-    content: attr(data-rank) "\A" attr(data-suit); /* "\A" 是 CSS 中的换行符 */
-    white-space: pre; /* 保留换行符效果 */
+    content: attr(data-rank) "\A" attr(data-suit);
+    white-space: pre;
     position: absolute;
     top: 6px;
     left: 6px;
-    line-height: 1; /* 调整行高以紧凑显示 */
+    line-height: 1;
     text-align: center;
-    font-size: 18px; /* 角标字体大小 */
+    font-size: 18px;
     font-weight: bold;
-    z-index: 1; /* 确保角标在中心图案之上，以防重叠 */
+    z-index: 1;
 }
 
 /* 右下角的点数和花色 (旋转180度) */
@@ -85,28 +85,26 @@ h1 {
     transform: rotate(180deg);
     line-height: 1;
     text-align: center;
-    font-size: 18px; /* 角标字体大小 */
+    font-size: 18px;
     font-weight: bold;
     z-index: 1;
 }
 
 /* 花色颜色 (应用于角标和中心图案) */
-.card-css.hearts, /* 红心 */
-.card-css.diamonds { /* 方块 */
-    color: #D32F2F; /* 鲜艳的红色 */
+.card-css.hearts,
+.card-css.diamonds {
+    color: #D32F2F;
 }
 
-.card-css.spades, /* 黑桃 */
-.card-css.clubs {  /* 梅花 */
-    color: #212121; /* 深灰色接近黑色 */
+.card-css.spades,
+.card-css.clubs {
+    color: #212121;
 }
 
 /* 中心花色图案的样式 */
 .card-center-suit {
-    font-size: 48px;  /* 中心花色的大小，可以根据喜好调整 */
-    line-height: 1;   /* 确保不会有过多的额外行高 */
-    /* 颜色会从父元素 .card-css 继承 */
-    /*  如果需要，可以添加额外的定位调整，但 flex 居中通常足够 */
+    font-size: 36px;  /* <<< 这里修改了字体大小 */
+    line-height: 1;
 }
 
 
@@ -145,7 +143,7 @@ h1 {
     color: #555;
 }
 
-.player-hand p { /* 初始提示文字 */
+.player-hand p {
     color: #777;
     font-style: italic;
 }
