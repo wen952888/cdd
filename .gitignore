@@ -1,16 +1,18 @@
-# General
+# Frontend
+frontend/node_modules/
+frontend/dist/
+frontend/build/
+
+# Backend (PHP Composer if used later)
+backend/vendor/
+backend/composer.lock
+
+# OS generated files
 .DS_Store
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
+Thumbs.db
 
-# IDE specific
-.idea/
+# IDE / Editor specific
 .vscode/
-
-# Local config (if any)
-config.local.php
-
-# Dependencies (if you were to use npm/composer later)
-/node_modules
-/vendor
+.idea/
+*.swp
+*.swo
