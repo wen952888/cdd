@@ -1,57 +1,223 @@
-/* ... (已有样式) ... */
+/* frontend/css/style.css */
 
-.player-area {
-    margin-bottom: 20px;
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start; /* 改为 flex-start 以便内容多时可以滚动 */
+    min-height: 100vh;
+    background-color: #367c3d;
+    margin: 0;
+    padding: 20px; /* 给整体页面一些边距 */
+    box-sizing: border-box;
 }
-.organized-rows .hand-row-label {
-    font-weight: bold;
-    margin-top: 10px;
-    margin-bottom: 5px;
+
+.game-container {
+    background-color: #f9f9f9;
+    padding: 20px; /* 减少一点内边距 */
+    border-radius: 10px; /* 统一圆角 */
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    text-align: center;
+    width: 100%; /* 响应式宽度 */
+    max-width: 800px; /* 限制最大宽度 */
+    margin: 0 auto; /* 水平居中 */
+}
+
+h1 {
+    color: #2c3e50;
+    margin-top: 0; /* 移除顶部外边距 */
+    margin-bottom: 20px;
+    font-weight: 400; /* 稍微加粗一点 */
+    letter-spacing: 0.5px;
+}
+
+/* 牌道区域和手牌区域的通用容器样式 */
+.player-area, .initial-hand-area {
+    margin-bottom: 15px;
+    padding: 10px;
+    border: 1px solid #dcdcdc; /* 统一边框颜色 */
+    border-radius: 6px; /* 统一圆角 */
+    background-color: #f0f0f0; /* 浅灰色背景 */
+}
+
+.player-area h3, .initial-hand-area h3 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    font-size: 1.1em;
+    color: #333;
     text-align: left;
 }
-.hand-row {
+
+.organized-rows .hand-row-label {
+    font-weight: bold;
+    margin-top: 8px;
+    margin-bottom: 4px;
+    text-align: left;
+    font-size: 0.9em;
+    color: #555;
+}
+.hand-row-label span { /* 牌型提示文字 */
+    font-weight: normal;
+    color: #007bff;
+}
+
+
+/* 放置已整理牌的牌道 和 初始手牌区域 */
+.hand-row, #player-hand {
     display: flex;
-    flex-wrap: nowrap; /* 牌道内不换行，除非牌多 */
+    flex-wrap: wrap; /* 允许牌换行，特别是初始手牌区 */
     justify-content: flex-start; /* 从左开始排列 */
-    align-items: center;
-    gap: 5px;
-    min-height: 110px; /* 适应卡牌高度 */
-    padding: 10px;
+    align-items: center; /* 垂直居中牌 */
+    gap: 8px; /* 牌之间的间隙 */
+    min-height: 105px; /* 调整最小高度以适应卡牌 */
+    padding: 8px;
     border: 1px dashed #b0b0b0;
     border-radius: 5px;
-    background-color: #f8f8f8;
-    margin-bottom: 10px;
+    background-color: #e9f5e9; /* 更浅的绿色背景 */
+    margin-bottom: 8px;
 }
-.initial-hand-area {
-    margin-top: 20px;
-}
-.initial-hand-area h3 {
-    margin-bottom: 10px;
+#player-hand { /* 初始手牌区特定样式，如果需要 */
+    background-color: #e6f0ff; /* 淡蓝色背景 */
 }
 
-/* 用于拖拽目标区域高亮 (可选) */
-.droppable-area.sortable-ghost {
-    background-color: #e6ffe6; /* 拖拽时目标区域的背景色 */
-}
-.card-css.sortable-chosen {
-    opacity: 0.7;
-    transform: scale(1.05);
+
+/* --- CSS 扑克牌样式 --- */
+.card-css {
+    /* 强制显示基本属性，方便调试 */
+    width: 65px !important;
+    height: 95px !important;
+    background-color: white !important;
+    border: 2px solid black !important; /* 使用更明显的边框进行测试 */
+    color: black !important; /* 默认文字颜色，确保可见 */
+
+    border-radius: 6px; /* 统一圆角 */
+    box-shadow: 1px 1px 4px rgba(0,0,0,0.2);
+    position: relative;
+    font-family: 'Georgia', serif; /* 衬线字体 */
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 4px; /* 内边距 */
+    box-sizing: border-box;
+    transition: transform 0.15s ease-out, box-shadow 0.15s ease-out; /* 过渡效果 */
 }
 
-/* 选中的卡牌样式 */
+/* 左上角的点数和花色 */
+.card-css::before {
+    content: attr(data-rank) "\A" attr(data-suit);
+    white-space: pre;
+    position: absolute;
+    top: 5px; /* 调整位置 */
+    left: 5px;
+    line-height: 1.1; /* 调整行高 */
+    text-align: center;
+    font-size: 16px; /* 调整角标字体大小 */
+    font-weight: bold;
+    z-index: 1;
+}
+
+/* 右下角的点数和花色 */
+.card-css::after {
+    content: attr(data-rank) "\A" attr(data-suit);
+    white-space: pre;
+    position: absolute;
+    bottom: 5px;
+    right: 5px;
+    transform: rotate(180deg);
+    line-height: 1.1;
+    text-align: center;
+    font-size: 16px;
+    font-weight: bold;
+    z-index: 1;
+}
+
+/* 花色颜色 (确保这里的类名与JS中 suitCssClass 一致) */
+.card-css.hearts,
+.card-css.diamonds {
+    color: #D32F2F !important; /* 强制红色 */
+}
+
+.card-css.spades,
+.card-css.clubs {
+    color: #111111 !important; /* 强制黑色 */
+}
+
+/* 中心花色图案的样式 */
+.card-center-suit {
+    font-size: 30px;  /* 减小中心花色图案大小 */
+    line-height: 1;
+    /* 颜色会从父元素 .card-css 继承 */
+    /* 如果父元素的 color 被 !important 覆盖，这里也需要 !important 或单独设置 */
+    /* 例如：.card-css.hearts .card-center-suit { color: #D32F2F !important; } */
+}
+
+
+/* 可选卡牌的样式 */
 .card-css.selectable:hover {
     cursor: pointer;
-    box-shadow: 0 0 8px gold;
+    transform: translateY(-3px) scale(1.03);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
 }
 .card-css.selected {
-    border: 2px solid gold;
-    transform: translateY(-5px);
+    border: 3px solid gold !important; /* 更明显的选中边框 */
+    transform: translateY(-5px) scale(1.05);
+    box-shadow: 0 0 10px gold;
 }
 
-.score-area {
+
+/* --- 控制按钮和消息区域样式 --- */
+.controls {
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 1px solid #eee; /* 分隔线 */
+}
+.controls button {
+    padding: 10px 18px; /* 调整按钮大小 */
+    margin: 5px;
+    border: none;
+    border-radius: 5px;
+    background-color: #007bff; /* Bootstrap 主题蓝 */
+    color: white;
+    cursor: pointer;
+    font-size: 0.95em; /* 调整字体大小 */
+    transition: background-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.controls button:hover {
+    background-color: #0056b3;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+.controls button:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+}
+.controls button:active {
+    background-color: #004085;
+}
+
+
+.message-area, .score-area {
     margin-top: 15px;
+    padding: 10px;
+    border: 1px dashed #ccc;
+    min-height: 30px;
+    background-color: #f8f9fa; /* 更亮的背景 */
+    border-radius: 5px;
+    font-size: 0.9em;
+    color: #495057; /* 深灰色文字 */
+}
+.score-area {
     font-weight: bold;
+    color: #198754; /* 绿色表示得分 */
+}
+
+/* 初始提示文字 */
+.hand-row p, #player-hand p {
+    color: #6c757d; /* Bootstrap muted color */
+    font-style: italic;
+    width: 100%; /* 确保提示文字居中或占满一行 */
+    text-align: center;
+    margin: 10px 0;
 }
