@@ -1,4 +1,5 @@
-// UI manipulation
+// frontend/js/ui.js
+
 const playerHandElement = document.getElementById('player-hand');
 const messageAreaElement = document.getElementById('message-area');
 
@@ -6,16 +7,15 @@ function renderCard(card) {
     const cardDiv = document.createElement('div');
     cardDiv.classList.add('card-css', card.suitCssClass); // 'card-css' 是基础样式, 'spades' 等是花色特定样式
 
-    // 将点数和花色存储在 data 属性中，供 CSS 使用
+    // 将点数和花色存储在 data 属性中，供 CSS 的伪元素使用
     cardDiv.dataset.rank = card.rank;
     cardDiv.dataset.suit = card.displaySuitChar;
 
-    // （可选）如果你想在卡牌中间也显示一些内容，可以在这里添加
-    // 例如，一个大的花色符号，或根据点数显示对应数量的小花色符号
-    // const centralSuitSpan = document.createElement('span');
-    // centralSuitSpan.classList.add('card-center-suit');
-    // centralSuitSpan.textContent = card.displaySuitChar;
-    // cardDiv.appendChild(centralSuitSpan);
+    // 创建用于显示中心花色的 span 元素
+    const centerSuitSpan = document.createElement('span');
+    centerSuitSpan.classList.add('card-center-suit');
+    centerSuitSpan.textContent = card.displaySuitChar; // 直接使用花色字符
+    cardDiv.appendChild(centerSuitSpan); // 将中心花色 span 添加到卡牌 div 中
 
     return cardDiv;
 }
