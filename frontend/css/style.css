@@ -1,10 +1,12 @@
+/* frontend/css/style.css */
+
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* 更现代的字体 */
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     display: flex;
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    background-color: #367c3d; /* 深一点的绿色，更像牌桌 */
+    background-color: #367c3d;
     margin: 0;
     padding: 10px;
 }
@@ -20,9 +22,9 @@ body {
 }
 
 h1 {
-    color: #2c3e50; /* 深蓝灰色 */
+    color: #2c3e50;
     margin-bottom: 25px;
-    font-weight: 300; /* 细一点的字体 */
+    font-weight: 300;
     letter-spacing: 1px;
 }
 
@@ -31,45 +33,46 @@ h1 {
     flex-wrap: wrap;
     justify-content: center;
     align-items: flex-start;
-    gap: 10px; /* 卡牌间距 */
+    gap: 10px;
     min-height: 130px;
     margin-bottom: 30px;
     padding: 15px;
     border: 1px solid #ddd;
     border-radius: 8px;
-    background-color: #eef3e3; /* 浅绿色背景 */
+    background-color: #eef3e3;
 }
 
 /* --- CSS 扑克牌样式 --- */
 .card-css {
-    width: 70px;  /* 卡牌宽度 */
-    height: 100px; /* 卡牌高度 */
+    width: 70px;
+    height: 100px;
     background-color: white;
     border: 1px solid #aaa;
-    border-radius: 8px; /* 圆角更明显 */
+    border-radius: 8px;
     box-shadow: 2px 2px 6px rgba(0,0,0,0.15);
-    position: relative; /* 为了伪元素定位 */
-    font-family: 'Georgia', serif; /* 卡牌上用衬线字体可能更好看 */
-    font-size: 18px; /* 左上角/右下角字体大小 */
-    font-weight: bold;
-    overflow: hidden; /* 确保伪元素内容不溢出圆角 */
-    display: flex; /* 用于未来可能的中间内容布局 */
-    flex-direction: column;
-    justify-content: space-between; /* 用于角标 */
-    align-items: center;
-    padding: 5px;
-    box-sizing: border-box;
+    position: relative;
+    font-family: 'Georgia', serif;
+    overflow: hidden;
+    display: flex; /* 使用 Flexbox 布局 */
+    flex-direction: column; /* 主轴垂直，以放置角标和中心内容 */
+    justify-content: center; /* 垂直居中中心内容 */
+    align-items: center;   /* 水平居中中心内容 */
+    padding: 5px; /* 为角标留出空间 */
+    box-sizing: border-box; /* 边框和内边距包含在宽高内 */
 }
 
 /* 左上角的点数和花色 */
 .card-css::before {
-    content: attr(data-rank) "\A" attr(data-suit); /* "\A" 是换行符 */
+    content: attr(data-rank) "\A" attr(data-suit); /* "\A" 是 CSS 中的换行符 */
     white-space: pre; /* 保留换行符效果 */
     position: absolute;
     top: 6px;
     left: 6px;
-    line-height: 1;
+    line-height: 1; /* 调整行高以紧凑显示 */
     text-align: center;
+    font-size: 18px; /* 角标字体大小 */
+    font-weight: bold;
+    z-index: 1; /* 确保角标在中心图案之上，以防重叠 */
 }
 
 /* 右下角的点数和花色 (旋转180度) */
@@ -82,34 +85,38 @@ h1 {
     transform: rotate(180deg);
     line-height: 1;
     text-align: center;
+    font-size: 18px; /* 角标字体大小 */
+    font-weight: bold;
+    z-index: 1;
 }
 
-/* 花色颜色 */
-.card-css.hearts,
-.card-css.diamonds {
-    color: #D32F2F; /* 红色 (Material Design Red 700) */
+/* 花色颜色 (应用于角标和中心图案) */
+.card-css.hearts, /* 红心 */
+.card-css.diamonds { /* 方块 */
+    color: #D32F2F; /* 鲜艳的红色 */
 }
 
-.card-css.spades,
-.card-css.clubs {
-    color: #212121; /* 深灰色/黑色 (Material Design Grey 900) */
+.card-css.spades, /* 黑桃 */
+.card-css.clubs {  /* 梅花 */
+    color: #212121; /* 深灰色接近黑色 */
 }
 
-/* (可选) 卡牌中间的大花色，如果需要的话 */
-.card-css .card-center-suit {
-    font-size: 40px; /* 调整大小 */
-    opacity: 0.8;
-    /*  可以根据需要调整位置 */
+/* 中心花色图案的样式 */
+.card-center-suit {
+    font-size: 48px;  /* 中心花色的大小，可以根据喜好调整 */
+    line-height: 1;   /* 确保不会有过多的额外行高 */
+    /* 颜色会从父元素 .card-css 继承 */
+    /*  如果需要，可以添加额外的定位调整，但 flex 居中通常足够 */
 }
 
 
-/* --- 控制按钮和消息区域样式 (保持或微调) --- */
+/* --- 控制按钮和消息区域样式 --- */
 .controls button {
     padding: 12px 22px;
     margin: 10px;
     border: none;
     border-radius: 6px;
-    background-color: #1976D2; /* Material Blue 700 */
+    background-color: #1976D2;
     color: white;
     cursor: pointer;
     font-size: 16px;
@@ -118,12 +125,12 @@ h1 {
 }
 
 .controls button:hover {
-    background-color: #1565C0; /* Material Blue 800 */
+    background-color: #1565C0;
     box-shadow: 0 3px 6px rgba(0,0,0,0.15);
 }
 
 .controls button:active {
-    background-color: #0D47A1; /* Material Blue 900 */
+    background-color: #0D47A1;
     box-shadow: 0 1px 2px rgba(0,0,0,0.1);
 }
 
@@ -132,7 +139,7 @@ h1 {
     padding: 12px;
     border: 1px dashed #b0b0b0;
     min-height: 35px;
-    background-color: #f0f0f0; /* 浅灰色背景 */
+    background-color: #f0f0f0;
     border-radius: 6px;
     font-style: italic;
     color: #555;
