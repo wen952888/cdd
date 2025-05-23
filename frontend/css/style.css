@@ -4,40 +4,39 @@ body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     display: flex;
     justify-content: center;
-    align-items: flex-start; /* 改为 flex-start 以便内容多时可以滚动 */
+    align-items: flex-start;
     min-height: 100vh;
     background-color: #367c3d;
     margin: 0;
-    padding: 20px; /* 给整体页面一些边距 */
+    padding: 20px;
     box-sizing: border-box;
 }
 
 .game-container {
     background-color: #f9f9f9;
-    padding: 20px; /* 减少一点内边距 */
-    border-radius: 10px; /* 统一圆角 */
+    padding: 20px;
+    border-radius: 10px;
     box-shadow: 0 4px 15px rgba(0,0,0,0.2);
     text-align: center;
-    width: 100%; /* 响应式宽度 */
-    max-width: 800px; /* 限制最大宽度 */
-    margin: 0 auto; /* 水平居中 */
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto;
 }
 
 h1 {
     color: #2c3e50;
-    margin-top: 0; /* 移除顶部外边距 */
+    margin-top: 0;
     margin-bottom: 20px;
-    font-weight: 400; /* 稍微加粗一点 */
+    font-weight: 400;
     letter-spacing: 0.5px;
 }
 
-/* 牌道区域和手牌区域的通用容器样式 */
 .player-area, .initial-hand-area {
     margin-bottom: 15px;
     padding: 10px;
-    border: 1px solid #dcdcdc; /* 统一边框颜色 */
-    border-radius: 6px; /* 统一圆角 */
-    background-color: #f0f0f0; /* 浅灰色背景 */
+    border: 1px solid #dcdcdc;
+    border-radius: 6px;
+    background-color: #f0f0f0;
 }
 
 .player-area h3, .initial-hand-area h3 {
@@ -56,52 +55,67 @@ h1 {
     font-size: 0.9em;
     color: #555;
 }
-.hand-row-label span { /* 牌型提示文字 */
+.hand-row-label span {
     font-weight: normal;
     color: #007bff;
 }
 
-
-/* 放置已整理牌的牌道 和 初始手牌区域 */
 .hand-row, #player-hand {
     display: flex;
-    flex-wrap: wrap; /* 允许牌换行，特别是初始手牌区 */
-    justify-content: flex-start; /* 从左开始排列 */
-    align-items: center; /* 垂直居中牌 */
-    gap: 8px; /* 牌之间的间隙 */
-    min-height: 105px; /* 调整最小高度以适应卡牌 */
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 8px;
+    min-height: 105px;
     padding: 8px;
     border: 1px dashed #b0b0b0;
     border-radius: 5px;
-    background-color: #e9f5e9; /* 更浅的绿色背景 */
+    background-color: #e9f5e9;
     margin-bottom: 8px;
+    /* 为拖拽添加cursor提示 */
+    cursor: grab;
 }
-#player-hand { /* 初始手牌区特定样式，如果需要 */
-    background-color: #e6f0ff; /* 淡蓝色背景 */
+#player-hand {
+    background-color: #e6f0ff;
+}
+.hand-row:empty::after, #player-hand:empty::after { /* 当区域为空时显示提示 */
+    content: "将牌拖到此处";
+    color: #aaa;
+    font-style: italic;
+    display: block;
+    width: 100%;
+    text-align: center;
+    padding: 20px 0;
+}
+#player-hand:empty::after {
+    content: "请点击“发牌”";
 }
 
 
 /* --- CSS 扑克牌样式 --- */
 .card-css {
-    /* 强制显示基本属性，方便调试 */
-    width: 65px !important;
-    height: 95px !important;
-    background-color: white !important;
-    border: 2px solid black !important; /* 使用更明显的边框进行测试 */
-    color: black !important; /* 默认文字颜色，确保可见 */
-
-    border-radius: 6px; /* 统一圆角 */
+    width: 65px;
+    height: 95px;
+    background-color: white;
+    border: 1px solid #999; /* 稍微调深一点边框 */
+    color: black; /* 默认文字颜色 */
+    border-radius: 6px;
     box-shadow: 1px 1px 4px rgba(0,0,0,0.2);
     position: relative;
-    font-family: 'Georgia', serif; /* 衬线字体 */
+    font-family: 'Georgia', serif;
     overflow: hidden;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    padding: 4px; /* 内边距 */
+    padding: 4px;
     box-sizing: border-box;
-    transition: transform 0.15s ease-out, box-shadow 0.15s ease-out; /* 过渡效果 */
+    transition: transform 0.15s ease-out, box-shadow 0.15s ease-out;
+    user-select: none; /* 防止拖拽时选中文本 */
+    cursor: grab; /* 拖拽手势 */
+}
+.card-css:active { /* 正在拖拽时的手势 */
+    cursor: grabbing;
 }
 
 /* 左上角的点数和花色 */
@@ -109,11 +123,11 @@ h1 {
     content: attr(data-rank) "\A" attr(data-suit);
     white-space: pre;
     position: absolute;
-    top: 5px; /* 调整位置 */
+    top: 5px;
     left: 5px;
-    line-height: 1.1; /* 调整行高 */
+    line-height: 1.1;
     text-align: center;
-    font-size: 16px; /* 调整角标字体大小 */
+    font-size: 16px;
     font-weight: bold;
     z-index: 1;
 }
@@ -133,37 +147,42 @@ h1 {
     z-index: 1;
 }
 
-/* 花色颜色 (确保这里的类名与JS中 suitCssClass 一致) */
 .card-css.hearts,
 .card-css.diamonds {
-    color: #D32F2F !important; /* 强制红色 */
+    color: #D32F2F;
 }
 
 .card-css.spades,
 .card-css.clubs {
-    color: #111111 !important; /* 强制黑色 */
+    color: #111111;
 }
 
-/* 中心花色图案的样式 */
 .card-center-suit {
-    font-size: 30px;  /* 减小中心花色图案大小 */
+    font-size: 30px;
     line-height: 1;
-    /* 颜色会从父元素 .card-css 继承 */
-    /* 如果父元素的 color 被 !important 覆盖，这里也需要 !important 或单独设置 */
-    /* 例如：.card-css.hearts .card-center-suit { color: #D32F2F !important; } */
+}
+
+/* SortableJS 视觉反馈样式 */
+.droppable-area.sortable-ghost {
+    opacity: 0.4;
+    background-color: #c8ebfb !important; /* 强制背景色 */
+    border: 2px dashed #007bff !important; /* 强制边框 */
+}
+.droppable-area .card-css.sortable-ghost { /* 如果ghost是card-css本身 */
+    border: 2px dashed #007bff !important;
+    background-color: rgba(200, 235, 251, 0.5) !important;
 }
 
 
-/* 可选卡牌的样式 */
-.card-css.selectable:hover {
-    cursor: pointer;
-    transform: translateY(-3px) scale(1.03);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+.card-css.sortable-chosen {
+    opacity: 0.8;
+    transform: scale(1.05) translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.25);
+    cursor: grabbing !important;
 }
-.card-css.selected {
-    border: 3px solid gold !important; /* 更明显的选中边框 */
-    transform: translateY(-5px) scale(1.05);
-    box-shadow: 0 0 10px gold;
+
+.card-css.sortable-drag { /* 实际被拖动的副本 */
+    opacity: 0.9;
 }
 
 
@@ -171,53 +190,53 @@ h1 {
 .controls {
     margin-top: 20px;
     padding-top: 15px;
-    border-top: 1px solid #eee; /* 分隔线 */
+    border-top: 1px solid #eee;
 }
 .controls button {
-    padding: 10px 18px; /* 调整按钮大小 */
+    padding: 10px 18px;
     margin: 5px;
     border: none;
     border-radius: 5px;
-    background-color: #007bff; /* Bootstrap 主题蓝 */
+    background-color: #007bff;
     color: white;
     cursor: pointer;
-    font-size: 0.95em; /* 调整字体大小 */
+    font-size: 0.95em;
     transition: background-color 0.2s ease, box-shadow 0.2s ease;
 }
 
-.controls button:hover {
+.controls button:hover:not(:disabled) {
     background-color: #0056b3;
     box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 .controls button:disabled {
     background-color: #cccccc;
     cursor: not-allowed;
+    opacity: 0.7;
 }
-.controls button:active {
+.controls button:active:not(:disabled) {
     background-color: #004085;
 }
-
 
 .message-area, .score-area {
     margin-top: 15px;
     padding: 10px;
     border: 1px dashed #ccc;
     min-height: 30px;
-    background-color: #f8f9fa; /* 更亮的背景 */
+    background-color: #f8f9fa;
     border-radius: 5px;
     font-size: 0.9em;
-    color: #495057; /* 深灰色文字 */
+    color: #495057;
 }
 .score-area {
     font-weight: bold;
-    color: #198754; /* 绿色表示得分 */
+    color: #198754;
 }
 
 /* 初始提示文字 */
-.hand-row p, #player-hand p {
-    color: #6c757d; /* Bootstrap muted color */
+.hand-row p, #player-hand p { /* 确保这个p标签在发牌后被清除 */
+    color: #6c757d;
     font-style: italic;
-    width: 100%; /* 确保提示文字居中或占满一行 */
+    width: 100%;
     text-align: center;
     margin: 10px 0;
 }
