@@ -5,7 +5,7 @@ const callBackendButton = document.getElementById('call-backend-button');
 const compareButton = document.getElementById('compare-button');
 const confirmOrganizationButton = document.getElementById('confirm-organization-button');
 
-const API_BASE_URL = 'https://wenge.cloudns.ch';
+const API_BASE_URL = 'https://wenge.cloudns.ch'; // 或者你当前的后端地址
 
 let deck = [];
 let playerHand = [];
@@ -15,9 +15,15 @@ let playerOrganizedHand = {
     bottom: []
 };
 
+// SortableJS 实例
 let sortableInitialHand, sortableTopRow, sortableMiddleRow, sortableBottomRow;
+// SortableJS 初始化尝试计数和延迟设置
+let sortableInitializationAttempts = 0;
+const MAX_SORTABLE_INIT_ATTEMPTS = 15; // 增加尝试次数
+const SORTABLE_INIT_DELAY = 300;  // 稍微增加延迟
 
 function updateHandModelFromDOM(domElements, rowName) {
+    // ... (这个函数保持和上次一样) ...
     console.log(`Updating model for row: ${rowName}. DOM elements count: ${domElements.length}`);
     const cardsData = domElements.map(div => {
         if (!div.cardData) {
@@ -38,156 +44,117 @@ function updateHandModelFromDOM(domElements, rowName) {
 }
 
 function initializeSortable() {
-    console.log("Attempting to initialize SortableJS...");
-    if (typeof Sortable === 'undefined') {
-        console.error("SortableJS library is not loaded!");
-        displayMessage("错误：拖拽功能未加载，请检查网络或刷新页面。", true);
-        return;
-    }
+    console.log(`Attempting to initialize SortableJS (Attempt ${sortableInitializationAttempts + 1}/${MAX_SORTABLE_INIT_ATTEMPTS})...`);
+    if (typeof Sortable !== 'undefined') {
+        console.log("SortableJS library is loaded!");
+        const sharedGroupName = 'thirteen-water-cards';
+        const commonSortableOptions = {
+            group: sharedGroupName,
+            animation: 150,
+            ghostClass: 'sortable-ghost',
+            chosenClass: 'sortable-chosen',
+            dragClass: 'sortable-drag',
+            onStart: function (evt) { console.log('%cDrag Started:', 'color: blue; font-weight: bold;', evt.item.cardData, 'from:', evt.from.dataset.rowName); },
+            onChoose: function (evt) { console.log('%cItem Chosen:', 'color: green;', evt.item.cardData); },
+            onUnchoose: function (evt) { console.log('%cItem Unchosen:', 'color: gray;', evt.item.cardData); },
+            onAdd: function (evt) {
+                console.log(`%cItem Added:`, 'color: orange;', evt.item.cardData, `to [${evt.to.dataset.rowName}] from [${evt.from.dataset.rowName}]`);
+                const rowName = evt.to.dataset.rowName;
+                const rowLimit = parseInt(evt.to.dataset.rowLimit);
+                if (rowLimit && evt.to.children.length > rowLimit) {
+                    displayMessage(`${rowName === 'top' ? '头' : rowName === 'middle' ? '中' : '尾'}道已满 (${rowLimit} 张)!`, true);
+                    console.warn(`Row ${rowName} limit ${rowLimit} exceeded.`);
+                }
+            },
+            onUpdate: function (evt) { console.log('%cList Updated (sorted):', 'color: purple;', evt.item.cardData, 'in:', evt.from.dataset.rowName); },
+            onRemove: function (evt) { console.log('%cItem Removed:', 'color: red;', evt.item.cardData, 'from:', evt.from.dataset.rowName, 'to:', evt.to ? evt.to.dataset.rowName : 'none'); },
+            onEnd: function (evt) {
+                console.log('%cDrag Ended.', 'color: brown; font-weight: bold;', 'Item:', evt.item.cardData, 'From:', evt.from.dataset.rowName, 'To:', evt.to.dataset.rowName);
+                updateHandModelFromDOM(Array.from(evt.from.children), evt.from.dataset.rowName);
+                if (evt.from !== evt.to) {
+                    updateHandModelFromDOM(Array.from(evt.to.children), evt.to.dataset.rowName);
+                }
+                console.log(`--- Data models updated after drag end ---`);
+            },
+            // onMove: function (evt, originalEvent) { // 暂时注释掉 onMove 的复杂逻辑
+            //     const toRowElement = evt.to;
+            //     const rowLimit = parseInt(toRowElement.dataset.rowLimit);
+            //     if (rowLimit && toRowElement.children.length >= rowLimit && evt.from !== toRowElement) {
+            //         return false; // 阻止移动到已满的牌道
+            //     }
+            //     return true;
+            // },
+        };
 
-    const sharedGroupName = 'thirteen-water-cards';
-    const commonSortableOptions = {
-        group: sharedGroupName,
-        animation: 150,
-        ghostClass: 'sortable-ghost',
-        chosenClass: 'sortable-chosen',
-        dragClass: 'sortable-drag',
-        onStart: function (/**Event*/evt) {
-            console.log('%cDrag Started:', 'color: blue; font-weight: bold;', evt.item.cardData, 'from container:', evt.from.dataset.rowName);
-        },
-        onChoose: function (/**Event*/evt) {
-            console.log('%cItem Chosen:', 'color: green;', evt.item.cardData);
-        },
-        onUnchoose: function (/**Event*/evt) {
-            console.log('%cItem Unchosen:', 'color: gray;', evt.item.cardData);
-        },
-        onAdd: function (/**Event*/evt) {
-            const itemEl = evt.item;
-            const toRowElement = evt.to;
-            const fromRowElement = evt.from;
-            console.log(`%cItem Added:`, 'color: orange;', itemEl.cardData, `to [${toRowElement.dataset.rowName}] from [${fromRowElement.dataset.rowName}]`);
+        const initialHandEl = document.getElementById('player-hand');
+        const topRowEl = document.getElementById('player-top-row');
+        const middleRowEl = document.getElementById('player-middle-row');
+        const bottomRowEl = document.getElementById('player-bottom-row');
 
-            const rowName = toRowElement.dataset.rowName;
-            const rowLimit = parseInt(toRowElement.dataset.rowLimit);
+        console.log("Sortable Init Check - initialHandEl:", initialHandEl ? 'Found' : 'NOT Found!');
+        // ... (其他元素检查)
 
-            // 重要的：这里的 children.length 是添加之后的目标列表长度
-            if (rowLimit && toRowElement.children.length > rowLimit) {
-                displayMessage(`${rowName === 'top' ? '头' : rowName === 'middle' ? '中' : '尾'}道已满 (${rowLimit} 张)! 请先移出一些牌。`, true);
-                // 关键：将元素移回来源地
-                // evt.from 是原始容器，evt.item 是被拖动的项
-                // SortableJS v1.10+ 应该在 onAdd 之后，如果目标列表拒绝（例如通过配置），它会自动处理回退
-                // 但如果没有这样的配置，我们需要手动将其“送回”
-                // 注意：直接操作 DOM 可能会与 SortableJS 的内部状态冲突，通常 onEnd 是更安全的地方处理最终状态
-                // 简单的做法是允许添加，然后在 onEnd 或 confirm 时校验
-                // 如果想立即阻止，需要更复杂的 onMove 回调返回 false
-                console.warn(`Row ${rowName} limit ${rowLimit} exceeded. Card ${itemEl.cardData.rank}${itemEl.cardData.displaySuitChar} was moved to a full row.`);
-                // 暂时不在这里做强制移回，依赖onEnd和最终校验
-            }
-        },
-        onUpdate: function (/**Event*/evt) { // 列表内排序
-            console.log('%cList Updated (sorted):', 'color: purple;', evt.item.cardData, 'in container:', evt.from.dataset.rowName);
-            // onEnd 也会触发，所以可以在 onEnd 中统一处理数据模型更新
-        },
-        onSort: function (/**Event*/evt) { // Fired when sorting within a list or between lists.
-            // console.log('Item Sort Event:', evt.item);
-        },
-        onRemove: function (/**Event*/evt) {
-            console.log('%cItem Removed:', 'color: red;', evt.item.cardData, 'from container:', evt.from.dataset.rowName, 'to:', evt.to ? evt.to.dataset.rowName : 'outside');
-        },
-        onEnd: function (/**Event*/evt) {
-            console.log('%cDrag Ended.', 'color: brown; font-weight: bold;', 'Item:', evt.item.cardData, 'New Index:', evt.newIndex, 'Old Index:', evt.oldIndex, 'From:', evt.from.dataset.rowName, 'To:', evt.to.dataset.rowName);
-            const fromRowName = evt.from.dataset.rowName;
-            const toRowName = evt.to.dataset.rowName;
+        if (initialHandEl) sortableInitialHand = new Sortable(initialHandEl, {...commonSortableOptions, sort: true });
+        if (topRowEl) sortableTopRow = new Sortable(topRowEl, {...commonSortableOptions, sort: true});
+        if (middleRowEl) sortableMiddleRow = new Sortable(middleRowEl, {...commonSortableOptions, sort: true});
+        if (bottomRowEl) sortableBottomRow = new Sortable(bottomRowEl, {...commonSortableOptions, sort: true});
 
-            // 核心：在拖拽操作结束后，根据 DOM 的最终状态更新数据模型
-            updateHandModelFromDOM(Array.from(evt.from.children), fromRowName);
-            if (evt.from !== evt.to) { // 如果是从一个列表拖到另一个列表
-                updateHandModelFromDOM(Array.from(evt.to.children), toRowName);
-            }
-            console.log(`--- Data models updated after drag end ---`);
-        },
-        onMove: function (/**Event*/evt, /**Event*/originalEvent) {
-            // evt.dragged; // 被拖拽的DOM元素
-            // evt.draggedRect; // 被拖拽的DOM元素的边界ClientRect
-            // evt.related; // 相关的拖拽元素（悬停在其上的元素）
-            // evt.relatedRect; // 相关元素的边界ClientRect
-            // originalEvent.clientY; // 鼠标Y坐标
-            // originalEvent.clientX; // 鼠标X坐标
-            // return false; // 取消移动并触发onEnd回调函数
-            const toRowElement = evt.to;
-            const rowLimit = parseInt(toRowElement.dataset.rowLimit);
-            // 检查目标牌道是否已满 (evt.related 即将插入的位置的元素)
-            // 如果 toRowElement 是目标牌道，并且里面已经有了 rowLimit 个元素，
-            // 并且 evt.dragged 不是来自 toRowElement (即不是在同一个牌道内排序)
-            if (rowLimit && toRowElement.children.length >= rowLimit && evt.from !== toRowElement) {
-                // console.log(`Attempting to move to full row [${toRowElement.dataset.rowName}]. Limit: ${rowLimit}, Current: ${toRowElement.children.length}`);
-                // displayMessage(`${toRowElement.dataset.rowName === 'top' ? '头' : toRowElement.dataset.rowName === 'middle' ? '中' : '尾'}道已满 (${rowLimit} 张)!`, true);
-                // return false; // 返回false可以阻止移动，并立即触发onEnd
-                // 注意：如果在onMove中阻止，onAdd可能不会触发。
-                // 暂时注释掉，让onAdd和onEnd处理，因为onMove的逻辑可能更复杂
-            }
-            return true; // 允许移动
-        },
-    };
+        if (initialHandEl || topRowEl || middleRowEl || bottomRowEl) {
+            console.log("SortableJS initialization process completed for found elements.");
+        } else {
+            console.warn("None of the target elements for SortableJS were found in the DOM, though Sortable lib is loaded.");
+        }
 
-    const initialHandEl = document.getElementById('player-hand');
-    const topRowEl = document.getElementById('player-top-row');
-    const middleRowEl = document.getElementById('player-middle-row');
-    const bottomRowEl = document.getElementById('player-bottom-row');
-
-    console.log("Sortable Init - initialHandEl:", initialHandEl ? 'Found' : 'NOT Found!');
-    console.log("Sortable Init - topRowEl:", topRowEl ? 'Found' : 'NOT Found!');
-    console.log("Sortable Init - middleRowEl:", middleRowEl ? 'Found' : 'NOT Found!');
-    console.log("Sortable Init - bottomRowEl:", bottomRowEl ? 'Found' : 'NOT Found!');
-
-    if (initialHandEl) {
-        sortableInitialHand = new Sortable(initialHandEl, {...commonSortableOptions, sort: true }); // 初始手牌区允许内部排序
-        console.log("Sortable for initialHandEl initialized.");
-    }
-    if (topRowEl) {
-        sortableTopRow = new Sortable(topRowEl, {...commonSortableOptions, sort: true}); // 牌道内也允许排序
-        console.log("Sortable for topRowEl initialized.");
-    }
-    if (middleRowEl) {
-        sortableMiddleRow = new Sortable(middleRowEl, {...commonSortableOptions, sort: true});
-        console.log("Sortable for middleRowEl initialized.");
-    }
-    if (bottomRowEl) {
-        sortableBottomRow = new Sortable(bottomRowEl, {...commonSortableOptions, sort: true});
-        console.log("Sortable for bottomRowEl initialized.");
-    }
-
-    if (initialHandEl || topRowEl || middleRowEl || bottomRowEl) {
-        console.log("At least one Sortable instance was attempted.");
     } else {
-        console.error("None of the target elements for SortableJS were found in the DOM!");
-        displayMessage("错误：无法初始化拖拽区域。", true);
+        sortableInitializationAttempts++;
+        if (sortableInitializationAttempts < MAX_SORTABLE_INIT_ATTEMPTS) {
+            console.warn(`SortableJS library is not loaded yet. Retrying in ${SORTABLE_INIT_DELAY}ms...`);
+            setTimeout(initializeSortable, SORTABLE_INIT_DELAY);
+        } else {
+            console.error("SortableJS library failed to load after multiple attempts!");
+            displayMessage("错误：拖拽功能加载失败，请刷新页面重试。", true);
+        }
     }
 }
 
-
 function initializeGame() {
-    // ... (内容不变) ...
+    deck = createDeck();
+    shuffleDeck(deck);
+    playerHand = [];
+    playerOrganizedHand = { top: [], middle: [], bottom: [] };
+
+    const playerHandElem = document.getElementById('player-hand');
+    if (playerHandElem) playerHandElem.innerHTML = '<p>点击 "发牌" 开始</p>';
+    const topRowElem = document.getElementById('player-top-row');
+    if (topRowElem) topRowElem.innerHTML = '';
+    const middleRowElem = document.getElementById('player-middle-row');
+    if (middleRowElem) middleRowElem.innerHTML = '';
+    const bottomRowElem = document.getElementById('player-bottom-row');
+    if (bottomRowElem) bottomRowElem.innerHTML = '';
+    // ... (其他UI清空) ...
+
+    displayMessage("Game initialized. Click '发牌' to deal.");
+    if (compareButton) compareButton.style.display = 'none';
+    if (confirmOrganizationButton) confirmOrganizationButton.style.display = 'none';
+    if (dealButton) dealButton.disabled = false;
     console.log("Game Initialized.");
 }
 
 dealButton.addEventListener('click', () => {
-    // ... (内容不变，但确保 playerHand 数据模型在 displayInitialHand 前已填充) ...
+    // ... (和上次版本一致) ...
     console.log("--- Deal Button Clicked ---");
     deck = createDeck();
     shuffleDeck(deck);
-    playerHand = dealCards(deck, 13); // 更新 playerHand 数据模型
+    playerHand = dealCards(deck, 13);
 
     if (!Array.isArray(playerHand) || playerHand.length !== 13) {
         console.error("CRITICAL: Failed to deal 13 cards properly. playerHand:", playerHand);
         displayMessage("错误：发牌失败！", true);
         return;
     }
-    // 清空之前的牌道数据模型
-    playerOrganizedHand = { top: [], middle: [], bottom: [] };
-    // 重新渲染所有UI区域
+    playerOrganizedHand = { top: [], middle: [], bottom: [] }; // 清空已整理的牌
     displayInitialHand(playerHand);
-    displayOrganizedHand(playerOrganizedHand); // 清空并渲染空的牌道
+    displayOrganizedHand(playerOrganizedHand); // 确保牌道是空的
 
     displayMessage("请理牌！将手牌拖拽到上方牌道。");
 
@@ -196,15 +163,13 @@ dealButton.addEventListener('click', () => {
 });
 
 confirmOrganizationButton.addEventListener('click', () => {
-    // ... (内容不变，但校验现在依赖于 playerHand 和 playerOrganizedHand 数据模型) ...
+    // ... (和上次版本一致) ...
     console.log("--- Confirm Organization Button Clicked ---");
-
     const totalOrganizedCards = playerOrganizedHand.top.length + playerOrganizedHand.middle.length + playerOrganizedHand.bottom.length;
-    const remainingInitialCards = playerHand.length; // playerHand 应该是初始区剩下的牌
+    const remainingInitialCards = playerHand.length;
     const totalCardsInPlay = totalOrganizedCards + remainingInitialCards;
 
     console.log("Confirming organization: Organized cards count:", totalOrganizedCards, "Initial cards count:", remainingInitialCards, "Total:", totalCardsInPlay);
-
 
     if (totalCardsInPlay !== 13) {
          displayMessage(`错误：总牌数 (${totalCardsInPlay}) 不等于13！请确保所有牌都在某个区域。初始区剩余: ${remainingInitialCards}`, true);
@@ -219,9 +184,8 @@ confirmOrganizationButton.addEventListener('click', () => {
         );
         return;
     }
-    // ... 后续逻辑不变 ...
-    // 计算牌型并显示
-    displayOrganizedHand(playerOrganizedHand); // 确保牌型文本基于当前数据模型更新
+
+    displayOrganizedHand(playerOrganizedHand);
 
     const topEval = evaluateHand(playerOrganizedHand.top);
     const middleEval = evaluateHand(playerOrganizedHand.middle);
@@ -237,11 +201,42 @@ confirmOrganizationButton.addEventListener('click', () => {
     if (confirmOrganizationButton) confirmOrganizationButton.style.display = 'none';
 });
 
-compareButton.addEventListener('click', () => { /* ... (逻辑基本不变) ... */ });
-callBackendButton.addEventListener('click', async () => { /* ... (逻辑不变) ... */ });
+compareButton.addEventListener('click', () => {
+    console.log("--- Compare Button Clicked ---");
+    const topEval = evaluateHand(playerOrganizedHand.top);
+    const middleEval = evaluateHand(playerOrganizedHand.middle);
+    const bottomEval = evaluateHand(playerOrganizedHand.bottom);
+
+    if (checkDaoshui(topEval, middleEval, bottomEval)) {
+        displayMessage("倒水！本局判输。", true);
+    } else {
+        displayMessage("比牌完成！（此处应有计分和与对手比较的逻辑）");
+    }
+    if (compareButton) compareButton.style.display = 'none';
+    if (dealButton) dealButton.disabled = false;
+});
+
+callBackendButton.addEventListener('click', async () => {
+    // ... (和上次版本一致) ...
+    displayMessage("Calling backend...", false);
+    try {
+        // 确保 API_BASE_URL 是你当前后端可访问的地址
+        const response = await fetch(`${API_BASE_URL}/api/index.php?action=hello`);
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`HTTP error! status: ${response.status} - ${errorText}`);
+        }
+        const data = await response.json();
+        displayMessage(`Backend says: ${data.message} (Timestamp: ${data.timestamp})`, false);
+    } catch (error) {
+        console.error("Error calling backend:", error);
+        displayMessage(`Error calling backend: ${error.message}`, true);
+    }
+});
 
 document.addEventListener('DOMContentLoaded', (event) => {
     console.log("DOM fully loaded and parsed");
     initializeGame();
-    initializeSortable();
+    initializeSortable(); // 确保在DOM加载后调用
 });
