@@ -10,10 +10,10 @@ function renderCard(card, isFaceUp = true) {
     let altText = "Playing Card"; let imgSrc = "";
 
     if (isFaceUp) {
-        if (typeof getCardImagePath !== 'function' || typeof RANK_FILENAME_PART === 'undefined' || typeof SUITS_DATA === 'undefined') {
-            console.error("renderCard ERROR: Game data for images not ready (getCardImagePath or mappings missing).");
-            imgSrc = (typeof CARD_IMAGE_PATH_PREFIX !== 'undefined' && typeof UNKNOWN_CARD_FILENAME !== 'undefined') ? CARD_IMAGE_PATH_PREFIX + UNKNOWN_CARD_FILENAME : 'images/cards/unknown.png'; // Provide a more robust fallback
-            img.alt = "Error loading card image";
+        if (typeof getCardImagePath !== 'function' || typeof RANK_FILENAME_PART === 'undefined' || typeof SUITS_DATA === 'undefined' || typeof CARD_IMAGE_PATH_PREFIX === 'undefined' || typeof UNKNOWN_CARD_FILENAME === 'undefined') {
+            console.error("renderCard CRITICAL ERROR: Required functions/data from game.js (getCardImagePath, RANK_FILENAME_PART, SUITS_DATA, CARD_IMAGE_PATH_PREFIX, UNKNOWN_CARD_FILENAME) are not available. Check script load order of game.js.");
+            imgSrc = 'images/cards/unknown.png'; // Default fallback if constants are missing
+            img.alt = "Error: Image data configuration missing";
         } else {
             imgSrc = getCardImagePath(card); // From game.js
             const rankPartForAlt = card?.rank ? (RANK_FILENAME_PART[card.rank.toUpperCase()] || card.rank) : "UnknownRank";
@@ -21,10 +21,10 @@ function renderCard(card, isFaceUp = true) {
             altText = `${rankPartForAlt} of ${suitPartForAlt}`;
         }
     } else {
-        if (typeof getCardBackImagePath !== 'function') {
-            console.error("renderCard ERROR: Game data for card back not ready (getCardBackImagePath missing).");
-            imgSrc = (typeof CARD_IMAGE_PATH_PREFIX !== 'undefined' && typeof CARD_IMAGE_EXTENSION !== 'undefined') ? CARD_IMAGE_PATH_PREFIX + 'back' + CARD_IMAGE_EXTENSION : 'images/cards/back.png'; // Fallback to expected back
-            img.alt = "Error loading card back";
+        if (typeof getCardBackImagePath !== 'function' || typeof CARD_IMAGE_PATH_PREFIX === 'undefined' || typeof CARD_IMAGE_EXTENSION === 'undefined') {
+            console.error("renderCard CRITICAL ERROR: Required functions/data from game.js (getCardBackImagePath, CARD_IMAGE_PATH_PREFIX, CARD_IMAGE_EXTENSION) for card back are not available.");
+            imgSrc = 'images/cards/back.png'; // Default fallback if constants are missing
+            img.alt = "Error: Card back data configuration missing";
         } else { imgSrc = getCardBackImagePath(); altText = "Card Back"; }
     }
     img.src = imgSrc; img.alt = altText;
@@ -39,10 +39,5 @@ function renderCard(card, isFaceUp = true) {
     }
     return cardDiv;
 }
-function displayMessage(message, isError = false) {
-    if (!messageAreaElement) { console.warn("displayMessage: messageAreaElement not found."); return; }
-    messageAreaElement.textContent = message; messageAreaElement.className = 'message-area';
-    if (isError) messageAreaElement.classList.add('error');
-    else if (message.toLowerCase().includes("backend says:") || message.toLowerCase().includes("服务器")) messageAreaElement.classList.add('info');
-}
-function displayScore(scoreText) { if (!scoreAreaElement) { console.warn("displayScore: scoreAreaElement not found."); return; } scoreAreaElement.textContent = scoreText; }
+function displayMessage(message, isError = false) { if (!messageAreaElement) {console.warn("displayMessage: messageAreaElement not found."); return;} messageAreaElement.textContent = message; messageAreaElement.className = 'message-area'; if (isError) messageAreaElement.classList.add('error'); else if (message.toLowerCase().includes("backend says:") || message.toLowerCase().includes("服务器")) messageAreaElement.classList.add('info'); }
+function displayScore(scoreText) { if (!scoreAreaElement) {console.warn("displayScore: scoreAreaElement not found."); return;} scoreAreaElement.textContent = scoreText; }
