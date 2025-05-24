@@ -1,98 +1,33 @@
 /* frontend/css/style.css */
-
-html, body {
-    height: 100vh; width: 100vw; margin: 0; padding: 0; overflow: hidden;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: #367c3d; color: #333;
-}
-.game-container {
-    width: 100%; height: 100%; max-width: none; max-height: none; margin: 0;
-    padding: clamp(10px, 1.5vh, 15px); box-sizing: border-box; background-color: #f0f3f7;
-    text-align: center; display: flex; flex-direction: column; align-items: stretch;
-    overflow-y: auto;
-}
-.player-area {
-    margin-bottom: clamp(10px, 1.5vh, 15px); padding: clamp(8px, 1.2vh, 10px);
-    border: 1px solid #d1d9e6; border-radius: 6px; background-color: #f8f9fa;
-    width: 100%; box-sizing: border-box;
-}
-.player-area > h3 {
-    margin-top: 0; margin-bottom: clamp(8px, 1.2vh, 10px);
-    font-size: clamp(1em, 2.2vw, 1.1em); color: #34495e;
-    text-align: left; font-weight: 500; padding-left: 5px;
-}
-.organized-rows .hand-row-label,
-#middle-hand-header-container {
-    font-weight: 600; margin-top: clamp(6px, 0.8vh, 8px); margin-bottom: clamp(3px, 0.4vh, 4px);
-    text-align: left; font-size: clamp(0.8em, 1.8vw, 0.9em); color: #495057; padding-left: 5px;
-}
-#middle-hand-header-container #middle-hand-header {
-    font-size: inherit !important; text-align: inherit !important;
-    margin: 0 !important; font-weight: inherit !important; color: inherit !important;
-    display: inline;
-}
-.hand-row-label span,
-#middle-hand-header-container #middle-hand-header #middle-eval-text {
-    font-weight: normal !important; color: #007bff !important; font-style: italic !important;
-}
-.hand-row, #player-hand.hand-row {
-    display: flex; flex-wrap: wrap; justify-content: flex-start; align-items: center;
-    gap: clamp(3px, 0.6vw, 5px); min-height: clamp(65px, 9vw, 95px);
-    padding: clamp(5px, 0.8vw, 7px); border: 1px dashed #ced4da; border-radius: 5px;
-    background-color: #e9ecef; margin-bottom: clamp(5px, 0.8vh, 7px);
-    width: 100%; box-sizing: border-box;
-}
+html, body { height: 100vh; width: 100vw; margin: 0; padding: 0; overflow: hidden; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #367c3d; color: #333; }
+.game-container { width: 100%; height: 100%; max-width: none; max-height: none; margin: 0; padding: clamp(10px, 1.5vh, 15px); box-sizing: border-box; background-color: #f0f3f7; text-align: center; display: flex; flex-direction: column; align-items: stretch; overflow-y: auto; }
+.player-area { margin-bottom: clamp(10px, 1.5vh, 15px); padding: clamp(8px, 1.2vh, 10px); border: 1px solid #d1d9e6; border-radius: 6px; background-color: #f8f9fa; width: 100%; box-sizing: border-box; }
+.player-area > h3 { margin-top: 0; margin-bottom: clamp(8px, 1.2vh, 10px); font-size: clamp(1em, 2.2vw, 1.1em); color: #34495e; text-align: left; font-weight: 500; padding-left: 5px; }
+.organized-rows .hand-row-label, #middle-hand-header-container { font-weight: 600; margin-top: clamp(6px, 0.8vh, 8px); margin-bottom: clamp(3px, 0.4vh, 4px); text-align: left; font-size: clamp(0.8em, 1.8vw, 0.9em); color: #495057; padding-left: 5px; }
+#middle-hand-header-container #middle-hand-header { font-size: inherit !important; text-align: inherit !important; margin: 0 !important; font-weight: inherit !important; color: inherit !important; display: inline; }
+.hand-row-label span, #middle-hand-header-container #middle-hand-header #middle-eval-text { font-weight: normal !important; color: #007bff !important; font-style: italic !important; }
+.hand-row, #player-hand.hand-row { display: flex; flex-wrap: wrap; justify-content: flex-start; align-items: center; gap: clamp(5px, 1vw, 7px); min-height: clamp(85px, 11vw, 120px); padding: clamp(6px, 1vw, 8px); border: 1px dashed #ced4da; border-radius: 5px; background-color: #e9ecef; margin-bottom: clamp(5px, 0.8vh, 7px); width: 100%; box-sizing: border-box; }
 #player-hand.player-hand { background-color: #ddeeff; }
 #player-hand.is-middle-row-style { border-color: #0d6efd; border-style: solid; }
-.hand-row:empty::after, #player-hand.hand-row:empty::after {
-    content: "将牌拖到此处"; color: #6c757d; font-style: italic; width: 100%;
-    text-align: center; padding: clamp(15px, 2.5vh, 25px) 0; font-size: clamp(0.8em, 1.8vw, 0.9em);
-}
+.hand-row:empty::after, #player-hand.hand-row:empty::after { content: "将牌拖到此处"; color: #6c757d; font-style: italic; width: 100%; text-align: center; padding: clamp(15px, 2.5vh, 25px) 0; font-size: clamp(0.8em, 1.8vw, 0.9em); }
 #player-hand.hand-row:empty::after { content: "请点击“发牌”"; }
-.card-css {
-    width: clamp(42px, 5.5vw, 60px); height: clamp(59px, 7.7vw, 84px);
-    background-color: #ffffff; border: 1px solid #adb5bd;
-    border-radius: clamp(3px, 0.5vw, 4px); box-shadow: 1px 1px 2px rgba(0,0,0,0.1);
-    overflow: hidden; padding: 0; box-sizing: border-box;
-    transition: transform 0.1s ease-out, box-shadow 0.1s ease-out;
-    user-select: none; cursor: grab; flex-shrink: 0; display: flex;
-    justify-content: center; align-items: center;
-}
+.card-css { width: clamp(54px, 6.96vw, 78px); height: clamp(76px, 9.74vw, 109px); background-color: #ffffff; border: 1px solid #adb5bd; border-radius: clamp(4px, 0.7vw, 6px); box-shadow: 1px 1px 3px rgba(0,0,0,0.15); overflow: hidden; padding: 0; box-sizing: border-box; transition: transform 0.15s ease-out, box-shadow 0.15s ease-out; user-select: none; cursor: grab; flex-shrink: 0; display: flex; justify-content: center; align-items: center; }
 .card-css img { display: block; width: 100%; height: 100%; object-fit: contain; }
 .card-image-load-error { border: 2px solid red !important; background-color: #ffe0e0 !important; }
 .card-image-load-error img { opacity: 0.3; }
-.droppable-area.sortable-ghost, .card-css.sortable-ghost {
-    opacity: 0.4; background-color: #cfe2ff !important; border: 2px dashed #0d6efd !important;
-}
-.card-css.sortable-chosen {
-    opacity: 0.9; transform: scale(1.05) translateY(-1px); box-shadow: 0 3px 8px rgba(0,0,0,0.15);
-}
-.controls {
-    margin-top: auto; padding-top: clamp(8px, 1.2vh, 10px); border-top: 1px solid #dee2e6;
-    flex-shrink: 0; width: 100%; box-sizing: border-box; text-align: center;
-}
-.controls button {
-    padding: clamp(8px, 1.5vh, 12px) clamp(12px, 2.2vw, 18px);
-    margin: clamp(3px, 0.6vh, 5px) clamp(4px, 0.7vw, 6px);
-    border: none; border-radius: 4px; background-color: #007bff; color: white; cursor: pointer;
-    font-size: clamp(0.8em, 2vw, 0.95em); transition: background-color 0.2s ease, box-shadow 0.2s ease;
-    font-weight: 500;
-}
+.droppable-area.sortable-ghost, .card-css.sortable-ghost { opacity: 0.4; background-color: #cfe2ff !important; border: 2px dashed #0d6efd !important; }
+.card-css.sortable-chosen { opacity: 0.9; transform: scale(1.06) translateY(-2px); box-shadow: 0 5px 12px rgba(0,0,0,0.2); }
+.controls { margin-top: auto; padding-top: clamp(8px, 1.2vh, 10px); border-top: 1px solid #dee2e6; flex-shrink: 0; width: 100%; box-sizing: border-box; text-align: center; }
+.controls button { padding: clamp(8px, 1.5vh, 12px) clamp(12px, 2.2vw, 18px); margin: clamp(3px, 0.6vh, 5px) clamp(4px, 0.7vw, 6px); border: none; border-radius: 4px; background-color: #007bff; color: white; cursor: pointer; font-size: clamp(0.8em, 2vw, 0.95em); transition: background-color 0.2s ease, box-shadow 0.2s ease; font-weight: 500; }
 .controls button:hover:not(:disabled) { background-color: #0069d9; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
 .controls button:disabled { background-color: #6c757d; opacity: 0.65; cursor: not-allowed; }
 .controls button#sort-hand-button { background-color: #198754; }
 .controls button#sort-hand-button:hover:not(:disabled) { background-color: #157347; }
-.controls button#ai-reference-button, .controls button#ai-autoplay-button { background-color: #fd7e14; } /* Orange for AI buttons */
-.controls button#ai-reference-button:hover:not(:disabled),
-.controls button#ai-autoplay-button:hover:not(:disabled) { background-color: #e66800; }
-.controls button#call-backend-button { background-color: #0dcaf0; } /* Cyan for Test Backend */
+.controls button#ai-reference-button, .controls button#ai-autoplay-button { background-color: #fd7e14; }
+.controls button#ai-reference-button:hover:not(:disabled), .controls button#ai-autoplay-button:hover:not(:disabled) { background-color: #e66800; }
+.controls button#call-backend-button { background-color: #0dcaf0; }
 .controls button#call-backend-button:hover:not(:disabled) { background-color: #0baccc; }
-.message-area, .score-area, .ai-reference-display {
-    margin-top: clamp(8px, 1.2vh, 10px); padding: clamp(6px, 1vh, 10px) clamp(8px, 1.5vw, 12px);
-    border: 1px solid #ced4da; min-height: 20px; line-height: 1.4; background-color: #f8f9fa;
-    border-radius: 5px; font-size: clamp(0.75em, 1.8vw, 0.9em); color: #212529;
-    text-align: left; flex-shrink: 0; width: 100%; box-sizing: border-box;
-}
+.message-area, .score-area, .ai-reference-display { margin-top: clamp(8px, 1.2vh, 10px); padding: clamp(6px, 1vh, 10px) clamp(8px, 1.5vw, 12px); border: 1px solid #ced4da; min-height: 20px; line-height: 1.4; background-color: #f8f9fa; border-radius: 5px; font-size: clamp(0.75em, 1.8vw, 0.9em); color: #212529; text-align: left; flex-shrink: 0; width: 100%; box-sizing: border-box; }
 .ai-reference-display { border-style: dashed; border-color: #fd7e14; background-color: #fff3e0; }
 .ai-reference-display h4 { margin-top:0; margin-bottom:8px; color:#d9534f; font-size: 1.05em;}
 .ai-reference-display div { margin-bottom:3px; font-size: 0.95em; }
@@ -101,6 +36,4 @@ html, body {
 .message-area.info { background-color: #d1e7dd; color: #0f5132; border-color: #badbcc; }
 .score-area { font-weight: bold; color: #0a3622; background-color: #d1e7dd; border-color: #a3cfbb; }
 .droppable-area.daoshui-warning { border-color: #dc3545 !important; background-color: #f8d7da !important; }
-.droppable-area.daoshui-warning .hand-row-label span,
-#middle-hand-header-container.daoshui-warning #middle-eval-text,
-#middle-hand-header-container.daoshui-warning #middle-hand-header { color: #b02a37 !important; }
+.droppable-area.daoshui-warning .hand-row-label span, #middle-hand-header-container.daoshui-warning #middle-eval-text, #middle-hand-header-container.daoshui-warning #middle-hand-header { color: #b02a37 !important; }
