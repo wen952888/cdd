@@ -4,32 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>十三水游戏</title>
-    <!--
-        Corrected paths relative to index.html if index.html is in frontend/
-        If index.html is at the root and frontend is a subdirectory, paths would be
-        href="frontend/css/style.css" and src="frontend/js/game.js" etc.
-        Assuming index.html is INSIDE frontend/ folder as per error log base.
-    -->
     <link rel="stylesheet" href="css/style.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js" integrity="sha512-Eezs+g9Lq4TCCq0wae01s9PuNWzHYoCMkE97e2qdkYthpI0pzC3UGB03lgEHn2XM85hDOUF6qgqqszs+iXU4UA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-    <!-- Optional: Define a base href if all relative paths should be based on a specific URL.
-         Be careful with this, as it affects ALL relative paths on the page.
-         If your index.html is at 'https://ss.9528.ip-ddns.com/frontend/index.html',
-         then relative paths like "css/style.css" are already correct.
-         <base href="https://ss.9528.ip-ddns.com/frontend/">
-    -->
 </head>
 <body>
     <div class="game-container">
-
+        <!-- ... (player-area, controls, message-area, score-area content remains the same) ... -->
         <div class="player-area">
             <h3>我的牌道</h3>
             <div class="organized-rows">
-                <!-- 头道 (Top Row) -->
                 <div class="hand-row-label">头道 (3张): <span id="top-eval-text"></span></div>
                 <div id="player-top-row" class="hand-row droppable-area" data-row-name="top" data-row-limit="3"></div>
-
-                <!-- 手牌区 / 中道区 (Initial Hand / Middle Row) -->
                 <div class="hand-row-label" id="middle-hand-header-container">
                      <h3 id="middle-hand-header" style="margin:0; font-size: 1em; color: #555f6b; font-weight:600; text-align: left;">
                         我的手牌 / 中道 (剩余牌): <span id="middle-eval-text" style="font-weight:normal; color: #2980b9; font-style:italic;"></span>
@@ -38,27 +23,23 @@
                 <div id="player-hand" class="player-hand hand-row droppable-area" data-row-name="initial_middle" data-row-limit="13">
                     <p>点击 "发牌" 开始</p>
                 </div>
-
-                <!-- 尾道 (Bottom Row) -->
                 <div class="hand-row-label">尾道 (5张): <span id="bottom-eval-text"></span></div>
                 <div id="player-bottom-row" class="hand-row droppable-area" data-row-name="bottom" data-row-limit="5"></div>
             </div>
         </div>
-
         <div class="controls">
             <button id="deal-button">发牌</button>
             <button id="confirm-organization-button" style="display:none;" disabled>确认理牌</button>
             <button id="compare-button" style="display:none;" disabled>比牌</button>
             <button id="call-backend-button" title="测试与后端基础通讯">测试后端</button>
         </div>
-
         <div id="message-area" class="message-area">游戏消息将会显示在这里。</div>
         <div id="score-area" class="score-area">得分: --</div>
     </div>
 
-    <!-- Corrected paths -->
-    <script src="js/game.js"></script>
-    <script src="js/ui.js"></script>
-    <script src="js/main.js"></script>
+    <!-- Scripts: CORRECTED ORDER -->
+    <script src="js/game.js"></script>  <!-- game.js MUST be loaded first -->
+    <script src="js/ui.js"></script>    <!-- ui.js (depends on game.js) loaded second -->
+    <script src="js/main.js"></script>  <!-- main.js (may depend on both) loaded last -->
 </body>
 </html>
