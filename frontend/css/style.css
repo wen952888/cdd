@@ -2,7 +2,7 @@
 
 /* Reset and Basic Setup */
 html, body {
-    height: 100vh; /* Use vh for viewport height, more reliable for full screen */
+    height: 100vh; /* Use vh for viewport height */
     width: 100vw;  /* Use vw for viewport width */
     margin: 0;
     padding: 0;
@@ -10,29 +10,27 @@ html, body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background-color: #367c3d; /* Casino green background for the whole page */
     color: #333;
-    /* display: flex; /* REMOVE or comment out flexbox from body if game-container is 100% width/height */
-    /* justify-content: center; */
-    /* align-items: center; */
+    /* display: flex; /* Flex on body removed as game-container is 100% */
 }
 
 .game-container {
-    width: 100%;  /* Ensure it takes full viewport width */
-    height: 100%; /* Ensure it takes full viewport height */
+    width: 100%;
+    height: 100%;
     max-width: none;
     max-height: none;
     margin: 0;
-    padding: 15px; /* Padding inside the container */
+    padding: 15px;
     box-sizing: border-box;
     background-color: #f0f3f7;
     border-radius: 0;
     box-shadow: none;
-    text-align: center; /* Center inline or inline-block children by default */
+    text-align: center;
 
-    display: flex;
+    display: flex; /* Kept flex for internal layout of game-container */
     flex-direction: column;
-    /* justify-content: space-between; /* This might push content too far apart if player-area doesn't grow */
     align-items: stretch; /* Make children like player-area stretch to full width */
-    overflow-y: auto; /* Allow scrolling within game-container if content overflows */
+    /* justify-content: space-between; /* Or flex-start if more appropriate */
+    overflow-y: auto;
 }
 
 .player-area {
@@ -41,9 +39,9 @@ html, body {
     border: 1px solid #dcdcdc;
     border-radius: 6px;
     background-color: #f7f9fc;
-    width: 100%; /* Make player-area take full width of its parent (game-container padding taken into account by box-sizing) */
-    box-sizing: border-box; /* Ensure padding and border are part of width */
-    /* flex-grow: 1; /* Uncomment if you want this area to take up most of the vertical space */
+    width: 100%;
+    box-sizing: border-box;
+    /* flex-grow: 1; /* Allow this to grow and push controls down */
 }
 
 .player-area h3 {
@@ -62,12 +60,15 @@ html, body {
     text-align: left;
     font-size: 0.9em;
     color: #555f6b;
-    padding-left: 5px; /* Add some padding for labels */
+    padding-left: 5px;
 }
 #middle-hand-header-container #middle-hand-header {
     font-size: 0.9em !important;
     text-align: left !important;
-    padding-left: 5px; /* Match other labels */
+    padding-left: 5px;
+    /* Ensure h3 inside label container doesn't add extra margins messing up alignment */
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
 }
 .hand-row-label span {
     font-weight: normal;
@@ -77,52 +78,51 @@ html, body {
 
 .hand-row, #player-hand.hand-row {
     display: flex;
-    flex-wrap: wrap; /* Allow cards to wrap to next line */
-    /* justify-content: center; /* Center cards if space allows, or flex-start */
-    justify-content: flex-start; /* Align cards to the start for a more standard look */
-    align-items: center; /* Vertically align cards in a row */
-    gap: 6px;
-    min-height: 95px; /* Adjust based on responsive card height */
+    flex-wrap: wrap;
+    justify-content: flex-start; /* Align cards to the start */
+    align-items: center;
+    gap: clamp(4px, 1vw, 6px); /* Responsive gap */
+    min-height: clamp(75px, 11vw, 100px); /* Responsive min-height based on card height */
     padding: 8px;
     border: 1px dashed #b0b0b0;
     border-radius: 5px;
     background-color: #eef2f7;
     margin-bottom: 8px;
-    width: 100%; /* Make rows take full width of player-area */
+    width: 100%;
     box-sizing: border-box;
 }
 
-#player-hand.player-hand {
+#player-hand.player-hand { /* Specific style for the initial hand area */
     background-color: #e6f0ff;
 }
-#player-hand.is-middle-row-style {
-    border-color: #86b7fe;
+#player-hand.is-middle-row-style { /* When player-hand becomes the middle row */
+    border-color: #86b7fe; /* Highlight border */
+    /* background-color: #e0f0e0; /* Optional: change background */
 }
 
 .hand-row:empty::after, #player-hand.hand-row:empty::after {
     content: "将牌拖到此处";
     color: #aaa;
     font-style: italic;
-    /* display: block; /* Flex items are block-like by default */
-    width: 100%; /* Ensure the placeholder text spans the full width */
+    width: 100%;
     text-align: center;
-    padding: 20px 0;
-    /* flex-grow: 1; /* Allow placeholder to fill space if row is flex container */
+    padding: clamp(10px, 3vh, 20px) 0; /* Responsive padding */
+    font-size: clamp(0.8em, 2vw, 0.9em);
 }
 #player-hand.hand-row:empty::after {
     content: "请点击“发牌”";
 }
 
 
-/* --- CSS Poker Card Style (Using responsive clamp) --- */
+/* --- CSS Poker Card Style (Responsive) --- */
 .card-css {
-    width: clamp(50px, 6.5vw, 70px); /* min, preferred (adjust % based on 13 cards + gaps fitting), max */
-    height: clamp(70px, 9vw, 100px);
+    width: clamp(45px, 6vw, 65px); /* min, preferred (adjust % based on 13 cards + gaps), max */
+    height: clamp(65px, 8.5vw, 95px);
     background-color: white;
     border: 1px solid #999;
     color: black;
-    border-radius: 5px;
-    box-shadow: 1px 1px 3px rgba(0,0,0,0.15);
+    border-radius: 4px; /* Slightly smaller radius for smaller cards */
+    box-shadow: 1px 1px 2px rgba(0,0,0,0.1);
     position: relative;
     font-family: 'Georgia', serif;
     overflow: hidden;
@@ -130,23 +130,26 @@ html, body {
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    padding: 3px;
+    padding: 2px; /* Reduced padding */
     box-sizing: border-box;
     transition: transform 0.15s ease-out, box-shadow 0.15s ease-out;
     user-select: none;
     cursor: grab;
-    flex-shrink: 0; /* Prevent cards from shrinking if the row is too narrow */
+    flex-shrink: 0;
 }
-/* ... (rest of .card-css styles like ::before, ::after, colors, .card-center-suit remain the same as previous version) ... */
+.card-css:active, .card-css.sortable-chosen, .card-css.sortable-drag {
+    cursor: grabbing !important;
+}
+
 .card-css::before {
     content: attr(data-rank) "\A" attr(data-suit);
     white-space: pre;
     position: absolute;
-    top: 4px;
-    left: 4px;
+    top: 3px; /* Adjusted for smaller padding */
+    left: 3px;
     line-height: 1.1;
     text-align: center;
-    font-size: clamp(10px, 1.6vw, 14px); /* Adjusted responsive font size */
+    font-size: clamp(9px, 1.5vw, 13px); /* Responsive font size */
     font-weight: bold;
     z-index: 1;
 }
@@ -154,21 +157,21 @@ html, body {
     content: attr(data-rank) "\A" attr(data-suit);
     white-space: pre;
     position: absolute;
-    bottom: 4px;
-    right: 4px;
+    bottom: 3px;
+    right: 3px;
     transform: rotate(180deg);
     line-height: 1.1;
     text-align: center;
-    font-size: clamp(10px, 1.6vw, 14px);
+    font-size: clamp(9px, 1.5vw, 13px);
     font-weight: bold;
     z-index: 1;
 }
 .card-css.hearts, .card-css.diamonds { color: #D32F2F; }
 .card-css.spades, .card-css.clubs { color: #111111; }
-.card-center-suit { font-size: clamp(20px, 3.5vw, 30px); line-height: 1; opacity: 0.9; }
+.card-center-suit { font-size: clamp(18px, 3vw, 28px); line-height: 1; opacity: 0.9; }
 
 
-/* SortableJS Visual Feedback (remains the same) */
+/* SortableJS Visual Feedback */
 .droppable-area.sortable-ghost,
 .card-css.sortable-ghost {
     opacity: 0.4;
@@ -181,27 +184,26 @@ html, body {
     box-shadow: 0 4px 10px rgba(0,0,0,0.25);
 }
 
-/* --- Controls and Message Area (remains largely the same, ensure they are full width or centered) --- */
+/* --- Controls and Message Area --- */
 .controls {
-    margin-top: auto; /* Push controls to the bottom if space-between is used on game-container */
+    margin-top: auto; /* Pushes to bottom if player-area has flex-grow:1 or game-container is space-between */
     padding-top: 10px;
     border-top: 1px solid #eee;
     flex-shrink: 0;
-    width: 100%; /* Make controls section take full width */
+    width: 100%;
     box-sizing: border-box;
 }
 .controls button {
-    padding: 10px 18px; /* Slightly larger buttons again */
-    margin: 5px;
+    padding: clamp(8px, 1.5vh, 12px) clamp(12px, 2.5vw, 20px); /* Responsive padding */
+    margin: clamp(3px, 0.5vh, 5px) clamp(4px, 0.8vw, 6px); /* Responsive margin */
     border: none;
     border-radius: 5px;
     background-color: #007bff;
     color: white;
     cursor: pointer;
-    font-size: 0.95em;
+    font-size: clamp(0.8em, 2.2vw, 1em); /* Responsive font size */
     transition: background-color 0.2s ease, box-shadow 0.2s ease;
 }
-/* ... (rest of button styles remain the same) ... */
 .controls button:hover:not(:disabled) { background-color: #0056b3; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
 .controls button:disabled { background-color: #cccccc; cursor: not-allowed; opacity: 0.7; }
 .controls button:active:not(:disabled) { background-color: #004085; }
@@ -209,38 +211,54 @@ html, body {
 
 .message-area, .score-area {
     margin-top: 10px;
-    padding: 10px 12px;
+    padding: clamp(6px, 1vh, 10px) clamp(8px, 1.5vw, 12px); /* Responsive padding */
     border: 1px dashed #ccc;
-    min-height: 22px;
+    min-height: 20px;
     line-height: 1.4;
     background-color: #f8f9fa;
     border-radius: 5px;
-    font-size: 0.9em;
+    font-size: clamp(0.75em, 2vw, 0.9em); /* Responsive font size */
     color: #495057;
     text-align: left;
     flex-shrink: 0;
-    width: 100%; /* Make message/score areas take full width */
+    width: 100%;
     box-sizing: border-box;
 }
-/* ... (rest of message/score styles remain the same) ... */
 .message-area.error { background-color: #f8d7da; color: #721c24; border-color: #f5c6cb; }
 .message-area.info { background-color: #d1ecf1; color: #0c5460; border-color: #bee5eb; }
 .score-area { font-weight: bold; color: #198754; background-color: #d4edda; border-color: #c3e6cb; }
 
 
-.droppable-area.daoshui-warning { /* remains the same */
+.droppable-area.daoshui-warning {
     border-color: #dc3545 !important;
     background-color: #f8d7da !important;
 }
-/* ... (daoshui text color styles remain the same) ... */
 .droppable-area.daoshui-warning .hand-row-label span,
-#middle-hand-header-container.daoshui-warning #middle-eval-text {
+#middle-hand-header-container.daoshui-warning #middle-eval-text, /* Assuming container gets class */
+#middle-hand-header-container.daoshui-warning #middle-hand-header { /* For the h3 itself */
     color: #dc3545 !important;
 }
-#middle-hand-header-container.daoshui-warning #middle-hand-header {
-     color: #dc3545 !important;
+/* If only #player-hand gets the daoshui-warning class: */
+#player-hand.daoshui-warning + #middle-hand-header-container #middle-eval-text,
+#player-hand.daoshui-warning + #middle-hand-header-container #middle-hand-header {
+    /* This selector is tricky if header is before player-hand. JS should target header directly. */
 }
 
-#player-hand.is-middle-row-style { /* remains the same */
-    border-color: #86b7fe;
+
+/* Styles for the Orientation Message Overlay (ID defined in JS: ORIENTATION_MESSAGE_ID) */
+/* These are largely backup, as JS applies styles directly for the overlay */
+#orientation-message-overlay {
+    /* display: none;  JS controls this */
+    /* position: fixed;
+    top: 0; left: 0; width: 100vw; height: 100vh;
+    background-color: rgba(0, 0, 0, 0.95);
+    color: white; z-index: 10000;
+    justify-content: center; align-items: center; text-align: center;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; */
 }
+
+/* Keyframes for the icon rotation (can be defined here or added by JS) */
+/* @keyframes rotateDeviceIcon {
+    0%, 100% { transform: rotate(0deg); }
+    50% { transform: rotate(-90deg); }
+} */
