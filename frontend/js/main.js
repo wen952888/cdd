@@ -14,7 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Configuration ---
     // IMPORTANT: Replace with your actual serv00 backend URL
-    const API_BASE_URL = 'http://your_username.serv00.net/thirteen_water_api'; // e.g., http://user123.serv00.net/十三水后端
+    const API_BASE_URL = 'https://wenge.cloudns.ch/backend/'; // e.g., http://user123.serv00.net/十三水后端
 
     // --- Game State ---
     let playerRawHand = []; // Cards directly from server
