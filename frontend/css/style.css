@@ -1,15 +1,61 @@
 /* frontend/css/style.css */
 html,body{height:100vh;width:100vw;margin:0;padding:0;overflow:hidden;font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background-color:#367c3d;color:#333}
-.game-container{width:100%;height:100%;max-width:none;max-height:none;margin:0;padding:clamp(10px,1.5vh,15px);box-sizing:border-box;background-color:#f0f3f7;text-align:center;display:flex;flex-direction:column;align-items:stretch;overflow-y:auto}
+.view{display:none;width:100%;height:100%;box-sizing:border-box;position:absolute;top:0;left:0;overflow:hidden; /* Prevent scroll on view itself */}
+.active-view{display:flex;flex-direction:column;justify-content:center;align-items:center}
+#main-menu-view{background-color:#2c3e50;color:#fff;padding:20px}
+.menu-container.auth-container{background-color:#34495e;padding:clamp(25px,4vh,40px) clamp(30px,5vw,50px);border-radius:10px;box-shadow:0 5px 25px rgba(0,0,0,.4);text-align:center;max-width:400px;width:90%;margin:auto}
+.menu-container h1#auth-title{font-size:clamp(2em,6vw,3em);margin-top:0;margin-bottom:25px;color:#ecf0f1;text-shadow:1px 1px 3px rgba(0,0,0,.3)}
+.auth-form{display:none;width:100%}
+.auth-form.active-auth-form{display:block}
+.auth-form h2{font-size:clamp(1.5em,4vw,2em);margin-bottom:20px;color:#bdc3c7;font-weight:300}
+.auth-form input[type=text],.auth-form input[type=password],.auth-form input[type=tel]{display:block;width:100%;padding:12px 15px;margin-bottom:15px;border-radius:5px;border:1px solid #7f8c8d;background-color:#465869;color:#ecf0f1;font-size:clamp(.9em,2.2vw,1em);box-sizing:border-box}
+.auth-form input[type=text]::placeholder,.auth-form input[type=password]::placeholder,.auth-form input[type=tel]::placeholder{color:#95a5a6}
+.auth-form button{display:block;width:100%;padding:12px 15px;margin-bottom:15px;border-radius:5px;border:none;font-size:clamp(1em,2.5vw,1.1em);box-sizing:border-box;color:#fff;cursor:pointer;transition:background-color .2s;font-weight:500}
+#login-btn{background-color:#3498db}
+#login-btn:hover{background-color:#2980b9}
+#register-btn{background-color:#2ecc71}
+#register-btn:hover{background-color:#27ae60}
+.auth-switch{font-size:clamp(.8em,2vw,.9em);color:#bdc3c7;margin-top:10px;}
+.auth-switch a{color:#3498db;text-decoration:none;font-weight:700}
+.auth-switch a:hover{text-decoration:underline}
+#game-options{margin-top:20px}
+#game-options h3{font-size:clamp(1.2em,3vw,1.5em);margin-bottom:15px;color:#ecf0f1;font-weight:400}
+#game-options button,#game-options input{display:block;width:100%;padding:12px 15px;margin-bottom:15px;border-radius:5px;border:1px solid #7f8c8d;font-size:clamp(1em,2.5vw,1.1em);box-sizing:border-box}
+#game-options input{background-color:#465869;color:#ecf0f1}
+#game-options input::placeholder{color:#95a5a6}
+#game-options button{background-color:#9b59b6;color:#fff;cursor:pointer;transition:background-color .2s}
+#game-options button:hover{background-color:#8e44ad}
+#game-options button#quick-start-btn{background-color:#f1c40f;color:#2c3e50}
+#game-options button#quick-start-btn:hover{background-color:#f39c12}
+#game-options button#logout-btn{background-color:#e74c3c}
+#game-options button#logout-btn:hover{background-color:#c0392b}
+#menu-message-area{color:#e74c3c;background-color:transparent;border:none;padding:0;min-height:1.5em;font-size:clamp(.85em,2.1vw,.95em);text-align:center}
+#room-view{background-color:#34495e;color:#fff}
+.room-container{background-color:rgba(255,255,255,.08);padding:30px;border-radius:10px;text-align:center;max-width:500px;width:90%;margin:auto}
+.room-container h2{margin-top:0;color:#ecf0f1}
+.room-container p{margin-bottom: 10px;}
+.player-list-container{margin-bottom:20px}
+#player-list{list-style:none;padding:10px;margin:0 auto 15px auto;max-height:150px;overflow-y:auto;background-color:rgba(0,0,0,.1);border-radius:5px;max-width:300px;}
+#player-list li{padding:8px;border-bottom:1px solid rgba(255,255,255,.1)}
+#player-list li:last-child{border-bottom:none}
+.room-container button{padding:12px 20px;margin:10px 5px;border-radius:5px;border:none;font-size:1em;cursor:pointer;transition:background-color .2s}
+#start-game-from-room-btn{background-color:#2ecc71;color:#fff}
+#start-game-from-room-btn:hover{background-color:#27ae60}
+#leave-room-btn{background-color:#e74c3c;color:#fff}
+#leave-room-btn:hover{background-color:#c0392b}
+#room-message-area{color:#f39c12;background-color:transparent;border:none;padding:0;min-height:1.5em;font-size:clamp(.85em,2.1vw,.95em);text-align:center}
+#game-view{justify-content:flex-start;align-items:stretch;padding:0; /* Game view takes full screen, inner container has padding */}
+.game-table-header{padding:8px 15px;background-color:rgba(0,0,0,0.1);color:#eee;display:flex;justify-content:space-between;font-size:0.85em;flex-shrink:0;}
+.game-container-inner{width:100%;height:100%; /* This used to be .game-container */ padding:clamp(10px,1.5vh,15px);box-sizing:border-box;background-color:#f0f3f7;text-align:center;display:flex;flex-direction:column;align-items:stretch;overflow-y:auto;flex-grow:1;}
 .player-area{margin-bottom:clamp(10px,1.5vh,15px);padding:clamp(8px,1.2vh,10px);border:1px solid #d1d9e6;border-radius:6px;background-color:#f8f9fa;width:100%;box-sizing:border-box}
 .player-area>h3{margin-top:0;margin-bottom:clamp(8px,1.2vh,10px);font-size:clamp(1em,2.2vw,1.1em);color:#34495e;text-align:left;font-weight:500;padding-left:5px}
 .organized-rows .hand-row-label,#middle-hand-header-container{font-weight:600;margin-top:clamp(6px,.8vh,8px);margin-bottom:clamp(3px,.4vh,4px);text-align:left;font-size:clamp(.8em,1.8vw,.9em);color:#495057;padding-left:5px}
 #middle-hand-header-container #middle-hand-header{font-size:inherit!important;text-align:inherit!important;margin:0!important;font-weight:inherit!important;color:inherit!important;display:inline}
 .hand-row-label span,#middle-hand-header-container #middle-hand-header #middle-eval-text{font-weight:400!important;color:#007bff!important;font-style:italic!important}
-.hand-row,#player-hand.hand-row{display:flex;flex-wrap:wrap;justify-content:flex-start;align-items:center;gap:clamp(3px,.6vw,5px);min-height:clamp(65px,9vw,95px);padding:clamp(5px,.8vw,7px);border:1px dashed #ced4da;border-radius:5px;background-color:#e9ecef;margin-bottom:clamp(5px,.8vh,7px);width:100%;box-sizing:border-box}
+.hand-row,#player-hand.hand-row{display:flex;flex-wrap:wrap;justify-content:flex-start;align-items:center;gap:clamp(3px,.6vw,5px);min-height:clamp(76px,9.74vw + 4px,113px);padding:clamp(5px,.8vw,7px);border:1px dashed #ced4da;border-radius:5px;background-color:#e9ecef;margin-bottom:clamp(5px,.8vh,7px);width:100%;box-sizing:border-box}
 #player-hand.player-hand{background-color:#ddeeff}
 #player-hand.is-middle-row-style{border-color:#0d6efd;border-style:solid}
-.hand-row:empty::after,#player-hand.hand-row:empty::after{content:"将牌拖到此处";color:#6c757d;font-style:italic;width:100%;text-align:center;padding:clamp(15px,2.5vh,25px) 0;font-size:clamp(.8em,1.8vw,.9em)}
+.hand-row:empty::after,#player-hand.hand-row:empty::after{content:"将牌拖到此处";color:#6c757d;font-style:italic;width:100%;text-align:center;padding:clamp(15px,2.5vh,25px)0;font-size:clamp(.8em,1.8vw,.9em)}
 #player-hand.hand-row:empty::after{content:"请点击“发牌”"}
 .card-css{width:clamp(54px,6.96vw,78px);height:clamp(76px,9.74vw,109px);background-color:#fff;border:1px solid #adb5bd;border-radius:clamp(4px,.7vw,6px);box-shadow:1px 1px 3px rgba(0,0,0,.15);overflow:hidden;padding:0;box-sizing:border-box;transition:transform .15s ease-out,box-shadow .15s ease-out;user-select:none;cursor:grab;flex-shrink:0;display:flex;justify-content:center;align-items:center}
 .card-css img{display:block;width:100%;height:100%;object-fit:contain}
@@ -18,7 +64,7 @@ html,body{height:100vh;width:100vw;margin:0;padding:0;overflow:hidden;font-famil
 .droppable-area.sortable-ghost,.card-css.sortable-ghost{opacity:.4;background-color:#cfe2ff!important;border:2px dashed #0d6efd!important}
 .card-css.sortable-chosen{opacity:.9;transform:scale(1.06) translateY(-2px);box-shadow:0 5px 12px rgba(0,0,0,.2)}
 .controls{margin-top:auto;padding-top:clamp(8px,1.2vh,10px);border-top:1px solid #dee2e6;flex-shrink:0;width:100%;box-sizing:border-box;text-align:center}
-.controls button{padding:clamp(8px,1.5vh,12px) clamp(12px,2.2vw,18px);margin:clamp(3px,.6vh,5px) clamp(4px,.7vw,6px);border:none;border-radius:4px;background-color:#007bff;color:#fff;cursor:pointer;font-size:clamp(.8em,2vw,.95em);transition:background-color .2s ease,box-shadow .2s ease;font-weight:500}
+.controls button{padding:clamp(8px,1.5vh,12px)clamp(12px,2.2vw,18px);margin:clamp(3px,.6vh,5px)clamp(4px,.7vw,6px);border:none;border-radius:4px;background-color:#007bff;color:#fff;cursor:pointer;font-size:clamp(.8em,2vw,.95em);transition:background-color .2s ease,box-shadow .2s ease;font-weight:500}
 .controls button:hover:not(:disabled){background-color:#0069d9;box-shadow:0 1px 3px rgba(0,0,0,.1)}
 .controls button:disabled{background-color:#6c757d;opacity:.65;cursor:not-allowed}
 .controls button#sort-hand-button{background-color:#198754}
@@ -27,13 +73,21 @@ html,body{height:100vh;width:100vw;margin:0;padding:0;overflow:hidden;font-famil
 .controls button#ai-reference-button:hover:not(:disabled),.controls button#ai-autoplay-button:hover:not(:disabled){background-color:#e66800}
 .controls button#call-backend-button{background-color:#0dcaf0}
 .controls button#call-backend-button:hover:not(:disabled){background-color:#0baccc}
-.message-area,.score-area,.ai-reference-display{margin-top:clamp(8px,1.2vh,10px);padding:clamp(6px,1vh,10px) clamp(8px,1.5vw,12px);border:1px solid #ced4da;min-height:20px;line-height:1.4;background-color:#f8f9fa;border-radius:5px;font-size:clamp(.75em,1.8vw,.9em);color:#212529;text-align:left;flex-shrink:0;width:100%;box-sizing:border-box}
+.message-area,.score-area,.ai-reference-display{margin-top:clamp(8px,1.2vh,10px);padding:clamp(6px,1vh,10px)clamp(8px,1.5vw,12px);border:1px solid #ced4da;min-height:20px;line-height:1.4;background-color:#f8f9fa;border-radius:5px;font-size:clamp(.75em,1.8vw,.9em);color:#212529;text-align:left;flex-shrink:0;width:100%;box-sizing:border-box}
 .ai-reference-display{border-style:dashed;border-color:#fd7e14;background-color:#fff3e0}
-.ai-reference-display h4{margin-top:0;margin-bottom:8px;color:#d9534f;font-size:1.05em}
-.ai-reference-display div{margin-bottom:3px;font-size:.95em}
-.ai-reference-display div strong{min-width:45px;display:inline-block;color:#555}
+.ai-reference-display h4{margin-top:0;margin-bottom:8px;color:#d9534f;font-size:1.05em; text-align: center;}
+.ai-reference-display div>strong{min-width:50px;display:inline-block;color:#555;vertical-align:top;margin-top:clamp(5px,.8vh,7px)}
+.ai-ref-row{min-height:clamp(55px,7.5vw,80px);padding:clamp(4px,.6vw,6px);margin-left:5px;display:inline-flex;vertical-align:top;max-width:calc(100% - 60px)}
+.ai-ref-row .card-css{width:clamp(38px,4.5vw,52px);height:clamp(53px,6.3vw,73px);border-radius:clamp(2px,.4vw,3px);box-shadow:0 1px 2px rgba(0,0,0,.1)}
 .message-area.error{background-color:#f8d7da;color:#721c24;border-color:#f5c2c7}
 .message-area.info{background-color:#d1e7dd;color:#0f5132;border-color:#badbcc}
 .score-area{font-weight:700;color:#0a3622;background-color:#d1e7dd;border-color:#a3cfbb}
 .droppable-area.daoshui-warning{border-color:#dc3545!important;background-color:#f8d7da!important}
 .droppable-area.daoshui-warning .hand-row-label span,#middle-hand-header-container.daoshui-warning #middle-eval-text,#middle-hand-header-container.daoshui-warning #middle-hand-header{color:#b02a37!important}
+.ai-round-selector-popup{display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background-color:#2c3e50;color:#fff;padding:25px 30px;border-radius:8px;box-shadow:0 8px 25px rgba(0,0,0,.4);z-index:1001;text-align:center}
+.ai-round-selector-popup h4{margin-top:0;margin-bottom:20px;font-size:1.2em;color:#ecf0f1}
+.ai-round-selector-popup button{padding:10px 18px;margin:8px;border-radius:5px;cursor:pointer;font-size:1em;transition:background-color .2s;border:none}
+.ai-round-selector-popup button.ai-round-option{background-color:#3498db;color:#fff}
+.ai-round-selector-popup button.ai-round-option:hover{background-color:#2980b9}
+.ai-round-selector-popup button#cancel-ai-autoplay{background-color:#e74c3c;color:#fff;margin-top:15px}
+.ai-round-selector-popup button#cancel-ai-autoplay:hover{background-color:#c0392b}
