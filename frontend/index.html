@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>十三水游戏</title>
-    <link rel="stylesheet" href="css/style.css"> <!-- Path relative to this index.html -->
+    <link rel="stylesheet" href="css/style.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js" integrity="sha512-Eezs+g9Lq4TCCq0wae01s9PuNWzHYoCMkE97e2qdkYthpI0pzC3UGB03lgEHn2XM85hDOUF6qgqqszs+iXU4UA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 </head>
 <body>
@@ -17,8 +17,8 @@
                 <div id="player-top-row" class="hand-row droppable-area" data-row-name="top" data-row-limit="3"></div>
 
                 <div class="hand-row-label" id="middle-hand-header-container">
-                     <h3 id="middle-hand-header">
-                        我的手牌 / 中道 (剩余牌): <span id="middle-eval-text"></span>
+                     <h3 id="middle-hand-header" style="margin:0; font-size: 1em; color: #555f6b; font-weight:600; text-align: left;">
+                        我的手牌 / 中道 (剩余牌): <span id="middle-eval-text" style="font-weight:normal; color: #2980b9; font-style:italic;"></span>
                      </h3>
                 </div>
                 <div id="player-hand" class="player-hand hand-row droppable-area" data-row-name="initial_middle" data-row-limit="13">
@@ -32,9 +32,7 @@
 
         <div class="controls">
             <button id="deal-button">发牌</button>
-            <button id="sort-hand-button" style="display:none;">整理手牌</button>
-            <button id="ai-reference-button" style="display:none;">AI参考</button>
-            <button id="ai-autoplay-button" style="display:none;">AI托管</button>
+            <button id="sort-hand-button" style="display:none;">整理手牌</button> <!-- ADDED THIS BUTTON -->
             <button id="confirm-organization-button" style="display:none;" disabled>确认理牌</button>
             <button id="compare-button" style="display:none;" disabled>比牌</button>
             <button id="call-backend-button" title="测试与后端基础通讯">测试后端</button>
@@ -42,16 +40,8 @@
 
         <div id="message-area" class="message-area">游戏消息将会显示在这里。</div>
         <div id="score-area" class="score-area">得分: --</div>
-
-        <div id="ai-reference-display" class="ai-reference-display" style="display:none;">
-            <h4>AI 推荐牌型:</h4>
-            <div><strong>头道:</strong> <span id="ai-top-ref"></span></div>
-            <div><strong>中道:</strong> <span id="ai-middle-ref"></span></div>
-            <div><strong>尾道:</strong> <span id="ai-bottom-ref"></span></div>
-        </div>
     </div>
 
-    <!-- Scripts: Order is game.js -> ui.js -> main.js -->
     <script src="js/game.js"></script>
     <script src="js/ui.js"></script>
     <script src="js/main.js"></script>
