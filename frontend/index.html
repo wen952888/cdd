@@ -5,28 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>十三水 HTML5 游戏</title>
     <link rel="stylesheet" href="css/style.css">
-    <!-- SortableJS CDN - Integrity Hash should be correct from previous fix -->
+    <!-- SortableJS CDN (Ensure integrity hash is correct) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js" integrity="sha512-Eezs+g9Lq4TCCq0wae01s9PuNWzHYoCMkE97e2qdkYthpI0pzC3UGB03lgEHn2XM85hDOUF6qgqqszs+iXU4UA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 </head>
 <body>
     <div class="game-container">
         <h1>十三水</h1>
 
-        <div class="player-area"> <!-- 包含已整理牌道（头、手牌区、尾） -->
+        <div class="player-area"> <!-- Contains defined Top and Bottom rows -->
             <h3>我的牌道</h3>
             <div class="organized-rows">
                 <!-- 头道 (Top Row) -->
                 <div class="hand-row-label">头道 (3张): <span id="top-eval-text"></span></div>
                 <div id="player-top-row" class="hand-row droppable-area" data-row-name="top" data-row-limit="3"></div>
-
-                <!-- 手牌区 (Initial Hand Area) - MOVED HERE -->
-                <div class="initial-hand-area" style="margin-top: 10px; margin-bottom: 10px;"> <!-- 保留 .initial-hand-area 类以应用其原有样式, 微调 margin -->
-                    <h3>我的手牌 (拖拽到牌道)</h3>
-                    <div id="player-hand" class="player-hand hand-row droppable-area" data-row-name="initial">
-                        <!-- 确保 #player-hand 也有 .hand-row 的基础样式，并可以通过 .player-hand 进行特定覆盖 -->
-                        <p>点击 "发牌" 开始</p>
-                    </div>
-                </div>
 
                 <!-- 尾道 (Bottom Row) -->
                 <div class="hand-row-label">尾道 (5张): <span id="bottom-eval-text"></span></div>
@@ -34,12 +25,11 @@
             </div>
         </div>
 
-        <!-- 中道区 (Middle Row Area) - MOVED HERE, style it like original initial-hand-area -->
-        <div class="initial-hand-area"> <!-- 使用 .initial-hand-area 类来获得相似的块级样式 -->
-            <!-- 使用与牌道标签一致的结构 -->
-            <div class="hand-row-label" style="font-size: 1.15em; color: #34495e; font-weight: 500; margin-bottom:12px; text-align: left;">中道 (5张): <span id="middle-eval-text"></span></div>
-            <div id="player-middle-row" class="hand-row droppable-area" data-row-name="middle" data-row-limit="5">
-                <!-- 中道牌将在这里显示和拖拽 -->
+        <div class="initial-hand-area"> <!-- This area's cards become the Middle row after organization -->
+            <h3 id="middle-hand-header">我的手牌 / 中道 (剩余牌): <span id="middle-eval-text"></span></h3>
+            <div id="player-hand" class="player-hand droppable-area" data-row-name="initial_middle" data-row-limit="13">
+                <!-- Initial hand cards will be displayed here. Remaining cards become the middle row. -->
+                <p>点击 "发牌" 开始</p>
             </div>
         </div>
 
