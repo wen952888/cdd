@@ -50,28 +50,28 @@ document.addEventListener('DOMContentLoaded', () => {
         const topC = playerOrganizedHand.top, botC = playerOrganizedHand.bottom;
         const midCSource = Array.from(initialAndMiddleHandElement.children).map(d => d.cardData).filter(Boolean);
         const midReady = topC.length === 3 && botC.length === 5 && midCSource.length === 5;
-        const evalF = typeof evaluateHand === "function" ? evaluateHand : () => ({message: "评价缺失"});
+        const evalF = typeof evaluateHand === "function" ? evaluateHand : () => ({message: "N/A"}); // Fallback if evaluateHand not ready
         if(topEvalTextElement) topEvalTextElement.textContent = topC.length > 0 ? ` (${(topC.length===3 ? evalF(topC).message : '...') || '...'})` : '';
         if(bottomEvalTextElement) bottomEvalTextElement.textContent = botC.length > 0 ? ` (${(botC.length===5 ? evalF(botC).message : '...') || '...'})` : '';
         if (middleHandHeader) {
             const h3 = document.getElementById('middle-hand-header'); const span = document.getElementById('middle-eval-text');
-            if(h3 && span) {
+            if(h3 && span) { // Ensure both elements exist
                 if (midReady) { h3.childNodes[0].nodeValue = `中道 (5张): `; span.textContent = ` (${evalF(midCSource).message || '...'})`; initialAndMiddleHandElement.classList.add('is-middle-row-style'); }
                 else { h3.childNodes[0].nodeValue = `我的手牌 / 中道 (剩余牌): `; span.textContent = midCSource.length > 0 ? ` (共${midCSource.length}张)` : ''; initialAndMiddleHandElement.classList.remove('is-middle-row-style'); }
             }
         }
-        if(typeof checkDaoshuiForUI === "function") checkDaoshuiForUI(midCSource);
+        if(typeof checkDaoshuiForUI === "function") checkDaoshuiForUI(midCSource); else console.warn("checkDaoshuiForUI is not defined");
     }
 
     function checkDaoshuiForUI(midC) {
         const topC = playerOrganizedHand.top, botC = playerOrganizedHand.bottom;
-        if(typeof evaluateHand !== "function" || typeof checkDaoshui !== "function") { safeDisplayMessage("牌型逻辑缺失，无法检查倒水", true); return; }
+        if(typeof evaluateHand !== "function" || typeof checkDaoshui !== "function") { safeDisplayMessage("牌型逻辑缺失。", true); return; }
         if (topC.length===3 && botC.length===5 && midC.length===5) {
             const tE=evaluateHand(topC), mE=evaluateHand(midC), bE=evaluateHand(botC);
             const isDS = checkDaoshui(tE,mE,bE);
             [topRowElement,initialAndMiddleHandElement,bottomRowElement].forEach(el => el && (isDS ? el.classList.add('daoshui-warning') : el.classList.remove('daoshui-warning')));
             if(isDS) safeDisplayMessage("警告: 检测到倒水！", true);
-            else if (confirmOrganizationButton.disabled && !checkAllCardsOrganized(true)) safeDisplayMessage("请继续理牌...", false);
+            else if (confirmOrganizationButton && confirmOrganizationButton.disabled && !checkAllCardsOrganized(true)) safeDisplayMessage("请继续理牌...", false);
         } else [topRowElement,initialAndMiddleHandElement,bottomRowElement].forEach(el => el && el.classList.remove('daoshui-warning'));
     }
 
@@ -103,7 +103,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     dealButton.addEventListener('click', async () => {
         console.log("--- Deal Button Clicked ---");
-        initializeGame(); safeDisplayMessage("发牌中...", false); dealButton.disabled=true;
+        initializeGame(); safeDisplayMessage("发牌中...", false); if(dealButton) dealButton.disabled=true;
         try {
             const res = await fetch(`${API_BASE_URL}deal_cards.php`);
             if(!res.ok) throw new Error(`发牌失败: ${res.status} ${await res.text()}`);
@@ -115,36 +115,32 @@ document.addEventListener('DOMContentLoaded', () => {
                 return { rank: c.rank, suitKey: c.suitKey, displaySuitChar: sI.displayChar, suitCssClass: sI.cssClass, id: (c.rank || 'X') + (c.suitKey || 'Y') + Math.random().toString(36).substring(2, 7)};
             }).filter(c => c.rank && c.suitKey);
 
-            // First, check for 13-card special hands
             let specialHand = null;
-            if (typeof evaluateThirteenCardSpecial === 'function') {
-                specialHand = evaluateThirteenCardSpecial(playerFullHandSource);
-            }
+            if (typeof evaluateThirteenCardSpecial === 'function') specialHand = evaluateThirteenCardSpecial(playerFullHandSource);
+            else console.warn("evaluateThirteenCardSpecial function not found in game.js");
 
             if (specialHand) {
                 safeDisplayMessage(`特殊牌型：${specialHand.message}！`, false);
                 initialAndMiddleHandElement.innerHTML='';
-                sortHandCardsForDisplay(playerFullHandSource).forEach(card => initialAndMiddleHandElement.appendChild(renderCard(card, true)));
-                // TODO: Handle special hand win (e.g., disable other buttons, show score)
+                const cardsToDisplay = (typeof sortHandCardsForDisplay === "function") ? sortHandCardsForDisplay(playerFullHandSource) : playerFullHandSource;
+                cardsToDisplay.forEach(card => initialAndMiddleHandElement.appendChild(renderCard(card, true)));
                 [sortHandButton, aiReferenceButton, aiAutoplayButton, confirmOrganizationButton, compareButton].forEach(btn => btn && (btn.style.display='none'));
-                dealButton.disabled = false; // Allow new game
+                if(dealButton) dealButton.disabled = false;
             } else {
                 initialAndMiddleHandElement.innerHTML='';
-                playerFullHandSource.forEach(c => c && typeof renderCard === "function" && initialAndMiddleHandElement.appendChild(renderCard(c,true)));
+                playerFullHandSource.forEach(c => { if (c && typeof renderCard === "function") initialAndMiddleHandElement.appendChild(renderCard(c,true)); else console.error("Cannot render card in dealButton:", c);});
                 displayCurrentArrangementState(); safeDisplayMessage("请理牌。", false);
                 [sortHandButton, aiReferenceButton, aiAutoplayButton, confirmOrganizationButton].forEach(btn => btn && (btn.style.display='inline-block'));
             }
         } catch(err) {
             console.error("发牌错误:", err); safeDisplayMessage(`错误: ${err.message}`,true);
-            dealButton.disabled=false;
+            if(dealButton) dealButton.disabled=false;
         }
     });
 
     if (sortHandButton) sortHandButton.addEventListener('click', () => {
         console.log("--- Sort Hand Button Clicked ---");
-        if (!initialAndMiddleHandElement || typeof sortHandCardsForDisplay !== 'function' || typeof renderCard !== 'function') {
-            safeDisplayMessage("整理功能出错。", true); return;
-        }
+        if (!initialAndMiddleHandElement || typeof sortHandCardsForDisplay !== 'function' || typeof renderCard !== 'function') { safeDisplayMessage("整理功能出错。", true); return; }
         let cardsToSort = Array.from(initialAndMiddleHandElement.children).map(div => div.cardData).filter(Boolean);
         const sortedCards = sortHandCardsForDisplay(cardsToSort);
         initialAndMiddleHandElement.innerHTML = '';
@@ -155,24 +151,15 @@ document.addEventListener('DOMContentLoaded', () => {
     if (aiReferenceButton) aiReferenceButton.addEventListener('click', () => {
         safeDisplayMessage("AI参考功能建设中...", true);
         if(aiReferenceDisplayElement) aiReferenceDisplayElement.style.display = 'block';
-        if(aiTopRefElement) aiTopRefElement.textContent = "AI思考中...";
-        if(aiMiddleRefElement) aiMiddleRefElement.textContent = "AI思考中...";
-        if(aiBottomRefElement) aiBottomRefElement.textContent = "AI思考中...";
-        // Placeholder: Simulate AI result after a delay
-        setTimeout(() => {
-            if(aiTopRefElement) aiTopRefElement.textContent = "♠A ♠K ♠Q (示例)";
-            if(aiMiddleRefElement) aiMiddleRefElement.textContent = "♥J ♥10 ♥9 ♥8 ♥7 (示例)";
-            if(aiBottomRefElement) aiBottomRefElement.textContent = "♦6 ♦6 ♣6 ♣5 ♣5 (示例)";
-        }, 1500);
+        if(aiTopRefElement) aiTopRefElement.textContent = "AI思考中..."; if(aiMiddleRefElement) aiMiddleRefElement.textContent = "AI思考中..."; if(aiBottomRefElement) aiBottomRefElement.textContent = "AI思考中...";
+        setTimeout(() => { if(aiTopRefElement) aiTopRefElement.textContent = "♠A ♠K ♠Q"; if(aiMiddleRefElement) aiMiddleRefElement.textContent = "♥J ♥10 ♥9 ♥8 ♥7"; if(aiBottomRefElement) aiBottomRefElement.textContent = "♦6 ♦6 ♣6 ♣5 ♣5"; }, 1000);
     });
     if (aiAutoplayButton) aiAutoplayButton.addEventListener('click', () => { safeDisplayMessage("AI托管功能建设中...", true); });
 
     confirmOrganizationButton.addEventListener('click', () => {
         console.log("--- Confirm Organization Button Clicked ---");
         playerOrganizedHand.middle = Array.from(initialAndMiddleHandElement.children).map(d=>d.cardData).filter(Boolean);
-        if(playerOrganizedHand.top.length!==3 || playerOrganizedHand.middle.length!==5 || playerOrganizedHand.bottom.length!==5) {
-            safeDisplayMessage(`牌数错误！头${playerOrganizedHand.top.length}/3, 中${playerOrganizedHand.middle.length}/5, 尾${playerOrganizedHand.bottom.length}/5.`,true); return;
-        }
+        if(playerOrganizedHand.top.length!==3 || playerOrganizedHand.middle.length!==5 || playerOrganizedHand.bottom.length!==5) { safeDisplayMessage(`牌数错误！头${playerOrganizedHand.top.length}/3, 中${playerOrganizedHand.middle.length}/5, 尾${playerOrganizedHand.bottom.length}/5.`,true); return; }
         const evalF = typeof evaluateHand === "function" ? evaluateHand : () => ({message:"N/A"});
         const tE=evalF(playerOrganizedHand.top), mE=evalF(playerOrganizedHand.middle), bE=evalF(playerOrganizedHand.bottom);
         const h3MidH = document.getElementById('middle-hand-header'), spanMidE = document.getElementById('middle-eval-text');
@@ -188,10 +175,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     compareButton.addEventListener('click', async () => {
         console.log("--- Compare Button Clicked ---");
-        safeDisplayMessage("提交比牌中...",false); compareButton.disabled=true;
+        safeDisplayMessage("提交比牌中...",false); if(compareButton) compareButton.disabled=true;
         if(playerOrganizedHand.middle.length!==5) playerOrganizedHand.middle=Array.from(initialAndMiddleHandElement.children).map(d=>d.cardData).filter(Boolean);
         const pL={top:playerOrganizedHand.top.map(c=>({rank:c.rank,suitKey:c.suitKey})), middle:playerOrganizedHand.middle.map(c=>({rank:c.rank,suitKey:c.suitKey})), bottom:playerOrganizedHand.bottom.map(c=>({rank:c.rank,suitKey:c.suitKey}))};
-        if(pL.top.length!==3||pL.middle.length!==5||pL.bottom.length!==5){ safeDisplayMessage("错误:提交牌数不对。",true); compareButton.style.display='none'; dealButton.disabled=false; return; }
+        if(pL.top.length!==3||pL.middle.length!==5||pL.bottom.length!==5){ safeDisplayMessage("错误:提交牌数不对。",true); if(compareButton)compareButton.style.display='none'; if(dealButton)dealButton.disabled=false; return; }
         try {
             const res = await fetch(`${API_BASE_URL}submit_hand.php`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(pL)});
             if(!res.ok) throw new Error(`比牌请求失败: ${res.status} ${await res.text()}`);
@@ -205,15 +192,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (callBackendButton) {
         callBackendButton.addEventListener('click', async () => {
-            console.log("--- Test Backend Button Clicked! ---");
-            safeDisplayMessage("正在测试后端通讯...", false);
+            console.log("--- Test Backend Button Clicked! ---"); safeDisplayMessage("正在测试后端通讯...", false);
             try {
                 const testEndpoint = `${API_BASE_URL}deal_cards.php`; console.log("Test endpoint URL:", testEndpoint);
-                const response = await fetch(testEndpoint); console.log("Test Backend - Fetch response received:", response);
-                if (!response.ok) { const errorText = await response.text(); console.error(`Test Backend - HTTP error! ${response.status} - ${errorText}`); throw new Error(`HTTP error! ${response.status} - ${errorText}`); }
+                const response = await fetch(testEndpoint); console.log("Test Backend - Fetch response:", response);
+                if (!response.ok) { const errTxt = await response.text(); throw new Error(`HTTP error! ${response.status} - ${errTxt}`); }
                 const data = await response.json(); console.log("Test Backend - Backend response data:", data);
-                let msg = "后端通讯成功！";
-                if(data?.cards?.length > 0) msg += ` (后端返回 ${data.cards.length} 张牌)`; else if(data?.message) msg += ` 后端消息: ${data.message}`;
+                let msg = "后端通讯成功！"; if(data?.cards?.length > 0) msg += ` (后端返回 ${data.cards.length} 张牌)`; else if(data?.message) msg += ` 后端消息: ${data.message}`;
                 safeDisplayMessage(msg, false);
             } catch (error) { console.error("Test Backend - 通讯捕获到错误:", error); safeDisplayMessage(`后端通讯测试失败: ${error.message}`, true); }
         });
