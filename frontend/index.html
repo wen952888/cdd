@@ -2,24 +2,20 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"> <!-- Added user-scalable=no for better mobile fullscreen feel -->
+    <!-- Ensure viewport is set for responsiveness and to prevent scaling -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>十三水 HTML5 游戏</title>
     <link rel="stylesheet" href="css/style.css">
-    <!-- SortableJS CDN (Ensure integrity hash is correct) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js" integrity="sha512-Eezs+g9Lq4TCCq0wae01s9PuNWzHYoCMkE97e2qdkYthpI0pzC3UGB03lgEHn2XM85hDOUF6qgqqszs+iXU4UA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 </head>
 <body>
-    <!-- Removed <h1>十三水</h1> -->
-    <div class="game-container"> <!-- This will be styled for fullscreen -->
-
+    <div class="game-container">
+        <!-- ... (your existing game container content) ... -->
         <div class="player-area">
-            <h3>我的牌道</h3> <!-- This h3 can also be removed or styled differently if not needed -->
+            <h3>我的牌道</h3>
             <div class="organized-rows">
-                <!-- 头道 (Top Row) -->
                 <div class="hand-row-label">头道 (3张): <span id="top-eval-text"></span></div>
                 <div id="player-top-row" class="hand-row droppable-area" data-row-name="top" data-row-limit="3"></div>
-
-                <!-- 手牌区 / 中道区 (Initial Hand / Middle Row) -->
                 <div class="hand-row-label" id="middle-hand-header-container">
                      <h3 id="middle-hand-header" style="margin-top:0; margin-bottom:0; font-size: 1em; color: #555f6b; font-weight:600;">
                         我的手牌 / 中道 (剩余牌): <span id="middle-eval-text" style="font-weight:normal; color: #2980b9; font-style:italic;"></span>
@@ -28,26 +24,23 @@
                 <div id="player-hand" class="player-hand hand-row droppable-area" data-row-name="initial_middle" data-row-limit="13">
                     <p>点击 "发牌" 开始</p>
                 </div>
-
-                <!-- 尾道 (Bottom Row) -->
                 <div class="hand-row-label">尾道 (5张): <span id="bottom-eval-text"></span></div>
                 <div id="player-bottom-row" class="hand-row droppable-area" data-row-name="bottom" data-row-limit="5"></div>
             </div>
         </div>
-
         <div class="controls">
             <button id="deal-button">发牌</button>
             <button id="confirm-organization-button" style="display:none;" disabled>确认理牌</button>
             <button id="compare-button" style="display:none;" disabled>比牌</button>
             <button id="call-backend-button" title="测试与后端基础通讯">测试后端</button>
         </div>
-
         <div id="message-area" class="message-area">游戏消息将会显示在这里。</div>
         <div id="score-area" class="score-area">得分: --</div>
     </div>
 
+    <!-- Ensure game.js and ui.js are loaded before main.js if main.js depends on them -->
     <script src="js/game.js"></script>
     <script src="js/ui.js"></script>
-    <script src="js/main.js"></script>
+    <script src="js/main.js"></script> <!-- Contains the new orientation logic -->
 </body>
 </html>
