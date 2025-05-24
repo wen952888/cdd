@@ -82,10 +82,10 @@ html, body {
 .controls button:disabled { background-color: #6c757d; opacity: 0.65; cursor: not-allowed; }
 .controls button#sort-hand-button { background-color: #198754; }
 .controls button#sort-hand-button:hover:not(:disabled) { background-color: #157347; }
-.controls button#ai-reference-button, .controls button#ai-autoplay-button { background-color: #fd7e14; }
+.controls button#ai-reference-button, .controls button#ai-autoplay-button { background-color: #fd7e14; } /* Orange for AI buttons */
 .controls button#ai-reference-button:hover:not(:disabled),
 .controls button#ai-autoplay-button:hover:not(:disabled) { background-color: #e66800; }
-.controls button#call-backend-button { background-color: #0dcaf0; }
+.controls button#call-backend-button { background-color: #0dcaf0; } /* Cyan for Test Backend */
 .controls button#call-backend-button:hover:not(:disabled) { background-color: #0baccc; }
 .message-area, .score-area, .ai-reference-display {
     margin-top: clamp(8px, 1.2vh, 10px); padding: clamp(6px, 1vh, 10px) clamp(8px, 1.5vw, 12px);
@@ -93,10 +93,10 @@ html, body {
     border-radius: 5px; font-size: clamp(0.75em, 1.8vw, 0.9em); color: #212529;
     text-align: left; flex-shrink: 0; width: 100%; box-sizing: border-box;
 }
-.ai-reference-display { border-style: dashed; border-color: #0dcaf0; background-color: #e7f7ff; }
-.ai-reference-display h4 { margin-top:0; margin-bottom:8px; color:#0a58ca; font-size: 1.1em; }
-.ai-reference-display div { margin-bottom:3px; }
-.ai-reference-display div strong { min-width:45px; display:inline-block; }
+.ai-reference-display { border-style: dashed; border-color: #fd7e14; background-color: #fff3e0; }
+.ai-reference-display h4 { margin-top:0; margin-bottom:8px; color:#d9534f; font-size: 1.05em;}
+.ai-reference-display div { margin-bottom:3px; font-size: 0.95em; }
+.ai-reference-display div strong { min-width:45px; display:inline-block; color: #555; }
 .message-area.error { background-color: #f8d7da; color: #721c24; border-color: #f5c2c7; }
 .message-area.info { background-color: #d1e7dd; color: #0f5132; border-color: #badbcc; }
 .score-area { font-weight: bold; color: #0a3622; background-color: #d1e7dd; border-color: #a3cfbb; }
