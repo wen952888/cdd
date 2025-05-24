@@ -1,93 +1,91 @@
 <?php
 // backend/submit_hand.php
-
-// --- IMPORTANT: Set your Cloudflare Pages URL for CORS ---
-$allowed_origin = "*"; // For development, replace with specific origin in production
-
-header("Access-Control-Allow-Origin: " . $allowed_origin);
-header("Access-Control-Allow-Methods: POST, OPTIONS"); // Allow POST
+header("Access-Control-Allow-Origin: *");
+header("Access-Control-Allow-Methods: POST, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type, Authorization");
 header("Content-Type: application/json; charset=UTF-8");
 
-if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
-    exit(0);
-}
+if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') { exit(0); }
 
-$response_data = ['success' => false, 'message' => 'An unknown error occurred.', 'score' => 0];
+$users_db_file = __DIR__ . '/users.json';
 
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $input_json = file_get_contents('php://input');
-    $input_data = json_decode($input_json, true); // true for associative array
+function loadData($filePath, $assoc = true) { /* ... */ }
+function saveData($filePath, $data) { /* ... */ }
+// Copy loadData and saveData from register_user.php
+function loadData($filePath, $assoc = true) { if (!file_exists($filePath)) return $assoc ? [] : ""; return json_decode(file_get_contents($filePath), $assoc) ?: ($assoc ? [] : ""); }
+function saveData($filePath, $data) { file_put_contents($filePath, json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)); }
 
-    if ($input_data && isset($input_data['top']) && isset($input_data['middle']) && isset($input_data['bottom'])) {
-        $player_top = $input_data['top'];
-        $player_middle = $input_data['middle'];
-        $player_bottom = $input_data['bottom'];
 
-        // 1. Validate card counts
-        if (count($player_top) !== 3 || count($player_middle) !== 5 || count($player_bottom) !== 5) {
-            $response_data['message'] = '服务器错误: 牌墩数量不正确 (头3, 中5, 尾5).';
-            echo json_encode($response_data);
-            exit;
-        }
+// Placeholder for your actual game logic functions (evaluateHand, compareHandInfos, checkDaoshui)
+// These would be much more complex in a real game.
+// For now, this script will just simulate a score change.
+define('HAND_TYPES_HIGH_CARD', 0); // Example
+function evaluateHandPHP($cards_array) { return ['type' => HAND_TYPES_HIGH_CARD, 'message' => '乌龙 (后端占位)', 'isSpecial' => false]; }
+function compareHandInfosPHP($h1, $h2) { return 0; } // 0 for tie, 1 if h1 wins, -1 if h2 wins
+function checkDaoshuiPHP($top, $middle, $bottom) { return false; } // Assume not daoshui for simplicity
 
-        // --- TODO: Implement PHP version of hand evaluation and comparison ---
-        // You need to translate game.js's evaluateHand, compareHandInfos, checkDaoshui to PHP.
-        // This is the most complex part of the backend.
+$response = ['success' => false, 'message' => '比牌处理失败。', 'score_change' => 0, 'new_total_score' => 0, 'daoshui' => false];
+$input = json_decode(file_get_contents('php://input'), true);
 
-        // Placeholder logic:
-        $php_top_eval = evaluateHandPHP($player_top);     // You need to write evaluateHandPHP
-        $php_middle_eval = evaluateHandPHP($player_middle);
-        $php_bottom_eval = evaluateHandPHP($player_bottom);
+if (isset($input['currentUserPhone'], $input['top'], $input['middle'], $input['bottom'])) {
+    $currentUserPhone = trim($input['currentUserPhone']);
+    $topCards = $input['top'];
+    $middleCards = $input['middle'];
+    $bottomCards = $input['bottom'];
 
-        $is_daoshui = checkDaoshuiPHP($php_top_eval, $php_middle_eval, $php_bottom_eval); // You need to write checkDaoshuiPHP
-
-        if ($is_daoshui) {
-            $response_data['success'] = true; // Or false, depending on how you want to handle daoshui score
-            $response_data['message'] = '服务器判定: 倒水!';
-            $response_data['daoshui'] = true;
-            $response_data['score'] = -10; // Example penalty for daoshui
-        } else {
-            // TODO: Compare with opponent (if any) and calculate score
-            $calculated_score = 5; // Placeholder score
-
-            $response_data['success'] = true;
-            $response_data['message'] = '牌型已成功提交并处理!';
-            $response_data['daoshui'] = false;
-            $response_data['score'] = $calculated_score;
-            // You might want to send back evaluated hand types too
-            // $response_data['evaluations'] = [
-            //    'top' => $php_top_eval['message'],
-            //    'middle' => $php_middle_eval['message'],
-            //    'bottom' => $php_bottom_eval['message'],
-            // ];
-        }
-
-    } else {
-        $response_data['message'] = '服务器错误: 无效的输入数据.';
+    // --- Basic Validation (should be more thorough) ---
+    if (count($topCards) !== 3 || count($middleCards) !== 5 || count($bottomCards) !== 5) {
+        $response['message'] = '提交的牌墩数量不正确。';
+        echo json_encode($response);
+        exit;
     }
+
+    // --- Simulate Game Logic ---
+    // In a real game, you'd evaluate each hand, compare, check daoshui, calculate score.
+    $topInfo = evaluateHandPHP($topCards);
+    $middleInfo = evaluateHandPHP($middleCards);
+    $bottomInfo = evaluateHandPHP($bottomCards);
+    $isDaoshui = checkDaoshuiPHP($topInfo, $middleInfo, $bottomInfo);
+
+    $game_score_change = 0; // Points won or lost in this round
+
+    if ($isDaoshui) {
+        $response['message'] = '倒水！本局判负。';
+        $response['daoshui'] = true;
+        $game_score_change = -10; // Example penalty for daoshui
+    } else {
+        // SIMPLIFIED: Assume player always wins a random amount or ties for this example
+        // In a real game, you'd compare player's hand segments against an opponent or rules.
+        $rand_outcome = rand(0, 2); // 0: lose, 1: tie, 2: win
+        if ($rand_outcome === 2) {
+            $game_score_change = rand(1, 5); // Win 1 to 5 points
+            $response['message'] = '恭喜，您赢了！';
+        } elseif ($rand_outcome === 0) {
+            $game_score_change = -rand(1, 3); // Lose 1 to 3 points
+            $response['message'] = '很遗憾，您输了。';
+        } else {
+            $game_score_change = 0; // Tie
+            $response['message'] = '本局平手。';
+        }
+    }
+
+    // --- Update User Score ---
+    $users = loadData($users_db_file);
+    if (isset($users[$currentUserPhone])) {
+        $current_score = isset($users[$currentUserPhone]['score']) ? $users[$currentUserPhone]['score'] : 0;
+        $users[$currentUserPhone]['score'] = $current_score + $game_score_change;
+        saveData($users_db_file, $users);
+
+        $response['success'] = true;
+        $response['score_change'] = $game_score_change;
+        $response['new_total_score'] = $users[$currentUserPhone]['score'];
+    } else {
+        $response['message'] = '错误：未找到用户信息以更新积分。';
+        $response['success'] = false; // Ensure success is false if user not found
+    }
+
 } else {
-    $response_data['message'] = '服务器错误: 仅支持 POST 请求.';
+    $response['message'] = '无效的请求数据。';
 }
-
-echo json_encode($response_data);
-exit;
-
-// --- PHP Helper functions (YOU NEED TO IMPLEMENT THESE BASED ON game.js) ---
-function getRankValuePHP($card, $aceAsOne = false) { /* ... translate from JS ... */ return 0; }
-function sortCardsPHP($cards, $aceAsOneContext = false, $ascending = false) { /* ... translate from JS ... */ return []; }
-function evaluateHandPHP($cards) {
-    // Complex logic to be translated from game.js's evaluateHand
-    // This is a major task.
-    // For now, a very basic placeholder:
-    if (empty($cards)) return ['type' => 0, 'message' => '空牌', 'ranks'=>[]];
-    return ['type' => 0, 'message' => '乌龙 (PHP评价)', 'ranks' => array_map(function($c){ return getRankValuePHP($c);}, $cards)];
-}
-function compareHandInfosPHP($info1, $info2) { /* ... translate from JS ... */ return 0; }
-function checkDaoshuiPHP($top, $middle, $bottom) {
-    // Translate from game.js's checkDaoshui
-    if (compareHandInfosPHP($top, $middle) > 0) return true;
-    if (compareHandInfosPHP($middle, $bottom) > 0) return true;
-    return false;
-}
+echo json_encode($response);
 ?>
