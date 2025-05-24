@@ -257,3 +257,21 @@ h1 {
 .hand-row.daoshui-warning .hand-row-label span {
     color: #dc3545 !important;
 }
+/* frontend/css/style.css */
+
+/* ... (all your existing styles) ... */
+
+/* Style for #player-hand when it's acting as the confirmed middle row */
+#player-hand.is-middle-row-style {
+    border-color: #86b7fe; /* Example: A different border to indicate it's "set" */
+    background-color: #e6f0ff; /* Keep or change background */
+    /* You might want to make it look more like other 'hand-row' elements if desired */
+}
+
+/* Ensure droppable areas maintain some height even when empty, if not already handled */
+.droppable-area:empty {
+    min-height: 110px; /* Or whatever your card height + padding is */
+}
+#player-hand:empty::after { /* Overwrite generic droppable-area empty state if needed */
+    content: "请点击“发牌”"; /* Or specific message */
+}
