@@ -38,64 +38,57 @@ const CARD_IMAGE_EXTENSION = '.png';
 const UNKNOWN_CARD_FILENAME = `unknown${CARD_IMAGE_EXTENSION}`;
 
 function getCardImageFilename(card) {
-    if (!card || typeof card.rank !== 'string' || typeof card.suitKey !== 'string') {
-        // console.error("getCardImageFilename ERROR: Invalid card data. Card:", JSON.stringify(card));
-        return UNKNOWN_CARD_FILENAME;
-    }
+    if (!card || typeof card.rank !== 'string' || typeof card.suitKey !== 'string') { return UNKNOWN_CARD_FILENAME; }
     const rankKey = card.rank.toUpperCase(); const rankPart = RANK_FILENAME_PART[rankKey];
     const suitInfo = SUITS_DATA[card.suitKey]; const suitPart = suitInfo ? suitInfo.fileNamePart : null;
-    if (!rankPart) { /* console.error(...); */ return `unknown_rank_${card.rank.toLowerCase()}${CARD_IMAGE_EXTENSION}`; }
-    if (!suitPart) { /* console.error(...); */ return `unknown_suit_${card.suitKey.toLowerCase()}${CARD_IMAGE_EXTENSION}`; }
+    if (!rankPart) { return `unknown_rank_${card.rank.toLowerCase()}${CARD_IMAGE_EXTENSION}`; }
+    if (!suitPart) { return `unknown_suit_${card.suitKey.toLowerCase()}${CARD_IMAGE_EXTENSION}`; }
     return `${rankPart}_of_${suitPart}${CARD_IMAGE_EXTENSION}`;
 }
-function getCardImagePath(card) {
-    const filename = getCardImageFilename(card);
-    if (!filename || typeof filename !== 'string') { return CARD_IMAGE_PATH_PREFIX + UNKNOWN_CARD_FILENAME; }
-    return CARD_IMAGE_PATH_PREFIX + filename;
-}
+function getCardImagePath(card) { const fn = getCardImageFilename(card); return CARD_IMAGE_PATH_PREFIX + (fn || UNKNOWN_CARD_FILENAME); }
 function getCardBackImagePath() { return CARD_IMAGE_PATH_PREFIX + 'back' + CARD_IMAGE_EXTENSION; }
-function getRankValue(card, aceAsOne = false) {
-    if (!card || typeof card.rank === 'undefined') return 0;
-    const rankUpper = card.rank.toUpperCase();
-    if (aceAsOne && rankUpper === "A") return 1;
-    return RANK_VALUES[rankUpper] || 0;
+function getRankValue(card, aceAsOne = false) { if (!card?.rank) return 0; const rU = card.rank.toUpperCase(); if (aceAsOne && rU === "A") return 1; return RANK_VALUES[rU] || 0; }
+function sortHandCardsForDisplay(cards) { if (!Array.isArray(cards)) return []; return [...cards].sort((a, b) => { const rA = getRankValue(a), rB = getRankValue(b); if (rA !== rB) return rB - rA; const sA = SUITS_DATA[a.suitKey]?.sortOrder || 0, sB = SUITS_DATA[b.suitKey]?.sortOrder || 0; return sB - sA; }); }
+function sortCardsByRankValue(cards, aceAsOne = false, ascending = false) { if (!Array.isArray(cards)) return []; return [...cards].sort((a,b) => (ascending?1:-1)*(getRankValue(a,aceAsOne) - getRankValue(b,aceAsOne))); }
+
+function evaluateThirteenCardSpecial(thirteenCards) {
+    // This is a placeholder. You need to implement the logic to detect
+    // special 13-card hands like Dragon, Six-Pairs-Plus, etc.
+    // Return the handInfo object if a special hand is found, otherwise return null.
+    // Example:
+    // if (isDragon(thirteenCards)) return { type: HAND_TYPES.DRAGON, ... };
+    console.warn("evaluateThirteenCardSpecial is a placeholder and needs full implementation.");
+    return null;
 }
-function sortHandCardsForDisplay(cards) {
-    if (!Array.isArray(cards)) return [];
-    return [...cards].sort((cardA, cardB) => {
-        const rA = getRankValue(cardA), rB = getRankValue(cardB); if (rA !== rB) return rB - rA;
-        const sA = SUITS_DATA[cardA.suitKey]?.sortOrder || 0, sB = SUITS_DATA[cardB.suitKey]?.sortOrder || 0;
-        return sB - sA;
-    });
-}
-function sortCardsByRankValue(cards, aceAsOne = false, ascending = false) {
-    if (!Array.isArray(cards)) return [];
-    return [...cards].sort((a,b) => (ascending?1:-1)*(getRankValue(a,aceAsOne) - getRankValue(b,aceAsOne)));
-}
-function evaluateThirteenCardSpecial(thirteenCards) { /* ... (Full function from previous, or your implementation) ... */ return null; }
 
 // --- REPLACE THE FOLLOWING 3 FUNCTIONS WITH YOUR FULL, WORKING LOGIC ---
 function evaluateHand(cards) {
     // This is a VERY basic placeholder. You NEED your full logic here.
+    // It should correctly evaluate 3-card and 5-card hands into standard poker types.
+    console.warn("evaluateHand is a placeholder and needs full implementation for correct game logic.");
     if (!cards || !Array.isArray(cards)) return { type: HAND_TYPES.HIGH_CARD, message: "无效牌", ranks: [], isSpecial: false };
     const count = cards.length;
     if (count !== 3 && count !== 5) return { type: HAND_TYPES.HIGH_CARD, message: `牌数错误(${count})`, ranks: [], isSpecial: false };
     const ranks = sortCardsByRankValue(cards, false, false).map(c => getRankValue(c));
+    // This default return of HIGH_CARD will cause incorrect "daoshui" if not replaced.
     return { type: HAND_TYPES.HIGH_CARD, ranks: ranks, message: HAND_TYPE_MESSAGES[HAND_TYPES.HIGH_CARD], originalCards: cards, isSpecial: false };
 }
 function compareHandInfos(h1, h2) {
     // This is a VERY basic placeholder. You NEED your full logic here.
+    console.warn("compareHandInfos is a placeholder and needs full implementation for correct game logic.");
     if (!h1 || !h2) return 0;
     if (h1.isSpecial && !h2.isSpecial) return 1; if (!h1.isSpecial && h2.isSpecial) return -1;
     if (h1.type !== h2.type) return h1.type > h2.type ? 1 : -1;
+    // This default comparison will be incorrect for most same-type hands.
     if (h1.ranks && h2.ranks) { for (let i = 0; i < h1.ranks.length; i++) { if (h1.ranks[i] !== h2.ranks[i]) return h1.ranks[i] > h2.ranks[i] ? 1 : -1; } }
     return 0;
 }
 function checkDaoshui(top, middle, bottom) {
-    // This is a VERY basic placeholder. You NEED your full logic here.
-    if (!top || !middle || !bottom || top.isSpecial || middle.isSpecial || bottom.isSpecial) return true;
-    if (compareHandInfos(top, middle) > 0) return true;
-    if (compareHandInfos(middle, bottom) > 0) return true;
+    // This function relies on compareHandInfos. If compareHandInfos is a placeholder, this will also be incorrect.
+    console.warn("checkDaoshui is using placeholder compareHandInfos logic.");
+    if (!top || !middle || !bottom || top.isSpecial || middle.isSpecial || bottom.isSpecial) return true; // Fail safe
+    if (compareHandInfos(top, middle) > 0) { console.log("Daoshui: Top > Middle"); return true;}
+    if (compareHandInfos(middle, bottom) > 0) { console.log("Daoshui: Middle > Bottom"); return true;}
     return false;
 }
 // --- END OF PLACEHOLDERS ---
