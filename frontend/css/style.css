@@ -6,237 +6,254 @@ body {
     justify-content: center;
     align-items: flex-start;
     min-height: 100vh;
-    background-color: #367c3d;
+    background-color: #367c3d; /* Casino green background */
     margin: 0;
     padding: 20px;
     box-sizing: border-box;
+    color: #333;
 }
 
 .game-container {
-    background-color: #f9f9f9;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    background-color: #fdfdfd; /* Slightly off-white */
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.25);
     text-align: center;
     width: 100%;
-    max-width: 800px;
+    max-width: 850px; /* Slightly wider */
     margin: 0 auto;
 }
 
 h1 {
     color: #2c3e50;
     margin-top: 0;
-    margin-bottom: 20px;
-    font-weight: 400;
-    letter-spacing: 0.5px;
+    margin-bottom: 25px;
+    font-weight: 300; /* Lighter font weight for modern look */
+    letter-spacing: 1px;
+    font-size: 2.2em;
 }
 
 .player-area, .initial-hand-area {
-    margin-bottom: 15px;
-    padding: 10px;
-    border: 1px solid #dcdcdc;
-    border-radius: 6px;
-    background-color: #f0f0f0;
+    margin-bottom: 20px;
+    padding: 15px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    background-color: #f7f9fc; /* Light neutral background for sections */
 }
 
 .player-area h3, .initial-hand-area h3 {
     margin-top: 0;
-    margin-bottom: 10px;
-    font-size: 1.1em;
-    color: #333;
+    margin-bottom: 12px;
+    font-size: 1.15em;
+    color: #34495e;
     text-align: left;
+    font-weight: 500;
 }
 
 .organized-rows .hand-row-label {
-    font-weight: bold;
-    margin-top: 8px;
-    margin-bottom: 4px;
+    font-weight: 600; /* Bolder label */
+    margin-top: 10px;
+    margin-bottom: 5px;
     text-align: left;
-    font-size: 0.9em;
-    color: #555;
+    font-size: 0.95em;
+    color: #555f6b;
 }
-.hand-row-label span {
+.hand-row-label span { /* Evaluation text */
     font-weight: normal;
-    color: #007bff;
+    color: #2980b9; /* Blue for info */
+    font-style: italic;
 }
 
 .hand-row, #player-hand {
     display: flex;
     flex-wrap: wrap;
-    justify-content: flex-start;
+    justify-content: flex-start; /* Align cards to the start */
     align-items: center;
-    gap: 8px;
-    min-height: 105px;
-    padding: 8px;
-    border: 1px dashed #b0b0b0;
-    border-radius: 5px;
-    background-color: #e9f5e9;
-    margin-bottom: 8px;
-    /* 为拖拽添加cursor提示 */
-    cursor: grab;
+    gap: 10px; /* Increased gap */
+    min-height: 110px; /* Slightly taller */
+    padding: 10px;
+    border: 2px dashed #c0c9d3; /* More prominent dashed border */
+    border-radius: 6px;
+    background-color: #eef2f7; /* Lighter blueish tint for droppable areas */
+    margin-bottom: 10px;
+    cursor: default; /* Default cursor for the area itself */
 }
 #player-hand {
-    background-color: #e6f0ff;
+    background-color: #e6f0ff; /* Different color for initial hand */
 }
-.hand-row:empty::after, #player-hand:empty::after { /* 当区域为空时显示提示 */
+.hand-row:empty::after, #player-hand:empty::after {
     content: "将牌拖到此处";
-    color: #aaa;
+    color: #95a5a6;
     font-style: italic;
     display: block;
     width: 100%;
     text-align: center;
-    padding: 20px 0;
+    padding: 25px 0; /* More padding for empty state */
+    font-size: 0.9em;
 }
 #player-hand:empty::after {
     content: "请点击“发牌”";
 }
 
 
-/* --- CSS 扑克牌样式 --- */
+/* --- CSS Poker Card Style --- */
 .card-css {
-    width: 65px;
-    height: 95px;
+    width: 70px; /* Slightly wider cards */
+    height: 100px; /* Standard proportion */
     background-color: white;
-    border: 1px solid #999; /* 稍微调深一点边框 */
-    color: black; /* 默认文字颜色 */
-    border-radius: 6px;
-    box-shadow: 1px 1px 4px rgba(0,0,0,0.2);
+    border: 1px solid #b0bec5; /* Softer border color */
+    color: black;
+    border-radius: 8px; /* More rounded corners */
+    box-shadow: 2px 2px 5px rgba(0,0,0,0.15);
     position: relative;
-    font-family: 'Georgia', serif;
+    font-family: 'Georgia', 'Times New Roman', serif;
     overflow: hidden;
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    padding: 4px;
+    justify-content: center; /* Vertically center the large suit */
+    align-items: center; /* Horizontally center */
+    padding: 5px;
     box-sizing: border-box;
-    transition: transform 0.15s ease-out, box-shadow 0.15s ease-out;
-    user-select: none; /* 防止拖拽时选中文本 */
-    cursor: grab; /* 拖拽手势 */
+    transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
+    user-select: none;
+    cursor: grab; /* Indicate draggable */
 }
-.card-css:active { /* 正在拖拽时的手势 */
-    cursor: grabbing;
+.card-css:active, .card-css.sortable-chosen, .card-css.sortable-drag {
+    cursor: grabbing !important; /* While dragging */
 }
 
-/* 左上角的点数和花色 */
-.card-css::before {
+.card-css::before { /* Top-left rank and suit */
     content: attr(data-rank) "\A" attr(data-suit);
     white-space: pre;
     position: absolute;
-    top: 5px;
-    left: 5px;
-    line-height: 1.1;
+    top: 6px;
+    left: 6px;
+    line-height: 1.2;
     text-align: center;
-    font-size: 16px;
+    font-size: 18px; /* Larger rank/suit */
     font-weight: bold;
     z-index: 1;
 }
-
-/* 右下角的点数和花色 */
-.card-css::after {
+.card-css::after { /* Bottom-right rank and suit (inverted) */
     content: attr(data-rank) "\A" attr(data-suit);
     white-space: pre;
     position: absolute;
-    bottom: 5px;
-    right: 5px;
+    bottom: 6px;
+    right: 6px;
     transform: rotate(180deg);
-    line-height: 1.1;
+    line-height: 1.2;
     text-align: center;
-    font-size: 16px;
+    font-size: 18px;
     font-weight: bold;
     z-index: 1;
 }
 
 .card-css.hearts,
 .card-css.diamonds {
-    color: #D32F2F;
+    color: #c0392b; /* Slightly desaturated red */
 }
-
 .card-css.spades,
 .card-css.clubs {
-    color: #111111;
+    color: #2c3e50; /* Dark blue/grey for black suits */
 }
 
-.card-center-suit {
-    font-size: 30px;
+.card-center-suit { /* Large suit symbol in the middle */
+    font-size: 38px; /* Larger central suit */
     line-height: 1;
+    opacity: 0.9; /* Slightly transparent for subtlety */
 }
 
-/* SortableJS 视觉反馈样式 */
-.droppable-area.sortable-ghost {
+/* SortableJS Visual Feedback */
+.droppable-area.sortable-ghost, /* Ghost class on the list */
+.card-css.sortable-ghost {      /* Ghost class on the card itself */
     opacity: 0.4;
-    background-color: #c8ebfb !important; /* 强制背景色 */
-    border: 2px dashed #007bff !important; /* 强制边框 */
+    background-color: #d1e7fd !important;
+    border: 2px dashed #0d6efd !important;
 }
-.droppable-area .card-css.sortable-ghost { /* 如果ghost是card-css本身 */
-    border: 2px dashed #007bff !important;
-    background-color: rgba(200, 235, 251, 0.5) !important;
-}
-
-
 .card-css.sortable-chosen {
-    opacity: 0.8;
-    transform: scale(1.05) translateY(-2px);
-    box-shadow: 0 4px 10px rgba(0,0,0,0.25);
-    cursor: grabbing !important;
-}
-
-.card-css.sortable-drag { /* 实际被拖动的副本 */
     opacity: 0.9;
+    transform: scale(1.08) translateY(-3px); /* More pronounced lift */
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
 }
+/* .sortable-drag is the element actually being dragged (usually a clone) */
 
 
-/* --- 控制按钮和消息区域样式 --- */
+/* --- Controls and Message Area --- */
 .controls {
-    margin-top: 20px;
-    padding-top: 15px;
-    border-top: 1px solid #eee;
+    margin-top: 25px;
+    padding-top: 20px;
+    border-top: 1px solid #eeeeee;
 }
 .controls button {
-    padding: 10px 18px;
-    margin: 5px;
+    padding: 12px 22px; /* Larger buttons */
+    margin: 8px;
     border: none;
-    border-radius: 5px;
+    border-radius: 6px;
     background-color: #007bff;
     color: white;
     cursor: pointer;
-    font-size: 0.95em;
-    transition: background-color 0.2s ease, box-shadow 0.2s ease;
+    font-size: 1em;
+    transition: background-color 0.2s ease, box-shadow 0.2s ease, transform 0.1s ease;
+    letter-spacing: 0.5px;
 }
-
 .controls button:hover:not(:disabled) {
     background-color: #0056b3;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+    transform: translateY(-1px);
 }
 .controls button:disabled {
-    background-color: #cccccc;
+    background-color: #ced4da;
     cursor: not-allowed;
-    opacity: 0.7;
+    opacity: 0.6;
 }
 .controls button:active:not(:disabled) {
     background-color: #004085;
+    transform: translateY(0px);
 }
 
 .message-area, .score-area {
-    margin-top: 15px;
-    padding: 10px;
-    border: 1px dashed #ccc;
-    min-height: 30px;
+    margin-top: 20px;
+    padding: 12px 15px;
+    border: 1px solid #ced4da;
+    min-height: 24px; /* Based on font size */
+    line-height: 1.5;
     background-color: #f8f9fa;
-    border-radius: 5px;
-    font-size: 0.9em;
+    border-radius: 6px;
+    font-size: 0.95em;
     color: #495057;
+    text-align: left;
+}
+.message-area.error {
+    background-color: #f8d7da;
+    color: #721c24;
+    border-color: #f5c6cb;
+}
+.message-area.info {
+    background-color: #d1ecf1;
+    color: #0c5460;
+    border-color: #bee5eb;
 }
 .score-area {
     font-weight: bold;
-    color: #198754;
+    color: #155724; /* Green for score */
+    background-color: #d4edda;
+    border-color: #c3e6cb;
 }
 
-/* 初始提示文字 */
-.hand-row p, #player-hand p { /* 确保这个p标签在发牌后被清除 */
+/* Initial placeholder text (redundant if :empty::after is used and p is cleared) */
+.hand-row p, #player-hand p {
     color: #6c757d;
     font-style: italic;
     width: 100%;
     text-align: center;
     margin: 10px 0;
+}
+
+/* Daoshui Warning */
+.hand-row.daoshui-warning {
+    border-color: #dc3545 !important; /* Red border for daoshui */
+    background-color: #f8d7da !important; /* Light red background */
+}
+.hand-row.daoshui-warning .hand-row-label span {
+    color: #dc3545 !important;
 }
