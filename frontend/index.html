@@ -2,35 +2,34 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"> <!-- Added user-scalable=no for better mobile fullscreen feel -->
     <title>十三水 HTML5 游戏</title>
     <link rel="stylesheet" href="css/style.css">
     <!-- SortableJS CDN (Ensure integrity hash is correct) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js" integrity="sha512-Eezs+g9Lq4TCCq0wae01s9PuNWzHYoCMkE97e2qdkYthpI0pzC3UGB03lgEHn2XM85hDOUF6qgqqszs+iXU4UA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 </head>
 <body>
-    <div class="game-container">
-        <h1>十三水</h1>
+    <!-- Removed <h1>十三水</h1> -->
+    <div class="game-container"> <!-- This will be styled for fullscreen -->
 
-        <div class="player-area"> <!-- All three rows are now conceptually within this main block -->
-            <h3>我的牌道</h3>
+        <div class="player-area">
+            <h3>我的牌道</h3> <!-- This h3 can also be removed or styled differently if not needed -->
             <div class="organized-rows">
                 <!-- 头道 (Top Row) -->
                 <div class="hand-row-label">头道 (3张): <span id="top-eval-text"></span></div>
                 <div id="player-top-row" class="hand-row droppable-area" data-row-name="top" data-row-limit="3"></div>
 
-                <!-- 手牌区 / 中道区 (Initial Hand / Middle Row) - MOVED UP -->
-                <div class="hand-row-label" id="middle-hand-header-container"> <!-- Container for the header -->
+                <!-- 手牌区 / 中道区 (Initial Hand / Middle Row) -->
+                <div class="hand-row-label" id="middle-hand-header-container">
                      <h3 id="middle-hand-header" style="margin-top:0; margin-bottom:0; font-size: 1em; color: #555f6b; font-weight:600;">
                         我的手牌 / 中道 (剩余牌): <span id="middle-eval-text" style="font-weight:normal; color: #2980b9; font-style:italic;"></span>
                      </h3>
                 </div>
                 <div id="player-hand" class="player-hand hand-row droppable-area" data-row-name="initial_middle" data-row-limit="13">
-                    <!-- Initial hand cards will be displayed here. Remaining cards become the middle row. -->
                     <p>点击 "发牌" 开始</p>
                 </div>
 
-                <!-- 尾道 (Bottom Row) - MOVED DOWN -->
+                <!-- 尾道 (Bottom Row) -->
                 <div class="hand-row-label">尾道 (5张): <span id="bottom-eval-text"></span></div>
                 <div id="player-bottom-row" class="hand-row droppable-area" data-row-name="bottom" data-row-limit="5"></div>
             </div>
