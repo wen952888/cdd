@@ -10,7 +10,6 @@ html, body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background-color: #367c3d; /* Casino green background for the whole page */
     color: #333;
-    /* display: flex; /* Flex on body removed as game-container is 100% */
 }
 
 .game-container {
@@ -19,18 +18,18 @@ html, body {
     max-width: none;
     max-height: none;
     margin: 0;
-    padding: 15px;
+    padding: 15px; /* Overall padding for the game area */
     box-sizing: border-box;
-    background-color: #f0f3f7;
-    border-radius: 0;
-    box-shadow: none;
-    text-align: center;
+    background-color: #f0f3f7; /* Light background for the game table */
+    border-radius: 0; /* No radius for fullscreen */
+    box-shadow: none; /* No shadow for fullscreen */
+    text-align: center; /* Default text alignment */
 
-    display: flex; /* Kept flex for internal layout of game-container */
+    display: flex;
     flex-direction: column;
-    align-items: stretch; /* Make children like player-area stretch to full width */
-    /* justify-content: space-between; /* Or flex-start if more appropriate */
-    overflow-y: auto;
+    align-items: stretch; /* Children like .player-area will stretch horizontally */
+    /* justify-content: space-between; /* Distributes space, pushing controls/messages down */
+    overflow-y: auto; /* Allow vertical scrolling within game-container if content overflows */
 }
 
 .player-area {
@@ -38,13 +37,13 @@ html, body {
     padding: 10px;
     border: 1px solid #dcdcdc;
     border-radius: 6px;
-    background-color: #f7f9fc;
-    width: 100%;
+    background-color: #f7f9fc; /* Slightly different background for card areas */
+    width: 100%; /* Take full width of parent */
     box-sizing: border-box;
-    /* flex-grow: 1; /* Allow this to grow and push controls down */
+    /* flex-grow: 1; /* Uncomment if you want this area to take up most vertical space */
 }
 
-.player-area h3 {
+.player-area h3 { /* For "我的牌道" */
     margin-top: 0;
     margin-bottom: 10px;
     font-size: 1.1em;
@@ -60,148 +59,142 @@ html, body {
     text-align: left;
     font-size: 0.9em;
     color: #555f6b;
-    padding-left: 5px;
+    padding-left: 5px; /* Indent labels slightly */
 }
+/* Styling for the h3 acting as the middle row's label */
 #middle-hand-header-container #middle-hand-header {
-    font-size: 0.9em !important;
+    font-size: 0.9em !important; /* Match other labels */
     text-align: left !important;
-    padding-left: 5px;
-    /* Ensure h3 inside label container doesn't add extra margins messing up alignment */
-    margin-top: 0 !important;
-    margin-bottom: 0 !important;
+    padding-left: 5px; /* Match other labels */
+    /* Reset h3 default margins to behave like a label */
+    margin-top: 8px !important; /* Align with other labels' top margin */
+    margin-bottom: 4px !important; /* Align with other labels' bottom margin */
+    font-weight: 600 !important; /* Match other labels' weight */
+    color: #555f6b !important; /* Match other labels' color */
 }
-.hand-row-label span {
+.hand-row-label span { /* For evaluation text like (乌龙) */
     font-weight: normal;
     color: #2980b9;
     font-style: italic;
 }
+/* Ensure the span inside the h3 for middle eval text also gets styled */
+#middle-hand-header-container #middle-hand-header #middle-eval-text {
+    font-weight: normal !important;
+    color: #2980b9 !important;
+    font-style: italic !important;
+}
 
-.hand-row, #player-hand.hand-row {
+
+.hand-row, #player-hand.hand-row { /* Common styles for all card rows */
     display: flex;
-    flex-wrap: wrap;
-    justify-content: flex-start; /* Align cards to the start */
-    align-items: center;
-    gap: clamp(4px, 1vw, 6px); /* Responsive gap */
-    min-height: clamp(75px, 11vw, 100px); /* Responsive min-height based on card height */
+    flex-wrap: wrap; /* Allow cards to wrap if they don't fit */
+    justify-content: flex-start; /* Align cards to the start of the row */
+    align-items: center; /* Vertically align cards in a row */
+    gap: clamp(4px, 0.8vw, 6px); /* Responsive gap between cards */
+    min-height: clamp(70px, 10vw, 100px); /* Responsive min height, should accommodate card image height */
     padding: 8px;
     border: 1px dashed #b0b0b0;
     border-radius: 5px;
-    background-color: #eef2f7;
+    background-color: #eef2f7; /* Background for the rows themselves */
     margin-bottom: 8px;
-    width: 100%;
+    width: 100%; /* Rows take full width of their container */
     box-sizing: border-box;
 }
 
-#player-hand.player-hand { /* Specific style for the initial hand area */
-    background-color: #e6f0ff;
+#player-hand.player-hand { /* Specific style for the initial hand / middle row area */
+    background-color: #e6f0ff; /* A distinct background */
 }
-#player-hand.is-middle-row-style { /* When player-hand becomes the middle row */
-    border-color: #86b7fe; /* Highlight border */
-    /* background-color: #e0f0e0; /* Optional: change background */
+#player-hand.is-middle-row-style { /* When player-hand is confirmed as middle row */
+    border-color: #86b7fe; /* Example: Highlight border */
+    /* background-color: #eef2f7; /* Optionally make it look like other organized rows */
 }
 
+/* Placeholder text for empty rows */
 .hand-row:empty::after, #player-hand.hand-row:empty::after {
     content: "将牌拖到此处";
     color: #aaa;
     font-style: italic;
-    width: 100%;
+    width: 100%; /* Ensure placeholder spans the row */
     text-align: center;
-    padding: clamp(10px, 3vh, 20px) 0; /* Responsive padding */
-    font-size: clamp(0.8em, 2vw, 0.9em);
+    padding: clamp(10px, 3vh, 20px) 0; /* Responsive vertical padding */
+    font-size: clamp(0.8em, 2vw, 0.9em); /* Responsive font size */
 }
-#player-hand.hand-row:empty::after {
+#player-hand.hand-row:empty::after { /* Specific placeholder for the initial hand area */
     content: "请点击“发牌”";
 }
 
 
-/* --- CSS Poker Card Style (Responsive) --- */
+/* --- CSS Poker Card Style (for Image Display) --- */
 .card-css {
-    width: clamp(45px, 6vw, 65px); /* min, preferred (adjust % based on 13 cards + gaps), max */
-    height: clamp(65px, 8.5vw, 95px);
-    background-color: white;
-    border: 1px solid #999;
-    color: black;
-    border-radius: 4px; /* Slightly smaller radius for smaller cards */
-    box-shadow: 1px 1px 2px rgba(0,0,0,0.1);
-    position: relative;
-    font-family: 'Georgia', serif;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    padding: 2px; /* Reduced padding */
+    /* Adjust width and height to match your card image aspect ratio. Example: playing cards are often ~2.5 x 3.5 inches */
+    /* Using clamp for responsiveness. A common card aspect ratio is roughly 1:1.4 or 0.71 */
+    width: clamp(48px, 6vw, 65px);  /* Min, Preferred (Viewport Width based), Max */
+    height: clamp(67px, 8.4vw, 91px); /* Maintain aspect ratio with width (e.g., height = width / 0.71) */
+                                     /* (6*1.4=8.4, 65*1.4=91) */
+
+    background-color: #fff; /* Fallback background, or for cards that don't load */
+    border: 1px solid #b0bec5; /* Softer border */
+    border-radius: clamp(3px, 0.5vw, 5px); /* Responsive border radius */
+    box-shadow: 1px 1px 3px rgba(0,0,0,0.15);
+    overflow: hidden; /* Important to clip image if using object-fit: cover */
+    padding: 0; /* No padding, image will fill */
     box-sizing: border-box;
     transition: transform 0.15s ease-out, box-shadow 0.15s ease-out;
-    user-select: none;
-    cursor: grab;
-    flex-shrink: 0;
-}
-.card-css:active, .card-css.sortable-chosen, .card-css.sortable-drag {
-    cursor: grabbing !important;
+    user-select: none; /* Prevent text selection on cards */
+    cursor: grab; /* Indicate draggable */
+    flex-shrink: 0; /* Prevent cards from shrinking in a flex row */
+    display: flex; /* For image centering if needed, though img is 100% */
+    justify-content: center;
+    align-items: center;
 }
 
-.card-css::before {
-    content: attr(data-rank) "\A" attr(data-suit);
-    white-space: pre;
-    position: absolute;
-    top: 3px; /* Adjusted for smaller padding */
-    left: 3px;
-    line-height: 1.1;
-    text-align: center;
-    font-size: clamp(9px, 1.5vw, 13px); /* Responsive font size */
-    font-weight: bold;
-    z-index: 1;
+.card-css img {
+    display: block; /* Remove extra space below inline images */
+    width: 100%;
+    height: 100%;
+    object-fit: contain; /* Recommended: Scales image to fit within the div, preserving aspect ratio. */
+                         /* Use 'cover' if you want images to always fill the div, possibly cropping. */
 }
-.card-css::after {
-    content: attr(data-rank) "\A" attr(data-suit);
-    white-space: pre;
-    position: absolute;
-    bottom: 3px;
-    right: 3px;
-    transform: rotate(180deg);
-    line-height: 1.1;
-    text-align: center;
-    font-size: clamp(9px, 1.5vw, 13px);
-    font-weight: bold;
-    z-index: 1;
-}
-.card-css.hearts, .card-css.diamonds { color: #D32F2F; }
-.card-css.spades, .card-css.clubs { color: #111111; }
-.card-center-suit { font-size: clamp(18px, 3vw, 28px); line-height: 1; opacity: 0.9; }
+
+/* Text-based card styles (::before, ::after, text color, .card-center-suit) are removed */
+/* as images now provide the visual representation of the card. */
 
 
-/* SortableJS Visual Feedback */
-.droppable-area.sortable-ghost,
-.card-css.sortable-ghost {
+/* SortableJS Visual Feedback Styles */
+.droppable-area.sortable-ghost, /* Ghost style for the placeholder in the list */
+.card-css.sortable-ghost {      /* Ghost style for the card being dragged (if Sortable clones it with this class) */
     opacity: 0.4;
-    background-color: #c8ebfb !important;
-    border: 2px dashed #007bff !important;
+    background-color: #c8ebfb !important; /* Light blue placeholder background */
+    border: 2px dashed #007bff !important; /* Dashed blue border for placeholder */
 }
-.card-css.sortable-chosen {
+.card-css.sortable-chosen { /* Style for the card element that is selected for dragging */
     opacity: 0.8;
-    transform: scale(1.05) translateY(-2px);
-    box-shadow: 0 4px 10px rgba(0,0,0,0.25);
+    transform: scale(1.05) translateY(-2px); /* Lift and scale effect */
+    box-shadow: 0 4px 10px rgba(0,0,0,0.25); /* Stronger shadow when chosen */
 }
+.card-css.sortable-drag { /* Style for the actual element being dragged (often a clone) */
+    /* opacity: 0.9; /* Slightly transparent if desired, often default is fine */
+}
+
 
 /* --- Controls and Message Area --- */
 .controls {
-    margin-top: auto; /* Pushes to bottom if player-area has flex-grow:1 or game-container is space-between */
+    margin-top: auto; /* Pushes controls to the bottom if .game-container is flex and other elements grow */
     padding-top: 10px;
     border-top: 1px solid #eee;
-    flex-shrink: 0;
+    flex-shrink: 0; /* Prevent this section from shrinking */
     width: 100%;
     box-sizing: border-box;
 }
 .controls button {
-    padding: clamp(8px, 1.5vh, 12px) clamp(12px, 2.5vw, 20px); /* Responsive padding */
-    margin: clamp(3px, 0.5vh, 5px) clamp(4px, 0.8vw, 6px); /* Responsive margin */
+    padding: clamp(8px, 1.5vh, 12px) clamp(12px, 2.5vw, 20px);
+    margin: clamp(3px, 0.5vh, 5px) clamp(4px, 0.8vw, 6px);
     border: none;
     border-radius: 5px;
     background-color: #007bff;
     color: white;
     cursor: pointer;
-    font-size: clamp(0.8em, 2.2vw, 1em); /* Responsive font size */
+    font-size: clamp(0.8em, 2.2vw, 1em);
     transition: background-color 0.2s ease, box-shadow 0.2s ease;
 }
 .controls button:hover:not(:disabled) { background-color: #0056b3; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
@@ -211,16 +204,16 @@ html, body {
 
 .message-area, .score-area {
     margin-top: 10px;
-    padding: clamp(6px, 1vh, 10px) clamp(8px, 1.5vw, 12px); /* Responsive padding */
+    padding: clamp(6px, 1vh, 10px) clamp(8px, 1.5vw, 12px);
     border: 1px dashed #ccc;
-    min-height: 20px;
+    min-height: 20px; /* Minimum height for these areas */
     line-height: 1.4;
     background-color: #f8f9fa;
     border-radius: 5px;
-    font-size: clamp(0.75em, 2vw, 0.9em); /* Responsive font size */
+    font-size: clamp(0.75em, 2vw, 0.9em);
     color: #495057;
     text-align: left;
-    flex-shrink: 0;
+    flex-shrink: 0; /* Prevent shrinking */
     width: 100%;
     box-sizing: border-box;
 }
@@ -229,36 +222,35 @@ html, body {
 .score-area { font-weight: bold; color: #198754; background-color: #d4edda; border-color: #c3e6cb; }
 
 
+/* Daoshui Warning Styles */
 .droppable-area.daoshui-warning {
-    border-color: #dc3545 !important;
-    background-color: #f8d7da !important;
+    border-color: #dc3545 !important; /* Red border for daoshui */
+    background-color: #f8d7da !important; /* Light red background */
 }
+/* Target spans within labels or the h3 acting as a label for daoshui text color change */
 .droppable-area.daoshui-warning .hand-row-label span,
-#middle-hand-header-container.daoshui-warning #middle-eval-text, /* Assuming container gets class */
-#middle-hand-header-container.daoshui-warning #middle-hand-header { /* For the h3 itself */
+#middle-hand-header-container.daoshui-warning #middle-eval-text, /* If container gets the class */
+#middle-hand-header-container.daoshui-warning #middle-hand-header {
     color: #dc3545 !important;
 }
-/* If only #player-hand gets the daoshui-warning class: */
-#player-hand.daoshui-warning + #middle-hand-header-container #middle-eval-text,
-#player-hand.daoshui-warning + #middle-hand-header-container #middle-hand-header {
-    /* This selector is tricky if header is before player-hand. JS should target header directly. */
-}
+/* Fallback if only the #player-hand div gets 'daoshui-warning' and header is separate */
+/* (This might need JS to also add 'daoshui-warning' to the header container for simplicity) */
 
 
-/* Styles for the Orientation Message Overlay (ID defined in JS: ORIENTATION_MESSAGE_ID) */
-/* These are largely backup, as JS applies styles directly for the overlay */
+/* Styles for the Orientation Message Overlay (ID: #orientation-message-overlay) */
+/* These are mostly handled by JS now, but can be here as a fallback or for initial state */
+/*
 #orientation-message-overlay {
-    /* display: none;  JS controls this */
-    /* position: fixed;
+    display: none; // JS controls display
+    position: fixed;
     top: 0; left: 0; width: 100vw; height: 100vh;
     background-color: rgba(0, 0, 0, 0.95);
     color: white; z-index: 10000;
     justify-content: center; align-items: center; text-align: center;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; */
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
-
-/* Keyframes for the icon rotation (can be defined here or added by JS) */
-/* @keyframes rotateDeviceIcon {
+@keyframes rotateDeviceIcon {
     0%, 100% { transform: rotate(0deg); }
     50% { transform: rotate(-90deg); }
-} */
+}
+*/
