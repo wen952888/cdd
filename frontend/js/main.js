@@ -11,9 +11,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const initialAndMiddleHandElement = document.getElementById('player-hand');
     const topRowElement = document.getElementById('player-top-row');
     const bottomRowElement = document.getElementById('player-bottom-row');
-    const middleHandHeader = document.getElementById('middle-hand-header'); // The H3 element
+    const middleHandHeader = document.getElementById('middle-hand-header');
     const topEvalTextElement = document.getElementById('top-eval-text');
-    // middleEvalTextElement is a span *inside* middleHandHeader, so we get it after potential innerHTML changes
     const bottomEvalTextElement = document.getElementById('bottom-eval-text');
     const aiReferenceDisplayElement = document.getElementById('ai-reference-display');
     const aiTopRefElement = document.getElementById('ai-top-ref');
@@ -27,10 +26,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const MAX_SORTABLE_INIT_ATTEMPTS = 10, SORTABLE_INIT_DELAY = 200;
     let sortableInitializationAttempts = 0;
 
-    const safeDisplayMessage = (msg, isErr = false) => {
-        if (typeof displayMessage === "function") displayMessage(msg, isErr);
-        else isErr ? console.error(msg) : console.log(msg);
-    };
+    const safeDisplayMessage = (msg, isErr = false) => { if (typeof displayMessage === "function") displayMessage(msg, isErr); else isErr ? console.error(msg) : console.log(msg); };
 
     function initializeSortable() {
         if (typeof Sortable === 'undefined') {
@@ -54,7 +50,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const topC = playerOrganizedHand.top, botC = playerOrganizedHand.bottom;
         const midCSource = Array.from(initialAndMiddleHandElement.children).map(d => d.cardData).filter(Boolean);
         const midReady = topC.length === 3 && botC.length === 5 && midCSource.length === 5;
-        const evalF = typeof evaluateHand === "function" ? evaluateHand : () => ({message: "N/A"});
+        const evalF = typeof evaluateHand === "function" ? evaluateHand : () => ({message: "评价缺失"});
         if(topEvalTextElement) topEvalTextElement.textContent = topC.length > 0 ? ` (${(topC.length===3 ? evalF(topC).message : '...') || '...'})` : '';
         if(bottomEvalTextElement) bottomEvalTextElement.textContent = botC.length > 0 ? ` (${(botC.length===5 ? evalF(botC).message : '...') || '...'})` : '';
         if (middleHandHeader) {
@@ -67,17 +63,161 @@ document.addEventListener('DOMContentLoaded', () => {
         if(typeof checkDaoshuiForUI === "function") checkDaoshuiForUI(midCSource);
     }
 
-    function checkDaoshuiForUI(midC) { /* ... (Full function from previous, using safeDisplayMessage) ... */ }
-    function checkAllCardsOrganized(silent = false) { /* ... (Full function from previous, using safeDisplayMessage) ... */ }
-    function initializeGame() { /* ... (Full function from previous, using safeDisplayMessage, ensure AI buttons/display hidden) ... */ }
+    function checkDaoshuiForUI(midC) {
+        const topC = playerOrganizedHand.top, botC = playerOrganizedHand.bottom;
+        if(typeof evaluateHand !== "function" || typeof checkDaoshui !== "function") { safeDisplayMessage("牌型逻辑缺失，无法检查倒水", true); return; }
+        if (topC.length===3 && botC.length===5 && midC.length===5) {
+            const tE=evaluateHand(topC), mE=evaluateHand(midC), bE=evaluateHand(botC);
+            const isDS = checkDaoshui(tE,mE,bE);
+            [topRowElement,initialAndMiddleHandElement,bottomRowElement].forEach(el => el && (isDS ? el.classList.add('daoshui-warning') : el.classList.remove('daoshui-warning')));
+            if(isDS) safeDisplayMessage("警告: 检测到倒水！", true);
+            else if (confirmOrganizationButton.disabled && !checkAllCardsOrganized(true)) safeDisplayMessage("请继续理牌...", false);
+        } else [topRowElement,initialAndMiddleHandElement,bottomRowElement].forEach(el => el && el.classList.remove('daoshui-warning'));
+    }
 
-    dealButton.addEventListener('click', async () => { /* ... (Full function from previous, using safeDisplayMessage, show AI/Sort buttons) ... */ });
-    if (sortHandButton) sortHandButton.addEventListener('click', () => { /* ... (Full function from previous, using safeDisplayMessage) ... */ });
-    if (aiReferenceButton) aiReferenceButton.addEventListener('click', () => { safeDisplayMessage("AI参考功能待实现", true); /* ... (show/hide display element) ... */ });
-    if (aiAutoplayButton) aiAutoplayButton.addEventListener('click', () => { safeDisplayMessage("AI托管功能待实现", true); });
-    confirmOrganizationButton.addEventListener('click', () => { /* ... (Full function from previous, using safeDisplayMessage) ... */ });
-    compareButton.addEventListener('click', async () => { /* ... (Full function from previous, using safeDisplayMessage) ... */ });
-    if (callBackendButton) callBackendButton.addEventListener('click', async () => { /* ... (Full function from previous, with detailed logging, using safeDisplayMessage) ... */ });
+    function checkAllCardsOrganized(silent = false) {
+        const midCount = initialAndMiddleHandElement.children.length;
+        const topOK = playerOrganizedHand.top.length === 3, botOK = playerOrganizedHand.bottom.length === 5, midOK = midCount === 5;
+        const allSet = topOK && botOK && midOK;
+        if(confirmOrganizationButton) confirmOrganizationButton.disabled = !allSet;
+        if(allSet && !silent) safeDisplayMessage("牌型已分配，请确认。", false);
+        return allSet;
+    }
+
+    function initializeGame() {
+        playerFullHandSource = []; playerOrganizedHand = {top:[],middle:[],bottom:[]};
+        [topRowElement,bottomRowElement].forEach(el => el && (el.innerHTML = ''));
+        if(initialAndMiddleHandElement) initialAndMiddleHandElement.innerHTML='<p>点击 "发牌" 开始</p>';
+        [topEvalTextElement,bottomEvalTextElement].forEach(el => el && (el.textContent=''));
+        const h3MidHeader = document.getElementById('middle-hand-header'); const spanMidEval = document.getElementById('middle-eval-text');
+        if(h3MidHeader && spanMidEval) { h3MidHeader.childNodes[0].nodeValue = `我的手牌 / 中道 (剩余牌): `; spanMidEval.textContent = ''; }
+        [topRowElement,initialAndMiddleHandElement,bottomRowElement].forEach(el => el && el.classList.remove('daoshui-warning','is-middle-row-style'));
+        safeDisplayMessage("点击“发牌”开始。", false);
+        if(typeof displayScore === "function") displayScore("");
+        if(dealButton) dealButton.disabled=false;
+        [sortHandButton, aiReferenceButton, aiAutoplayButton, confirmOrganizationButton, compareButton].forEach(btn => btn && (btn.style.display='none'));
+        if(confirmOrganizationButton) confirmOrganizationButton.disabled=true;
+        if(aiReferenceDisplayElement) aiReferenceDisplayElement.style.display = 'none';
+        console.log("Game Initialized.");
+    }
+
+    dealButton.addEventListener('click', async () => {
+        console.log("--- Deal Button Clicked ---");
+        initializeGame(); safeDisplayMessage("发牌中...", false); dealButton.disabled=true;
+        try {
+            const res = await fetch(`${API_BASE_URL}deal_cards.php`);
+            if(!res.ok) throw new Error(`发牌失败: ${res.status} ${await res.text()}`);
+            const data = await res.json();
+            if(!data || !Array.isArray(data.cards) || data.cards.length!==13) throw new Error("牌数据错误。");
+
+            playerFullHandSource = data.cards.map(c => {
+                const sI = (typeof SUITS_DATA !== "undefined" && SUITS_DATA[c.suitKey]) || { displayChar: '?', cssClass: 'unknown', fileNamePart: 'unknown' };
+                return { rank: c.rank, suitKey: c.suitKey, displaySuitChar: sI.displayChar, suitCssClass: sI.cssClass, id: (c.rank || 'X') + (c.suitKey || 'Y') + Math.random().toString(36).substring(2, 7)};
+            }).filter(c => c.rank && c.suitKey);
+
+            // First, check for 13-card special hands
+            let specialHand = null;
+            if (typeof evaluateThirteenCardSpecial === 'function') {
+                specialHand = evaluateThirteenCardSpecial(playerFullHandSource);
+            }
+
+            if (specialHand) {
+                safeDisplayMessage(`特殊牌型：${specialHand.message}！`, false);
+                initialAndMiddleHandElement.innerHTML='';
+                sortHandCardsForDisplay(playerFullHandSource).forEach(card => initialAndMiddleHandElement.appendChild(renderCard(card, true)));
+                // TODO: Handle special hand win (e.g., disable other buttons, show score)
+                [sortHandButton, aiReferenceButton, aiAutoplayButton, confirmOrganizationButton, compareButton].forEach(btn => btn && (btn.style.display='none'));
+                dealButton.disabled = false; // Allow new game
+            } else {
+                initialAndMiddleHandElement.innerHTML='';
+                playerFullHandSource.forEach(c => c && typeof renderCard === "function" && initialAndMiddleHandElement.appendChild(renderCard(c,true)));
+                displayCurrentArrangementState(); safeDisplayMessage("请理牌。", false);
+                [sortHandButton, aiReferenceButton, aiAutoplayButton, confirmOrganizationButton].forEach(btn => btn && (btn.style.display='inline-block'));
+            }
+        } catch(err) {
+            console.error("发牌错误:", err); safeDisplayMessage(`错误: ${err.message}`,true);
+            dealButton.disabled=false;
+        }
+    });
+
+    if (sortHandButton) sortHandButton.addEventListener('click', () => {
+        console.log("--- Sort Hand Button Clicked ---");
+        if (!initialAndMiddleHandElement || typeof sortHandCardsForDisplay !== 'function' || typeof renderCard !== 'function') {
+            safeDisplayMessage("整理功能出错。", true); return;
+        }
+        let cardsToSort = Array.from(initialAndMiddleHandElement.children).map(div => div.cardData).filter(Boolean);
+        const sortedCards = sortHandCardsForDisplay(cardsToSort);
+        initialAndMiddleHandElement.innerHTML = '';
+        sortedCards.forEach(card => initialAndMiddleHandElement.appendChild(renderCard(card, true)));
+        safeDisplayMessage("手牌已整理。", false); displayCurrentArrangementState();
+    });
+
+    if (aiReferenceButton) aiReferenceButton.addEventListener('click', () => {
+        safeDisplayMessage("AI参考功能建设中...", true);
+        if(aiReferenceDisplayElement) aiReferenceDisplayElement.style.display = 'block';
+        if(aiTopRefElement) aiTopRefElement.textContent = "AI思考中...";
+        if(aiMiddleRefElement) aiMiddleRefElement.textContent = "AI思考中...";
+        if(aiBottomRefElement) aiBottomRefElement.textContent = "AI思考中...";
+        // Placeholder: Simulate AI result after a delay
+        setTimeout(() => {
+            if(aiTopRefElement) aiTopRefElement.textContent = "♠A ♠K ♠Q (示例)";
+            if(aiMiddleRefElement) aiMiddleRefElement.textContent = "♥J ♥10 ♥9 ♥8 ♥7 (示例)";
+            if(aiBottomRefElement) aiBottomRefElement.textContent = "♦6 ♦6 ♣6 ♣5 ♣5 (示例)";
+        }, 1500);
+    });
+    if (aiAutoplayButton) aiAutoplayButton.addEventListener('click', () => { safeDisplayMessage("AI托管功能建设中...", true); });
+
+    confirmOrganizationButton.addEventListener('click', () => {
+        console.log("--- Confirm Organization Button Clicked ---");
+        playerOrganizedHand.middle = Array.from(initialAndMiddleHandElement.children).map(d=>d.cardData).filter(Boolean);
+        if(playerOrganizedHand.top.length!==3 || playerOrganizedHand.middle.length!==5 || playerOrganizedHand.bottom.length!==5) {
+            safeDisplayMessage(`牌数错误！头${playerOrganizedHand.top.length}/3, 中${playerOrganizedHand.middle.length}/5, 尾${playerOrganizedHand.bottom.length}/5.`,true); return;
+        }
+        const evalF = typeof evaluateHand === "function" ? evaluateHand : () => ({message:"N/A"});
+        const tE=evalF(playerOrganizedHand.top), mE=evalF(playerOrganizedHand.middle), bE=evalF(playerOrganizedHand.bottom);
+        const h3MidH = document.getElementById('middle-hand-header'), spanMidE = document.getElementById('middle-eval-text');
+        if(h3MidH && spanMidE) { h3MidH.childNodes[0].nodeValue =`中道 (5张): `; spanMidE.textContent=` (${mE.message||'未知'})`; initialAndMiddleHandElement.classList.add('is-middle-row-style'); }
+        if(typeof checkDaoshui==="function" && checkDaoshui(tE,mE,bE)){
+            safeDisplayMessage("警告: 倒水！",true); [topRowElement,initialAndMiddleHandElement,bottomRowElement].forEach(el=>el&&el.classList.add('daoshui-warning'));
+        } else {
+            safeDisplayMessage("理牌完成，可比牌。",false); [topRowElement,initialAndMiddleHandElement,bottomRowElement].forEach(el=>el&&el.classList.remove('daoshui-warning'));
+        }
+        [confirmOrganizationButton, sortHandButton, aiReferenceButton, aiAutoplayButton].forEach(btn => btn && (btn.style.display='none'));
+        if(compareButton) { compareButton.style.display='inline-block'; compareButton.disabled=false; }
+    });
+
+    compareButton.addEventListener('click', async () => {
+        console.log("--- Compare Button Clicked ---");
+        safeDisplayMessage("提交比牌中...",false); compareButton.disabled=true;
+        if(playerOrganizedHand.middle.length!==5) playerOrganizedHand.middle=Array.from(initialAndMiddleHandElement.children).map(d=>d.cardData).filter(Boolean);
+        const pL={top:playerOrganizedHand.top.map(c=>({rank:c.rank,suitKey:c.suitKey})), middle:playerOrganizedHand.middle.map(c=>({rank:c.rank,suitKey:c.suitKey})), bottom:playerOrganizedHand.bottom.map(c=>({rank:c.rank,suitKey:c.suitKey}))};
+        if(pL.top.length!==3||pL.middle.length!==5||pL.bottom.length!==5){ safeDisplayMessage("错误:提交牌数不对。",true); compareButton.style.display='none'; dealButton.disabled=false; return; }
+        try {
+            const res = await fetch(`${API_BASE_URL}submit_hand.php`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(pL)});
+            if(!res.ok) throw new Error(`比牌请求失败: ${res.status} ${await res.text()}`);
+            const rst = await res.json(); console.log("比牌结果:",rst);
+            if(rst.success){ let msg=`服务器: ${rst.message||'完成.'}`; if(rst.daoshui)msg+=" (倒水)"; safeDisplayMessage(msg,rst.daoshui); }
+            else safeDisplayMessage(`服务器错误: ${rst.message||'失败.'}`,true);
+            if(typeof displayScore==="function"&&typeof rst.score!=="undefined")displayScore(`得分: ${rst.score}`);
+        } catch(err){ console.error("比牌错误:",err); safeDisplayMessage(`错误: ${err.message}`,true);
+        } finally { if(dealButton) dealButton.disabled=false; if(compareButton) compareButton.style.display='none'; }
+    });
+
+    if (callBackendButton) {
+        callBackendButton.addEventListener('click', async () => {
+            console.log("--- Test Backend Button Clicked! ---");
+            safeDisplayMessage("正在测试后端通讯...", false);
+            try {
+                const testEndpoint = `${API_BASE_URL}deal_cards.php`; console.log("Test endpoint URL:", testEndpoint);
+                const response = await fetch(testEndpoint); console.log("Test Backend - Fetch response received:", response);
+                if (!response.ok) { const errorText = await response.text(); console.error(`Test Backend - HTTP error! ${response.status} - ${errorText}`); throw new Error(`HTTP error! ${response.status} - ${errorText}`); }
+                const data = await response.json(); console.log("Test Backend - Backend response data:", data);
+                let msg = "后端通讯成功！";
+                if(data?.cards?.length > 0) msg += ` (后端返回 ${data.cards.length} 张牌)`; else if(data?.message) msg += ` 后端消息: ${data.message}`;
+                safeDisplayMessage(msg, false);
+            } catch (error) { console.error("Test Backend - 通讯捕获到错误:", error); safeDisplayMessage(`后端通讯测试失败: ${error.message}`, true); }
+        });
+    } else console.error("callBackendButton element NOT found!");
 
     initializeGame();
     initializeSortable();
