@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>十三水游戏</title>
     <link rel="stylesheet" href="css/style.css">
-    <!-- SortableJS CDN (Ensure integrity hash is correct and up-to-date) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js" integrity="sha512-Eezs+g9Lq4TCCq0wae01s9PuNWzHYoCMkE97e2qdkYthpI0pzC3UGB03lgEHn2XM85hDOUF6qgqqszs+iXU4UA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 </head>
 <body>
@@ -14,11 +13,9 @@
         <div class="player-area">
             <h3>我的牌道</h3>
             <div class="organized-rows">
-                <!-- 头道 (Top Row) -->
                 <div class="hand-row-label">头道 (3张): <span id="top-eval-text"></span></div>
                 <div id="player-top-row" class="hand-row droppable-area" data-row-name="top" data-row-limit="3"></div>
 
-                <!-- 手牌区 / 中道区 (Initial Hand / Middle Row) -->
                 <div class="hand-row-label" id="middle-hand-header-container">
                      <h3 id="middle-hand-header" style="margin:0; font-size: 1em; color: #555f6b; font-weight:600; text-align: left;">
                         我的手牌 / 中道 (剩余牌): <span id="middle-eval-text" style="font-weight:normal; color: #2980b9; font-style:italic;"></span>
@@ -28,7 +25,6 @@
                     <p>点击 "发牌" 开始</p>
                 </div>
 
-                <!-- 尾道 (Bottom Row) -->
                 <div class="hand-row-label">尾道 (5张): <span id="bottom-eval-text"></span></div>
                 <div id="player-bottom-row" class="hand-row droppable-area" data-row-name="bottom" data-row-limit="5"></div>
             </div>
@@ -45,9 +41,9 @@
         <div id="score-area" class="score-area">得分: --</div>
     </div>
 
-    <!-- Scripts: CORRECTED AND CRITICAL ORDER -->
-    <script src="js/game.js"></script>  <!-- game.js defines functions and data used by ui.js and main.js -->
-    <script src="js/ui.js"></script>    <!-- ui.js defines renderCard, displayMessage, etc., may use game.js items -->
-    <script src="js/main.js"></script>  <!-- main.js orchestrates everything, uses functions from game.js and ui.js -->
+    <!-- Scripts: Correct order is CRITICAL -->
+    <script src="js/game.js"></script>  <!-- Defines data structures and core logic functions -->
+    <script src="js/ui.js"></script>    <!-- Defines UI rendering functions (like renderCard), uses game.js items -->
+    <script src="js/main.js"></script>  <!-- Main game flow, event handling, uses game.js and ui.js items -->
 </body>
 </html>
