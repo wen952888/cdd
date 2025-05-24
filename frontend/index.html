@@ -19,27 +19,22 @@
                 <div class="hand-row-label">头道 (3张): <span id="top-eval-text"></span></div>
                 <div id="player-top-row" class="hand-row droppable-area" data-row-name="top" data-row-limit="3"></div>
 
-                <!-- 尾道 (Bottom Row) - MOVED UP -->
-                <div class="hand-row-label">尾道 (5张): <span id="bottom-eval-text"></span></div>
-                <div id="player-bottom-row" class="hand-row droppable-area" data-row-name="bottom" data-row-limit="5"></div>
-
-                <!-- 手牌区 / 中道区 (Initial Hand / Middle Row) - MOVED HERE, formerly was in a separate initial-hand-area div -->
-                <!-- The h3 and div#player-hand are now direct children of organized-rows or a similar structure -->
-                <div class="hand-row-label" id="middle-hand-header-container"> <!-- Container for the header to match other rows -->
+                <!-- 手牌区 / 中道区 (Initial Hand / Middle Row) - MOVED UP -->
+                <div class="hand-row-label" id="middle-hand-header-container"> <!-- Container for the header -->
                      <h3 id="middle-hand-header" style="margin-top:0; margin-bottom:0; font-size: 1em; color: #555f6b; font-weight:600;">
                         我的手牌 / 中道 (剩余牌): <span id="middle-eval-text" style="font-weight:normal; color: #2980b9; font-style:italic;"></span>
                      </h3>
                 </div>
                 <div id="player-hand" class="player-hand hand-row droppable-area" data-row-name="initial_middle" data-row-limit="13">
                     <!-- Initial hand cards will be displayed here. Remaining cards become the middle row. -->
-                    <!-- Add .hand-row class for consistent styling with other rows -->
                     <p>点击 "发牌" 开始</p>
                 </div>
+
+                <!-- 尾道 (Bottom Row) - MOVED DOWN -->
+                <div class="hand-row-label">尾道 (5张): <span id="bottom-eval-text"></span></div>
+                <div id="player-bottom-row" class="hand-row droppable-area" data-row-name="bottom" data-row-limit="5"></div>
             </div>
         </div>
-
-        <!-- The .initial-hand-area div is now effectively merged into .player-area -->
-        <!-- So, we remove the now-empty original .initial-hand-area div -->
 
         <div class="controls">
             <button id="deal-button">发牌</button>
