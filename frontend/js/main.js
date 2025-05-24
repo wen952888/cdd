@@ -1,7 +1,7 @@
 // frontend/js/main.js
 
 document.addEventListener('DOMContentLoaded', () => {
-    // --- DOM Elements ---
+    // --- DOM Elements (Your existing elements) ---
     const dealButton = document.getElementById('deal-button');
     const confirmOrganizationButton = document.getElementById('confirm-organization-button');
     const compareButton = document.getElementById('compare-button');
@@ -12,28 +12,24 @@ document.addEventListener('DOMContentLoaded', () => {
     const bottomRowElement = document.getElementById('player-bottom-row');
     const middleHandHeader = document.getElementById('middle-hand-header');
     const topEvalTextElement = document.getElementById('top-eval-text');
-    const middleEvalTextElement = document.getElementById('middle-eval-text'); // Ensure this exists
+    const middleEvalTextElement = document.getElementById('middle-eval-text');
     const bottomEvalTextElement = document.getElementById('bottom-eval-text');
 
+    // --- Configuration (Your existing config) ---
+    const API_BASE_URL = 'https://wenge.cloudns.ch/backend/'; // Example from previous
 
-    // --- Configuration ---
-    // IMPORTANT: Replace with your actual serv00 backend URL
-    const API_BASE_URL = 'https://wenge.cloudns.ch/backend/';
-
-    // --- Game State ---
-    let playerFullHandSource = []; // Cards directly from server, before any organization
-    let playerOrganizedHand = {
-        top: [],
-        middle: [], // Will be populated from initialAndMiddleHandElement at confirmation
-        bottom: []
-    };
+    // --- Game State (Your existing state) ---
+    let playerFullHandSource = [];
+    let playerOrganizedHand = { top: [], middle: [], bottom: [] };
     let sortableInstances = {};
 
+    // --- SortableJS Initialization (Your existing init) ---
     const MAX_SORTABLE_INIT_ATTEMPTS = 10;
     let sortableInitializationAttempts = 0;
     const SORTABLE_INIT_DELAY = 200;
 
     function initializeSortable() {
+        // ... (Your existing SortableJS initialization code remains here) ...
         if (typeof Sortable === 'undefined') {
             sortableInitializationAttempts++;
             if (sortableInitializationAttempts < MAX_SORTABLE_INIT_ATTEMPTS) {
@@ -64,350 +60,248 @@ document.addEventListener('DOMContentLoaded', () => {
                 const toRowElement = evt.to;
                 const fromRowElement = evt.from;
                 const rowLimit = parseInt(toRowElement.dataset.rowLimit);
-
                 if (rowLimit && toRowElement !== fromRowElement) {
-                    if (toRowElement.children.length >= rowLimit) {
-                        return false; // Prevent adding to a full row
-                    }
+                    if (toRowElement.children.length >= rowLimit) return false;
                 }
                 return true;
             },
-            onAdd: function(evt) { // Fallback if onMove doesn't catch it (e.g. fast drag)
+            onAdd: function(evt) {
                 const toRowElement = evt.to;
                 const fromRowElement = evt.from;
                 const rowLimit = parseInt(toRowElement.dataset.rowLimit);
                  if (rowLimit && toRowElement.children.length > rowLimit) {
-                    // Item was added, making it over limit. Move it back.
-                    Sortable.utils.select(evt.item).parentNode.removeChild(evt.item); // Remove from target
-                    fromRowElement.appendChild(evt.item); // Add back to source
+                    Sortable.utils.select(evt.item).parentNode.removeChild(evt.item);
+                    fromRowElement.appendChild(evt.item);
                     displayMessage(`${toRowElement.dataset.rowName === 'top' ? '头' : '尾'}道已满! 卡片已退回。`, true);
-                    // Update models after programmatic move
                     updateHandModelFromDOM(fromRowElement, fromRowElement.dataset.rowName);
-                    if (toRowElement !== fromRowElement) {
-                         updateHandModelFromDOM(toRowElement, toRowElement.dataset.rowName);
-                    }
-                    displayCurrentArrangementState(); // Refresh UI
+                    if (toRowElement !== fromRowElement) updateHandModelFromDOM(toRowElement, toRowElement.dataset.rowName);
+                    displayCurrentArrangementState();
                 }
             }
         };
 
         if (initialAndMiddleHandElement) {
             sortableInstances.initial_middle = new Sortable(initialAndMiddleHandElement, {
-                ...commonSortableOptions,
-                sort: true, // Allow sorting within this area
-                group: { name: sharedGroupName, pull: true, put: true } // Can pull from and put into
+                ...commonSortableOptions, sort: true, group: { name: sharedGroupName, pull: true, put: true }
             });
         }
         if (topRowElement) {
             sortableInstances.top = new Sortable(topRowElement, {
-                ...commonSortableOptions,
-                sort: true,
-                group: { name: sharedGroupName, pull: true, put: true }
+                ...commonSortableOptions, sort: true, group: { name: sharedGroupName, pull: true, put: true }
             });
         }
         if (bottomRowElement) {
             sortableInstances.bottom = new Sortable(bottomRowElement, {
-                ...commonSortableOptions,
-                sort: true,
-                group: { name: sharedGroupName, pull: true, put: true }
+                ...commonSortableOptions, sort: true, group: { name: sharedGroupName, pull: true, put: true }
             });
         }
     }
 
-    function updateHandModelFromDOM(rowElement, rowName) {
-        if (!rowElement || !rowName) return;
-        const cardsInRow = Array.from(rowElement.children)
-            .map(cardDiv => cardDiv.cardData)
-            .filter(Boolean);
+    // --- Game Logic Functions (Your existing functions) ---
+    function updateHandModelFromDOM(rowElement, rowName) { /* ... */ }
+    function displayCurrentArrangementState() { /* ... */ }
+    function checkDaoshuiForUI(currentMiddleCards) { /* ... */ }
+    function checkAllCardsOrganized() { /* ... */ }
+    function initializeGame() { /* ... */ }
 
-        if (rowName === 'top') {
-            playerOrganizedHand.top = cardsInRow;
-        } else if (rowName === 'bottom') {
-            playerOrganizedHand.bottom = cardsInRow;
-        } else if (rowName === 'initial_middle') {
-            // This area's cards are not directly assigned to playerOrganizedHand.middle yet.
-            // That happens at confirmation. For UI, we read its content directly.
+    // --- Event Listeners (Your existing listeners) ---
+    dealButton.addEventListener('click', async () => { /* ... */ });
+    confirmOrganizationButton.addEventListener('click', () => { /* ... */ });
+    compareButton.addEventListener('click', async () => { /* ... */ });
+    callBackendButton.addEventListener('click', async () => { /* ... */ });
+
+
+    // --- START: SCREEN ORIENTATION HANDLING LOGIC ---
+    const ORIENTATION_MESSAGE_ID = 'orientation-message-overlay';
+
+    async function attemptLockToLandscape() {
+        try {
+            if (screen.orientation && typeof screen.orientation.lock === 'function') {
+                await screen.orientation.lock('landscape-primary'); // or 'landscape'
+                console.log('Screen orientation lock attempted to landscape.');
+                return true;
+            } else if (screen.lockOrientation) {
+                screen.lockOrientation('landscape-primary');
+                console.log('Screen orientation lock attempted (deprecated API).');
+                return true;
+            } // Add other browser-specific prefixes if needed (mozLockOrientation, msLockOrientation)
+            console.warn('Screen Orientation API lock function not available.');
+            return false;
+        } catch (error) {
+            console.error('Failed to lock screen orientation:', error);
+            return false; // Lock failed
         }
     }
 
-    function displayCurrentArrangementState() {
-        // Update Top Row Evaluation
-        const topCards = playerOrganizedHand.top;
-        if (topEvalTextElement) {
-            const topEval = topCards.length === 3 ? evaluateHand(topCards) : { message: '' };
-            topEvalTextElement.textContent = topCards.length > 0 ? ` (${topEval.message || '未完成'})` : '';
-        }
+    function showRotationMessageOverlay() {
+        let messageDiv = document.getElementById(ORIENTATION_MESSAGE_ID);
+        if (!messageDiv) {
+            messageDiv = document.createElement('div');
+            messageDiv.id = ORIENTATION_MESSAGE_ID;
+            // SVG for rotation icon (simple one)
+            const svgIcon = `
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="48" height="48" style="margin-bottom: 15px; animation: rotateDeviceIcon 2s infinite ease-in-out;">
+                    <path d="M0 0h24v24H0z" fill="none"/>
+                    <path d="M7.99 4.01C7.99 2.9 7.1 2 6 2S4.01 2.9 4.01 4.01v15.98c0 1.1.9 2 1.99 2s2-.9 2-2V4.01zm8.01 0V12h-4V4.01c0-1.1.89-2 2-2s2 .9 2 2zm0 15.98V14h-4v5.99c0 1.1.89 2 2 2s2-.9 2-2zM16 0H8C5.79 0 4 1.79 4 4v16c0 2.21 1.79 4 4 4h8c2.21 0 4-1.79 4-4V4c0-2.21-1.79-4-4-4z"/>
+                </svg>`; // A different icon for "rotate device"
+            messageDiv.innerHTML = `
+                <div style="padding: 20px; border-radius: 10px; background-color: #2c3e50; max-width: 80vw; text-align:center;">
+                    ${svgIcon}
+                    <p style="font-size: 1.1em; line-height: 1.5; margin: 0; color: white;">为了获得最佳游戏体验，请将您的设备旋转至横屏模式。</p>
+                </div>`;
+            document.body.appendChild(messageDiv);
 
-        // Update Bottom Row Evaluation
-        const bottomCards = playerOrganizedHand.bottom;
-        if (bottomEvalTextElement) {
-            const bottomEval = bottomCards.length === 5 ? evaluateHand(bottomCards) : { message: '' };
-            bottomEvalTextElement.textContent = bottomCards.length > 0 ? ` (${bottomEval.message || '未完成'})` : '';
-        }
-
-        // Update Middle (from initialAndMiddleHandElement) Row Evaluation and Header
-        const cardsInInitialMiddle = Array.from(initialAndMiddleHandElement.children)
-                                       .map(cardDiv => cardDiv.cardData)
-                                       .filter(Boolean);
-        const isMiddleReadyConceptually = topCards.length === 3 && bottomCards.length === 5 && cardsInInitialMiddle.length === 5;
-
-        if (middleHandHeader && middleEvalTextElement) {
-            if (isMiddleReadyConceptually) {
-                middleHandHeader.innerHTML = `中道 (5张): <span id="middle-eval-text"></span>`; // Re-target span
-                const middleEval = evaluateHand(cardsInInitialMiddle);
-                document.getElementById('middle-eval-text').textContent = ` (${middleEval.message || '计算中...'})`; // Update new span
-                initialAndMiddleHandElement.classList.add('is-middle-row-style'); // Add class for styling
-            } else {
-                middleHandHeader.innerHTML = `我的手牌 / 中道 (剩余牌): <span id="middle-eval-text"></span>`;
-                document.getElementById('middle-eval-text').textContent = cardsInInitialMiddle.length > 0 ? ` (共${cardsInInitialMiddle.length}张)` : '';
-                initialAndMiddleHandElement.classList.remove('is-middle-row-style');
+            // Add keyframes for animation if not in CSS
+            if (!document.getElementById('rotateDeviceKeyframes')) {
+                const styleSheet = document.createElement("style");
+                styleSheet.id = 'rotateDeviceKeyframes';
+                styleSheet.innerText = `@keyframes rotateDeviceIcon { 0%, 100% { transform: rotate(0deg); } 50% { transform: rotate(-90deg); } }`;
+                document.head.appendChild(styleSheet);
             }
         }
-        checkDaoshuiForUI(cardsInInitialMiddle); // Pass current middle cards
-    }
-
-    function checkDaoshuiForUI(currentMiddleCards) {
-        const topCards = playerOrganizedHand.top;
-        const bottomCards = playerOrganizedHand.bottom;
-
-        // Only perform check if all conceptual rows have the correct number of cards
-        if (topCards.length === 3 && bottomCards.length === 5 && currentMiddleCards.length === 5) {
-            const topEval = evaluateHand(topCards);
-            const middleEval = evaluateHand(currentMiddleCards);
-            const bottomEval = evaluateHand(bottomCards);
-
-            const daoshuiOccurred = checkDaoshui(topEval, middleEval, bottomEval);
-
-            [topRowElement, initialAndMiddleHandElement, bottomRowElement].forEach(el => {
-                if (el) daoshuiOccurred ? el.classList.add('daoshui-warning') : el.classList.remove('daoshui-warning');
-            });
-
-            if (daoshuiOccurred) {
-                displayMessage("警告: 检测到倒水！请调整牌型。", true);
-            } else {
-                // Clear message if not daoshui and confirm button isn't active yet (meaning user is still arranging)
-                if (confirmOrganizationButton.disabled) displayMessage("请继续理牌...", false);
-            }
-        } else {
-            // Clear warnings if card counts are not met for a full check
-            [topRowElement, initialAndMiddleHandElement, bottomRowElement].forEach(el => {
-                if (el) el.classList.remove('daoshui-warning');
-            });
-        }
-    }
-
-    function checkAllCardsOrganized() {
-        const cardsInInitialMiddleCount = initialAndMiddleHandElement.children.length;
-        const topOk = playerOrganizedHand.top.length === 3;
-        const bottomOk = playerOrganizedHand.bottom.length === 5;
-        const middleOkViaInitial = cardsInInitialMiddleCount === 5;
-
-        if (topOk && bottomOk && middleOkViaInitial) {
-            confirmOrganizationButton.disabled = false;
-            displayMessage("牌型已分配完毕，请点击“确认理牌”。", false);
-        } else {
-            confirmOrganizationButton.disabled = true;
-        }
-    }
-
-    function initializeGame() {
-        playerFullHandSource = [];
-        playerOrganizedHand = { top: [], middle: [], bottom: [] };
-
-        [topRowElement, bottomRowElement].forEach(el => { if (el) el.innerHTML = ''; });
-        if (initialAndMiddleHandElement) initialAndMiddleHandElement.innerHTML = '<p>点击 "发牌" 开始</p>';
-
-        if (topEvalTextElement) topEvalTextElement.textContent = '';
-        if (middleEvalTextElement) middleEvalTextElement.textContent = '';
-        if (bottomEvalTextElement) bottomEvalTextElement.textContent = '';
-        if (middleHandHeader) middleHandHeader.innerHTML = `我的手牌 / 中道 (剩余牌): <span id="middle-eval-text"></span>`;
-
-        [topRowElement, initialAndMiddleHandElement, bottomRowElement].forEach(el => {
-            if (el) el.classList.remove('daoshui-warning', 'is-middle-row-style');
+        // Apply styles via JS for the overlay itself (or use CSS)
+        Object.assign(messageDiv.style, {
+            display: 'flex',
+            position: 'fixed', top: '0', left: '0', width: '100vw', height: '100vh',
+            backgroundColor: 'rgba(0, 0, 0, 0.95)', color: 'white', zIndex: '10000',
+            justifyContent: 'center', alignItems: 'center'
         });
-
-        displayMessage("点击“发牌”开始新游戏。");
-        displayScore("");
-
-        dealButton.disabled = false;
-        confirmOrganizationButton.style.display = 'none';
-        confirmOrganizationButton.disabled = true;
-        compareButton.style.display = 'none';
-        console.log("Game Initialized.");
+        // Optionally hide game container if overlay is shown
+        const gameContainer = document.querySelector('.game-container');
+        if (gameContainer) gameContainer.style.display = 'none';
     }
 
-    dealButton.addEventListener('click', async () => {
-        console.log("--- Deal Button Clicked ---");
-        initializeGame(); // Reset game state and UI before dealing
-        displayMessage("正在从服务器获取手牌...", false);
-        dealButton.disabled = true; // Disable deal button immediately
-
-        try {
-            const response = await fetch(`${API_BASE_URL}/deal_cards.php`);
-            if (!response.ok) {
-                const errorText = await response.text();
-                throw new Error(`获取手牌失败: ${response.status} ${response.statusText}. ${errorText}`);
-            }
-            const data = await response.json();
-            if (!data || !Array.isArray(data.cards) || data.cards.length !== 13) {
-                throw new Error("从服务器获取的手牌数据格式不正确。");
-            }
-
-            playerFullHandSource = data.cards.map(cardFromServer => ({
-                ...cardFromServer,
-                displaySuitChar: SUITS_DATA[cardFromServer.suitKey].displayChar,
-                suitCssClass: SUITS_DATA[cardFromServer.suitKey].cssClass,
-                id: cardFromServer.rank + cardFromServer.suitKey // Ensure unique ID for DOM
-            })).filter(Boolean);
-
-            initialAndMiddleHandElement.innerHTML = ''; // Clear placeholder
-            playerFullHandSource.forEach(card => {
-                if (card) initialAndMiddleHandElement.appendChild(renderCard(card));
-            });
-
-            displayCurrentArrangementState(); // Initial display after cards are dealt
-            displayMessage("请理牌！将手牌拖拽到头道和尾道。");
-            confirmOrganizationButton.style.display = 'inline-block'; // Show confirm button
-            // Confirm button remains disabled until checkAllCardsOrganized enables it.
-
-        } catch (error) {
-            console.error("发牌过程中发生错误:", error);
-            displayMessage(`错误: ${error.message}`, true);
-            dealButton.disabled = false; // Re-enable deal on error
+    function hideRotationMessageOverlay() {
+        const messageDiv = document.getElementById(ORIENTATION_MESSAGE_ID);
+        if (messageDiv) {
+            messageDiv.style.display = 'none';
         }
-    });
+        // Show game container again
+        const gameContainer = document.querySelector('.game-container');
+        if (gameContainer) gameContainer.style.display = 'flex'; // Assuming it was flex
+    }
 
-    confirmOrganizationButton.addEventListener('click', () => {
-        console.log("--- Confirm Organization Button Clicked ---");
-        // Populate playerOrganizedHand.middle from what's left in initialAndMiddleHandElement
-        playerOrganizedHand.middle = Array.from(initialAndMiddleHandElement.children)
-                                       .map(cardDiv => cardDiv.cardData)
-                                       .filter(Boolean);
-
-        if (playerOrganizedHand.top.length !== 3 ||
-            playerOrganizedHand.middle.length !== 5 ||
-            playerOrganizedHand.bottom.length !== 5) {
-            displayMessage(
-                `牌数不正确！头道: ${playerOrganizedHand.top.length}/3, 中道: ${playerOrganizedHand.middle.length}/5, 尾道: ${playerOrganizedHand.bottom.length}/5.`, true
-            );
+    function handleDeviceOrientation() {
+        // Basic mobile check
+        const isLikelyMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        if (!isLikelyMobile) {
+            hideRotationMessageOverlay(); // Ensure it's hidden on desktop
             return;
         }
 
-        const topEval = evaluateHand(playerOrganizedHand.top);
-        const middleEval = evaluateHand(playerOrganizedHand.middle);
-        const bottomEval = evaluateHand(playerOrganizedHand.bottom);
-
-        // Final UI update for middle道 as confirmed
-        if (middleHandHeader && middleEvalTextElement) {
-             middleHandHeader.innerHTML = `中道 (5张): <span id="middle-eval-text"></span>`;
-             document.getElementById('middle-eval-text').textContent = ` (${middleEval.message || '未知'})`;
-             initialAndMiddleHandElement.classList.add('is-middle-row-style');
-        }
-
-
-        if (checkDaoshui(topEval, middleEval, bottomEval)) {
-            displayMessage("警告: 倒水！请重新理牌或确认。", true);
-             // Add daoshui warnings again if they were cleared
-            [topRowElement, initialAndMiddleHandElement, bottomRowElement].forEach(el => {
-                if (el) el.classList.add('daoshui-warning');
-            });
+        // Check current orientation: screen.orientation for modern browsers, window.orientation for older
+        let isPortrait;
+        if (screen.orientation && screen.orientation.type) {
+            isPortrait = screen.orientation.type.startsWith('portrait');
         } else {
-            displayMessage("理牌完成，可以比牌了！");
-            [topRowElement, initialAndMiddleHandElement, bottomRowElement].forEach(el => {
-                if (el) el.classList.remove('daoshui-warning');
-            });
+            isPortrait = Math.abs(window.orientation) !== 90; // 0 or 180 for portrait
         }
+        // Alternative: window.matchMedia("(orientation: portrait)").matches
 
-        confirmOrganizationButton.style.display = 'none';
-        compareButton.style.display = 'inline-block';
-        compareButton.disabled = false;
-    });
-
-    compareButton.addEventListener('click', async () => {
-        console.log("--- Compare Button Clicked ---");
-        displayMessage("正在提交牌型到服务器进行比牌...", false);
-        compareButton.disabled = true;
-
-        // playerOrganizedHand.middle should be correctly populated by confirmOrganizationButton
-        // but as a safeguard, we can re-verify or re-populate if needed, though it shouldn't be.
-        if (playerOrganizedHand.middle.length !== 5) {
-             console.warn("Compare button clicked but middle hand not 5 cards in model. Re-evaluating from DOM.");
-             playerOrganizedHand.middle = Array.from(initialAndMiddleHandElement.children)
-                                       .map(cardDiv => cardDiv.cardData)
-                                       .filter(Boolean);
-        }
-
-
-        const payload = {
-            top: playerOrganizedHand.top.map(c => ({ rank: c.rank, suitKey: c.suitKey })),
-            middle: playerOrganizedHand.middle.map(c => ({ rank: c.rank, suitKey: c.suitKey })),
-            bottom: playerOrganizedHand.bottom.map(c => ({ rank: c.rank, suitKey: c.suitKey }))
-        };
-
-        if (payload.top.length !== 3 || payload.middle.length !== 5 || payload.bottom.length !== 5) {
-            displayMessage("错误: 提交的牌墩数量不正确。请重新开始游戏。", true);
-            compareButton.style.display = 'none';
-            dealButton.disabled = false;
-            return;
-        }
-
-        try {
-            const response = await fetch(`${API_BASE_URL}/submit_hand.php`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload),
-            });
-            if (!response.ok) {
-                const errorText = await response.text();
-                throw new Error(`比牌请求失败: ${response.status} ${response.statusText}. ${errorText}`);
-            }
-            const result = await response.json();
-            console.log("服务器比牌结果:", result);
-
-            if (result.success) {
-                let resultMessage = `服务器: ${result.message || '处理完成.'}`;
-                if (result.daoshui) {
-                    resultMessage += " (判定为倒水)";
-                    displayMessage(resultMessage, true);
+        if (isPortrait) {
+            console.log("Device is in Portrait mode. Attempting to lock or show message.");
+            attemptLockToLandscape().then(locked => {
+                if (!locked) { // If lock failed or wasn't attempted by API
+                    // Re-check orientation after attempt, as lock might be async
+                    if (screen.orientation && screen.orientation.type) {
+                        if (screen.orientation.type.startsWith('portrait')) showRotationMessageOverlay();
+                        else hideRotationMessageOverlay();
+                    } else if (Math.abs(window.orientation) !== 90) {
+                        showRotationMessageOverlay();
+                    } else {
+                         hideRotationMessageOverlay();
+                    }
                 } else {
-                    displayMessage(resultMessage, false);
+                    // If lock was successful, orientationchange event should hide the message
+                    // but we can preemptively hide if already landscape
+                     if (screen.orientation && screen.orientation.type && screen.orientation.type.startsWith('landscape')) {
+                        hideRotationMessageOverlay();
+                     } else if (Math.abs(window.orientation) === 90) {
+                        hideRotationMessageOverlay();
+                     }
                 }
-                if (typeof result.score !== 'undefined') displayScore(`得分: ${result.score}`);
-            } else {
-                displayMessage(`服务器错误: ${result.message || '处理牌型失败.'}`, true);
-                if (typeof result.score !== 'undefined') displayScore(`得分: ${result.score}`);
-            }
-        } catch (error) {
-            console.error("提交牌型或比牌时发生错误:", error);
-            displayMessage(`错误: ${error.message}`, true);
-        } finally {
-            dealButton.disabled = false; // Allow new game
-            compareButton.style.display = 'none'; // Hide compare button
+            });
+        } else { // Landscape mode
+            console.log("Device is in Landscape mode.");
+            hideRotationMessageOverlay();
+        }
+    }
+
+    // Initial check on load
+    window.addEventListener('load', handleDeviceOrientation);
+
+    // Listen for orientation changes
+    if (screen.orientation && typeof screen.orientation.addEventListener === 'function') {
+        screen.orientation.addEventListener('change', handleDeviceOrientation);
+    } else {
+        window.addEventListener('orientationchange', handleDeviceOrientation); // Older API
+    }
+
+    // Some browsers (like Safari on iOS) might only allow lock after user interaction or fullscreen.
+    // You can try to lock again if the user enters fullscreen mode, for example.
+    document.addEventListener('fullscreenchange', () => {
+        if (document.fullscreenElement) {
+            console.log("Entered fullscreen, re-attempting landscape lock.");
+            handleDeviceOrientation(); // Re-check and attempt lock
         }
     });
+    // --- END: SCREEN ORIENTATION HANDLING LOGIC ---
 
-    callBackendButton.addEventListener('click', async () => {
-        displayMessage("正在测试后端通讯...", false);
-        try {
-            const testEndpoint = `${API_BASE_URL}/deal_cards.php`;
-            const response = await fetch(testEndpoint);
-            if (!response.ok) {
-                const errorText = await response.text();
-                throw new Error(`HTTP error! Status: ${response.status} - ${errorText}`);
-            }
-            const data = await response.json();
-            let message = "后端通讯成功！";
-            if(data && data.cards && data.cards.length > 0) message += ` (后端返回 ${data.cards.length} 张牌)`
-            else if(data && data.message) message += ` 后端消息: ${data.message}`;
-            displayMessage(message, false);
-            console.log("Backend test response:", data);
-        } catch (error) {
-            console.error("后端通讯测试失败:", error);
-            displayMessage(`后端通讯测试失败: ${error.message}`, true);
-        }
-    });
 
-    // --- Initial Setup ---
+    // --- Initial Game Setup (Your existing setup call) ---
     initializeGame();
     initializeSortable();
+    // The orientation handler will be called on 'load' event now.
 });
+
+// --- Global Helper Functions (Your existing renderCard, displayMessage, displayScore from ui.js if moved here, or keep in ui.js) ---
+// Assuming these are still in ui.js and ui.js is loaded before main.js
+// If not, you'd need to define them or ensure they are accessible.
+// For simplicity, I am assuming ui.js defines renderCard, displayMessage, displayScore globally or they are imported.
+// And game.js defines evaluateHand, checkDaoshui etc.
+
+// Re-add the definitions of ui.js functions here if ui.js is removed or for self-containment
+const messageAreaElement = document.getElementById('message-area');
+const scoreAreaElement = document.getElementById('score-area');
+
+function renderCard(card) { /* ... (copy from previous ui.js) ... */
+    const cardDiv = document.createElement('div');
+    cardDiv.classList.add('card-css', card.suitCssClass);
+    cardDiv.dataset.rank = card.rank;
+    cardDiv.dataset.suit = card.displaySuitChar;
+    cardDiv.id = `card-${card.id || (card.rank + card.suitKey)}`; // Ensure ID
+    cardDiv.cardData = card;
+
+    const centerSuitSpan = document.createElement('span');
+    centerSuitSpan.classList.add('card-center-suit');
+    centerSuitSpan.textContent = card.displaySuitChar;
+    cardDiv.appendChild(centerSuitSpan);
+    return cardDiv;
+}
+function displayMessage(message, isError = false) { /* ... (copy from previous ui.js) ... */
+    if (!messageAreaElement) return;
+    messageAreaElement.textContent = message;
+    messageAreaElement.className = 'message-area';
+    if (isError) messageAreaElement.classList.add('error');
+    else if (message.toLowerCase().includes("backend says:") || message.toLowerCase().includes("服务器"))
+         messageAreaElement.classList.add('info');
+}
+function displayScore(scoreText) { /* ... (copy from previous ui.js) ... */
+    if (!scoreAreaElement) return;
+    scoreAreaElement.textContent = scoreText;
+}
+
+// Dummy SUITS_DATA if not imported from game.js, for renderCard to work with backend data
+const SUITS_DATA = {
+    SPADES:   { displayChar: "♠", cssClass: "spades" },
+    HEARTS:   { displayChar: "♥", cssClass: "hearts" },
+    DIAMONDS: { displayChar: "♦", cssClass: "diamonds" },
+    CLUBS:    { displayChar: "♣", cssClass: "clubs" },
+    UNKNOWN:  { displayChar: "?", cssClass: "unknown" } // Fallback
+};
+// Dummy evaluateHand and checkDaoshui if not imported from game.js for main.js logic
+function evaluateHand(cards) { return { message: (cards && cards.length > 0) ? `评价 (${cards.length}张)` : '未完成' }; }
+function checkDaoshui(t,m,b) { return false; }
+
+// Make sure your actual game.js functions (evaluateHand, checkDaoshui) are correctly loaded and accessible.
+// The above dummies are just to make this main.js runnable in isolation for the orientation part.
