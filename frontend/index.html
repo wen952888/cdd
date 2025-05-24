@@ -32,7 +32,9 @@
 
         <div class="controls">
             <button id="deal-button">发牌</button>
-            <button id="sort-hand-button" style="display:none;">整理手牌</button> <!-- ADDED THIS BUTTON -->
+            <button id="sort-hand-button" style="display:none;">整理手牌</button>
+            <button id="ai-reference-button" style="display:none;">AI参考</button>
+            <button id="ai-autoplay-button" style="display:none;">AI托管</button>
             <button id="confirm-organization-button" style="display:none;" disabled>确认理牌</button>
             <button id="compare-button" style="display:none;" disabled>比牌</button>
             <button id="call-backend-button" title="测试与后端基础通讯">测试后端</button>
@@ -40,8 +42,16 @@
 
         <div id="message-area" class="message-area">游戏消息将会显示在这里。</div>
         <div id="score-area" class="score-area">得分: --</div>
+
+        <div id="ai-reference-display" class="ai-reference-display" style="display:none;">
+            <h4>AI 推荐牌型:</h4>
+            <div><strong>头道:</strong> <span id="ai-top-ref"></span></div>
+            <div><strong>中道:</strong> <span id="ai-middle-ref"></span></div>
+            <div><strong>尾道:</strong> <span id="ai-bottom-ref"></span></div>
+        </div>
     </div>
 
+    <!-- Scripts: Order is game.js -> ui.js -> main.js -->
     <script src="js/game.js"></script>
     <script src="js/ui.js"></script>
     <script src="js/main.js"></script>
