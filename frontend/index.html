@@ -32,6 +32,7 @@
 
         <div class="controls">
             <button id="deal-button">发牌</button>
+            <button id="sort-hand-button" style="display:none;">整理手牌</button> <!-- ADDED THIS BUTTON -->
             <button id="confirm-organization-button" style="display:none;" disabled>确认理牌</button>
             <button id="compare-button" style="display:none;" disabled>比牌</button>
             <button id="call-backend-button" title="测试与后端基础通讯">测试后端</button>
@@ -41,9 +42,8 @@
         <div id="score-area" class="score-area">得分: --</div>
     </div>
 
-    <!-- Scripts: Correct order is CRITICAL -->
-    <script src="js/game.js"></script>  <!-- Defines data structures and core logic functions -->
-    <script src="js/ui.js"></script>    <!-- Defines UI rendering functions (like renderCard), uses game.js items -->
-    <script src="js/main.js"></script>  <!-- Main game flow, event handling, uses game.js and ui.js items -->
+    <script src="js/game.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/main.js"></script>
 </body>
 </html>
