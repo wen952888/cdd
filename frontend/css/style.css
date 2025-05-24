@@ -2,50 +2,51 @@
 
 /* Reset and Basic Setup */
 html, body {
-    height: 100%; /* Ensure html and body take full height */
+    height: 100vh; /* Use vh for viewport height, more reliable for full screen */
+    width: 100vw;  /* Use vw for viewport width */
     margin: 0;
     padding: 0;
-    overflow: hidden; /* Prevent scrollbars on the body for a true fullscreen feel */
+    overflow: hidden; /* Prevent scrollbars on the body */
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background-color: #367c3d; /* Casino green background for the whole page */
     color: #333;
-    display: flex; /* Use flexbox to center game-container */
-    justify-content: center;
-    align-items: center;
+    /* display: flex; /* REMOVE or comment out flexbox from body if game-container is 100% width/height */
+    /* justify-content: center; */
+    /* align-items: center; */
 }
 
 .game-container {
-    width: 100%;
-    height: 100%;
-    max-width: none; /* Override previous max-width */
-    max-height: none; /* Override previous max-height */
-    margin: 0; /* No margin when fullscreen */
-    padding: 15px; /* Add some padding inside the container */
-    box-sizing: border-box; /* Include padding in width/height calculation */
-    background-color: #f0f3f7; /* A slightly different background for the game area itself */
-    border-radius: 0; /* No border-radius for fullscreen */
-    box-shadow: none; /* No box-shadow for fullscreen */
-    text-align: center;
+    width: 100%;  /* Ensure it takes full viewport width */
+    height: 100%; /* Ensure it takes full viewport height */
+    max-width: none;
+    max-height: none;
+    margin: 0;
+    padding: 15px; /* Padding inside the container */
+    box-sizing: border-box;
+    background-color: #f0f3f7;
+    border-radius: 0;
+    box-shadow: none;
+    text-align: center; /* Center inline or inline-block children by default */
 
     display: flex;
-    flex-direction: column; /* Stack elements vertically */
-    justify-content: space-between; /* Distribute space, pushes controls/messages to bottom */
+    flex-direction: column;
+    /* justify-content: space-between; /* This might push content too far apart if player-area doesn't grow */
+    align-items: stretch; /* Make children like player-area stretch to full width */
     overflow-y: auto; /* Allow scrolling within game-container if content overflows */
 }
 
-/* Remove H1 styles if any were specific to it and not reset by its removal */
-/* h1 { ... } */
-
 .player-area {
-    margin-bottom: 15px; /* Adjust as needed */
+    margin-bottom: 15px;
     padding: 10px;
     border: 1px solid #dcdcdc;
     border-radius: 6px;
     background-color: #f7f9fc;
-    /* flex-grow: 1; /* Allow player-area to take up available space if needed */
+    width: 100%; /* Make player-area take full width of its parent (game-container padding taken into account by box-sizing) */
+    box-sizing: border-box; /* Ensure padding and border are part of width */
+    /* flex-grow: 1; /* Uncomment if you want this area to take up most of the vertical space */
 }
 
-.player-area h3 { /* Style for "我的牌道" or remove if h3 is removed */
+.player-area h3 {
     margin-top: 0;
     margin-bottom: 10px;
     font-size: 1.1em;
@@ -61,70 +62,66 @@ html, body {
     text-align: left;
     font-size: 0.9em;
     color: #555f6b;
+    padding-left: 5px; /* Add some padding for labels */
+}
+#middle-hand-header-container #middle-hand-header {
+    font-size: 0.9em !important;
+    text-align: left !important;
+    padding-left: 5px; /* Match other labels */
 }
 .hand-row-label span {
     font-weight: normal;
     color: #2980b9;
     font-style: italic;
 }
-/* Adjust style for the h3 inside middle-hand-header-container if needed */
-#middle-hand-header-container #middle-hand-header {
-    font-size: 0.9em !important; /* Match other labels */
-    /* margin-top: 8px !important; */
-    /* margin-bottom: 4px !important; */
-    text-align: left !important;
-}
 
-
-.hand-row, #player-hand.hand-row { /* Ensure #player-hand gets hand-row styles */
+.hand-row, #player-hand.hand-row {
     display: flex;
-    flex-wrap: wrap;
-    justify-content: center; /* Center cards within rows if space allows */
-    align-items: center;
-    gap: 6px; /* Reduced gap slightly for tighter fit */
-    min-height: 95px; /* Adjust based on card height + padding */
+    flex-wrap: wrap; /* Allow cards to wrap to next line */
+    /* justify-content: center; /* Center cards if space allows, or flex-start */
+    justify-content: flex-start; /* Align cards to the start for a more standard look */
+    align-items: center; /* Vertically align cards in a row */
+    gap: 6px;
+    min-height: 95px; /* Adjust based on responsive card height */
     padding: 8px;
     border: 1px dashed #b0b0b0;
     border-radius: 5px;
     background-color: #eef2f7;
     margin-bottom: 8px;
+    width: 100%; /* Make rows take full width of player-area */
+    box-sizing: border-box;
 }
 
-#player-hand.player-hand { /* Specific styles for #player-hand if different from other .hand-row */
-    background-color: #e6f0ff; /* Original distinct background */
+#player-hand.player-hand {
+    background-color: #e6f0ff;
 }
 #player-hand.is-middle-row-style {
     border-color: #86b7fe;
-    /* background-color: #e0f0e0; */ /* Or keep its distinct player-hand background */
 }
-
 
 .hand-row:empty::after, #player-hand.hand-row:empty::after {
     content: "将牌拖到此处";
     color: #aaa;
     font-style: italic;
-    display: block;
-    width: 100%;
+    /* display: block; /* Flex items are block-like by default */
+    width: 100%; /* Ensure the placeholder text spans the full width */
     text-align: center;
     padding: 20px 0;
+    /* flex-grow: 1; /* Allow placeholder to fill space if row is flex container */
 }
-#player-hand.hand-row:empty::after { /* If #player-hand has the class hand-row */
+#player-hand.hand-row:empty::after {
     content: "请点击“发牌”";
 }
 
 
-/* --- CSS Poker Card Style --- */
+/* --- CSS Poker Card Style (Using responsive clamp) --- */
 .card-css {
-    width: clamp(50px, 7vw, 65px); /* Responsive card width: min, preferred, max */
-    height: clamp(70px, 10vw, 95px); /* Responsive card height */
-    /* Or fixed size if preferred:
-    width: 60px;
-    height: 85px;
-    */
+    width: clamp(50px, 6.5vw, 70px); /* min, preferred (adjust % based on 13 cards + gaps fitting), max */
+    height: clamp(70px, 9vw, 100px);
     background-color: white;
     border: 1px solid #999;
     color: black;
-    border-radius: 5px; /* Slightly smaller radius */
+    border-radius: 5px;
     box-shadow: 1px 1px 3px rgba(0,0,0,0.15);
     position: relative;
     font-family: 'Georgia', serif;
@@ -133,26 +130,23 @@ html, body {
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    padding: 3px; /* Reduced padding */
+    padding: 3px;
     box-sizing: border-box;
     transition: transform 0.15s ease-out, box-shadow 0.15s ease-out;
     user-select: none;
     cursor: grab;
+    flex-shrink: 0; /* Prevent cards from shrinking if the row is too narrow */
 }
-.card-css:active, .card-css.sortable-chosen, .card-css.sortable-drag {
-    cursor: grabbing !important;
-}
-
+/* ... (rest of .card-css styles like ::before, ::after, colors, .card-center-suit remain the same as previous version) ... */
 .card-css::before {
     content: attr(data-rank) "\A" attr(data-suit);
     white-space: pre;
     position: absolute;
-    top: 4px; /* Adjusted for smaller padding */
+    top: 4px;
     left: 4px;
     line-height: 1.1;
     text-align: center;
-    font-size: clamp(10px, 1.8vw, 14px); /* Responsive font size */
-    /* font-size: 14px; */ /* Fixed size */
+    font-size: clamp(10px, 1.6vw, 14px); /* Adjusted responsive font size */
     font-weight: bold;
     z-index: 1;
 }
@@ -165,29 +159,16 @@ html, body {
     transform: rotate(180deg);
     line-height: 1.1;
     text-align: center;
-    font-size: clamp(10px, 1.8vw, 14px);
-    /* font-size: 14px; */
+    font-size: clamp(10px, 1.6vw, 14px);
     font-weight: bold;
     z-index: 1;
 }
+.card-css.hearts, .card-css.diamonds { color: #D32F2F; }
+.card-css.spades, .card-css.clubs { color: #111111; }
+.card-center-suit { font-size: clamp(20px, 3.5vw, 30px); line-height: 1; opacity: 0.9; }
 
-.card-css.hearts,
-.card-css.diamonds {
-    color: #D32F2F;
-}
-.card-css.spades,
-.card-css.clubs {
-    color: #111111;
-}
 
-.card-center-suit {
-    font-size: clamp(20px, 4vw, 30px); /* Responsive */
-    /* font-size: 28px; */ /* Fixed */
-    line-height: 1;
-    opacity: 0.9;
-}
-
-/* SortableJS Visual Feedback */
+/* SortableJS Visual Feedback (remains the same) */
 .droppable-area.sortable-ghost,
 .card-css.sortable-ghost {
     opacity: 0.4;
@@ -200,68 +181,66 @@ html, body {
     box-shadow: 0 4px 10px rgba(0,0,0,0.25);
 }
 
-/* --- Controls and Message Area --- */
+/* --- Controls and Message Area (remains largely the same, ensure they are full width or centered) --- */
 .controls {
-    margin-top: 10px; /* Reduced margin */
+    margin-top: auto; /* Push controls to the bottom if space-between is used on game-container */
     padding-top: 10px;
     border-top: 1px solid #eee;
-    flex-shrink: 0; /* Prevent controls from shrinking too much */
+    flex-shrink: 0;
+    width: 100%; /* Make controls section take full width */
+    box-sizing: border-box;
 }
 .controls button {
-    padding: 8px 15px; /* Smaller buttons */
-    margin: 4px;
+    padding: 10px 18px; /* Slightly larger buttons again */
+    margin: 5px;
     border: none;
     border-radius: 5px;
     background-color: #007bff;
     color: white;
     cursor: pointer;
-    font-size: 0.9em; /* Smaller font */
+    font-size: 0.95em;
     transition: background-color 0.2s ease, box-shadow 0.2s ease;
 }
-.controls button:hover:not(:disabled) {
-    background-color: #0056b3;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-}
-.controls button:disabled {
-    background-color: #cccccc;
-    cursor: not-allowed;
-    opacity: 0.7;
-}
-.controls button:active:not(:disabled) {
-    background-color: #004085;
-}
+/* ... (rest of button styles remain the same) ... */
+.controls button:hover:not(:disabled) { background-color: #0056b3; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+.controls button:disabled { background-color: #cccccc; cursor: not-allowed; opacity: 0.7; }
+.controls button:active:not(:disabled) { background-color: #004085; }
+
 
 .message-area, .score-area {
     margin-top: 10px;
-    padding: 8px 10px; /* Smaller padding */
+    padding: 10px 12px;
     border: 1px dashed #ccc;
-    min-height: 20px;
+    min-height: 22px;
     line-height: 1.4;
     background-color: #f8f9fa;
     border-radius: 5px;
-    font-size: 0.85em; /* Smaller font */
+    font-size: 0.9em;
     color: #495057;
     text-align: left;
-    flex-shrink: 0; /* Prevent from shrinking */
+    flex-shrink: 0;
+    width: 100%; /* Make message/score areas take full width */
+    box-sizing: border-box;
 }
-.message-area.error {
-    background-color: #f8d7da; color: #721c24; border-color: #f5c6cb;
-}
-.message-area.info {
-    background-color: #d1ecf1; color: #0c5460; border-color: #bee5eb;
-}
-.score-area {
-    font-weight: bold; color: #198754; background-color: #d4edda; border-color: #c3e6cb;
-}
+/* ... (rest of message/score styles remain the same) ... */
+.message-area.error { background-color: #f8d7da; color: #721c24; border-color: #f5c6cb; }
+.message-area.info { background-color: #d1ecf1; color: #0c5460; border-color: #bee5eb; }
+.score-area { font-weight: bold; color: #198754; background-color: #d4edda; border-color: #c3e6cb; }
 
-.droppable-area.daoshui-warning {
+
+.droppable-area.daoshui-warning { /* remains the same */
     border-color: #dc3545 !important;
     background-color: #f8d7da !important;
 }
-.droppable-area.daoshui-warning .hand-row-label span, /* If label is inside */
-#middle-hand-header-container.daoshui-warning #middle-eval-text { /* For middle header eval span */
+/* ... (daoshui text color styles remain the same) ... */
+.droppable-area.daoshui-warning .hand-row-label span,
+#middle-hand-header-container.daoshui-warning #middle-eval-text {
     color: #dc3545 !important;
 }
-#middle-hand-header-container.daoshui-warning #middle-hand-header{
+#middle-hand-header-container.daoshui-warning #middle-hand-header {
      color: #dc3545 !important;
+}
+
+#player-hand.is-middle-row-style { /* remains the same */
+    border-color: #86b7fe;
 }
