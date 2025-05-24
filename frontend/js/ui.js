@@ -3,13 +3,6 @@
 const messageAreaElement = document.getElementById('message-area');
 const scoreAreaElement = document.getElementById('score-area');
 
-/**
- * Renders a single card DOM element using an image.
- * Relies on getCardImagePath, getCardBackImagePath, RANK_FILENAME_PART, SUITS_DATA from game.js.
- * @param {object} card - Card data (needs rank, suitKey, id).
- * @param {boolean} [isFaceUp=true] - Shows card back if false.
- * @returns {HTMLElement} The card div.
- */
 function renderCard(card, isFaceUp = true) {
     const cardDiv = document.createElement('div');
     cardDiv.classList.add('card-css');
@@ -19,27 +12,22 @@ function renderCard(card, isFaceUp = true) {
     let imgSrc = "";
 
     if (isFaceUp) {
-        // Ensure game.js functions and data are available
         if (typeof getCardImagePath !== 'function' || typeof RANK_FILENAME_PART === 'undefined' || typeof SUITS_DATA === 'undefined') {
             console.error("renderCard ERROR: Required functions/data from game.js are not available.");
             img.alt = "Error: Missing game data for card image";
-            // Consider setting a visible error placeholder for img.src if this happens
         } else {
-            imgSrc = getCardImagePath(card); // From game.js
-            // Construct alt text more robustly
+            imgSrc = getCardImagePath(card);
             const rankPartForAlt = card && card.rank ? (RANK_FILENAME_PART[card.rank.toUpperCase()] || card.rank) : "Unknown Rank";
             const suitPartForAlt = card && card.suitKey && SUITS_DATA[card.suitKey] ? SUITS_DATA[card.suitKey].fileNamePart : "Unknown Suit";
             altText = `${rankPartForAlt} of ${suitPartForAlt}`;
-            // console.log(`renderCard: Setting FACE UP image for card ${JSON.stringify(card)} to src: ${imgSrc}`);
         }
     } else {
         if (typeof getCardBackImagePath !== 'function') {
             console.error("renderCard ERROR: getCardBackImagePath from game.js is not available.");
             img.alt = "Error: Missing game data for card back";
         } else {
-            imgSrc = getCardBackImagePath(); // From game.js
+            imgSrc = getCardBackImagePath();
             altText = "Card Back";
-            // console.log(`renderCard: Setting CARD BACK image. src: ${imgSrc}`);
         }
     }
     img.src = imgSrc;
@@ -52,11 +40,8 @@ function renderCard(card, isFaceUp = true) {
     img.onerror = function() {
         console.error(`renderCard IMAGE LOAD ERROR: Failed to load image. Attempted src: "${imgSrc}". Card data: ${JSON.stringify(card)}`);
         this.alt = `Failed to load: ${altText}`;
-        cardDiv.classList.add('card-image-load-error'); // For CSS to style broken images
-        // Optionally, you could set a generic placeholder image here:
-        // this.src = 'images/cards/image_load_error.png';
+        cardDiv.classList.add('card-image-load-error');
     };
-    // img.onload = function() { console.log(`Image loaded: ${imgSrc}`); }; // Optional success log
 
     cardDiv.appendChild(img);
 
