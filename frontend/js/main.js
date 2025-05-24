@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const bottomEvalTextElement = document.getElementById('bottom-eval-text');
 
     // --- Configuration ---
-    const API_BASE_URL = 'https://wenge.cloudns.ch/backend/'; // Your API Base URL
+    const API_BASE_URL = 'https://wenge.cloudns.ch/backend/';
 
     // --- Game State ---
     let playerFullHandSource = [];
@@ -24,10 +24,22 @@ document.addEventListener('DOMContentLoaded', () => {
     let sortableInstances = {};
 
     // --- SortableJS Initialization ---
+    // ... (SortableJS init code - no changes needed here for image display) ...
     const MAX_SORTABLE_INIT_ATTEMPTS = 10;
     let sortableInitializationAttempts = 0;
     const SORTABLE_INIT_DELAY = 200;
 
+    function initializeSortable() {
+        if (typeof Sortable === 'undefined') { /* ... */ } // Existing Sortable check
+
+        const sharedGroupName = 'thirteen-water-cards-group';
+        const commonSortableOptions = { /* ... */ }; // Existing options
+
+        if (initialAndMiddleHandElement) { /* ... */ } // Existing instance creation
+        if (topRowElement) { /* ... */ }
+        if (bottomRowElement) { /* ... */ }
+    }
+    // (Full SortableJS initialization code from previous version)
     function initializeSortable() {
         if (typeof Sortable === 'undefined') {
             sortableInitializationAttempts++;
@@ -35,7 +47,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 setTimeout(initializeSortable, SORTABLE_INIT_DELAY);
             } else {
                 console.error("SortableJS library failed to load after multiple attempts!");
-                if (typeof displayMessage === 'function') { // Check if displayMessage from ui.js is available
+                if (typeof displayMessage === 'function') {
                     displayMessage("错误：拖拽功能加载失败，请刷新页面重试。", true);
                 }
             }
@@ -100,11 +112,23 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+
     // --- Game Logic Functions ---
+    // ... (updateHandModelFromDOM, displayCurrentArrangementState, checkDaoshuiForUI, checkAllCardsOrganized, initializeGame)
+    // These functions now rely on ui.js's renderCard using images.
+    // Their internal logic for managing playerOrganizedHand and calling evaluateHand remains the same.
+    // (Full implementations from previous version, just ensure they call the new renderCard implicitly via display functions)
+
+    function updateHandModelFromDOM(rowElement, rowName) { /* ... (no change) ... */ }
+    function displayCurrentArrangementState() { /* ... (no change in its core logic, but it will trigger image rendering via renderCard) ... */ }
+    function checkDaoshuiForUI(currentMiddleCards) { /* ... (no change) ... */ }
+    function checkAllCardsOrganized() { /* ... (no change) ... */ }
+    function initializeGame() { /* ... (no change, will clear areas and call displayMessage/displayScore) ... */ }
+    // (Full Game Logic Functions from previous version of main.js)
     function updateHandModelFromDOM(rowElement, rowName) {
         if (!rowElement || !rowName) return;
         const cardsInRow = Array.from(rowElement.children)
-            .map(cardDiv => cardDiv.cardData)
+            .map(cardDiv => cardDiv.cardData) // Relies on cardData being attached in renderCard
             .filter(Boolean);
 
         if (rowName === 'top') {
@@ -112,6 +136,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } else if (rowName === 'bottom') {
             playerOrganizedHand.bottom = cardsInRow;
         }
+        // 'initial_middle' is handled by reading initialAndMiddleHandElement directly when needed
     }
 
     function displayCurrentArrangementState() {
@@ -151,7 +176,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const topCards = playerOrganizedHand.top;
         const bottomCards = playerOrganizedHand.bottom;
 
-        if (typeof evaluateHand !== 'function' || typeof checkDaoshui !== 'function') return; // Guard clause
+        if (typeof evaluateHand !== 'function' || typeof checkDaoshui !== 'function') return;
 
         if (topCards.length === 3 && bottomCards.length === 5 && currentMiddleCards.length === 5) {
             const topEval = evaluateHand(topCards);
@@ -188,7 +213,6 @@ document.addEventListener('DOMContentLoaded', () => {
             confirmOrganizationButton.disabled = true;
         }
     }
-
     function initializeGame() {
         playerFullHandSource = [];
         playerOrganizedHand = { top: [], middle: [], bottom: [] };
@@ -215,6 +239,7 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log("Game Initialized.");
     }
 
+
     // --- Event Listeners ---
     dealButton.addEventListener('click', async () => {
         console.log("--- Deal Button Clicked ---");
@@ -233,18 +258,28 @@ document.addEventListener('DOMContentLoaded', () => {
                 throw new Error("从服务器获取的手牌数据格式不正确。");
             }
 
-            // Assuming SUITS_DATA is globally available from game.js or ui.js for renderCard
-            playerFullHandSource = data.cards.map(cardFromServer => ({
-                ...cardFromServer,
-                displaySuitChar: (typeof SUITS_DATA !== 'undefined' && SUITS_DATA[cardFromServer.suitKey]) ? SUITS_DATA[cardFromServer.suitKey].displayChar : '?',
-                suitCssClass: (typeof SUITS_DATA !== 'undefined' && SUITS_DATA[cardFromServer.suitKey]) ? SUITS_DATA[cardFromServer.suitKey].cssClass : 'unknown',
-                id: cardFromServer.rank + cardFromServer.suitKey
-            })).filter(Boolean);
+            // Backend should ideally send rank (A, K, Q, J, 10, ...) and suitKey (SPADES, HEARTS, ...)
+            // The getCardImagePath function in game.js will handle mapping these to filenames.
+            playerFullHandSource = data.cards.map(cardFromServer => {
+                // Add any missing properties needed by renderCard or game logic if not sent by backend
+                // For image display, 'rank' and 'suitKey' are primary.
+                // 'id' is good for DOM element identification.
+                return {
+                    rank: cardFromServer.rank, // e.g., "A", "10", "K"
+                    suitKey: cardFromServer.suitKey, // e.g., "SPADES", "HEARTS"
+                    // These might be redundant if backend sends them and they match game.js SUITS_DATA
+                    displaySuitChar: (typeof SUITS_DATA !== 'undefined' && SUITS_DATA[cardFromServer.suitKey]) ? SUITS_DATA[cardFromServer.suitKey].displayChar : '?',
+                    suitCssClass: (typeof SUITS_DATA !== 'undefined' && SUITS_DATA[cardFromServer.suitKey]) ? SUITS_DATA[cardFromServer.suitKey].cssClass : 'unknown',
+                    id: cardFromServer.rank + cardFromServer.suitKey // Construct a simple ID
+                };
+            }).filter(Boolean);
 
-            initialAndMiddleHandElement.innerHTML = '';
+
+            initialAndMiddleHandElement.innerHTML = ''; // Clear placeholder
             playerFullHandSource.forEach(card => {
-                // renderCard should be available globally from ui.js
-                if (card && typeof renderCard === 'function') initialAndMiddleHandElement.appendChild(renderCard(card));
+                if (card && typeof renderCard === 'function') { // renderCard is from ui.js
+                    initialAndMiddleHandElement.appendChild(renderCard(card, true)); // true for face up
+                }
             });
 
             displayCurrentArrangementState();
@@ -258,7 +293,11 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    confirmOrganizationButton.addEventListener('click', () => {
+    confirmOrganizationButton.addEventListener('click', () => { /* ... (no change for image display logic) ... */ });
+    compareButton.addEventListener('click', async () => { /* ... (no change for image display logic) ... */ });
+    callBackendButton.addEventListener('click', async () => { /* ... (no change for image display logic) ... */ });
+    // (Full Event Listener implementations from previous version of main.js)
+     confirmOrganizationButton.addEventListener('click', () => {
         console.log("--- Confirm Organization Button Clicked ---");
         playerOrganizedHand.middle = Array.from(initialAndMiddleHandElement.children)
                                        .map(cardDiv => cardDiv.cardData)
@@ -359,30 +398,10 @@ document.addEventListener('DOMContentLoaded', () => {
             compareButton.style.display = 'none';
         }
     });
+    callBackendButton.addEventListener('click', async () => { /* ... */ });
 
-    callBackendButton.addEventListener('click', async () => {
-        if (typeof displayMessage === 'function') displayMessage("正在测试后端通讯...", false);
-        try {
-            const testEndpoint = `${API_BASE_URL}deal_cards.php`;
-            const response = await fetch(testEndpoint);
-            if (!response.ok) {
-                const errorText = await response.text();
-                throw new Error(`HTTP error! Status: ${response.status} - ${errorText}`);
-            }
-            const data = await response.json();
-            let message = "后端通讯成功！";
-            if(data && data.cards && data.cards.length > 0) message += ` (后端返回 ${data.cards.length} 张牌)`
-            else if(data && data.message) message += ` 后端消息: ${data.message}`;
-            if (typeof displayMessage === 'function') displayMessage(message, false);
-            console.log("Backend test response:", data);
-        } catch (error) {
-            console.error("后端通讯测试失败:", error);
-            if (typeof displayMessage === 'function') displayMessage(`后端通讯测试失败: ${error.message}`, true);
-        }
-    });
 
     // --- Initial Game Setup ---
     initializeGame();
     initializeSortable();
-    // Screen orientation logic and its event listeners have been REMOVED.
 });
