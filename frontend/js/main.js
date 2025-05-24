@@ -50,12 +50,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const topC = playerOrganizedHand.top, botC = playerOrganizedHand.bottom;
         const midCSource = Array.from(initialAndMiddleHandElement.children).map(d => d.cardData).filter(Boolean);
         const midReady = topC.length === 3 && botC.length === 5 && midCSource.length === 5;
-        const evalF = typeof evaluateHand === "function" ? evaluateHand : () => ({message: "N/A"}); // Fallback if evaluateHand not ready
+        const evalF = typeof evaluateHand === "function" ? evaluateHand : () => ({message: "N/A"});
         if(topEvalTextElement) topEvalTextElement.textContent = topC.length > 0 ? ` (${(topC.length===3 ? evalF(topC).message : '...') || '...'})` : '';
         if(bottomEvalTextElement) bottomEvalTextElement.textContent = botC.length > 0 ? ` (${(botC.length===5 ? evalF(botC).message : '...') || '...'})` : '';
         if (middleHandHeader) {
             const h3 = document.getElementById('middle-hand-header'); const span = document.getElementById('middle-eval-text');
-            if(h3 && span) { // Ensure both elements exist
+            if(h3 && span) {
                 if (midReady) { h3.childNodes[0].nodeValue = `中道 (5张): `; span.textContent = ` (${evalF(midCSource).message || '...'})`; initialAndMiddleHandElement.classList.add('is-middle-row-style'); }
                 else { h3.childNodes[0].nodeValue = `我的手牌 / 中道 (剩余牌): `; span.textContent = midCSource.length > 0 ? ` (共${midCSource.length}张)` : ''; initialAndMiddleHandElement.classList.remove('is-middle-row-style'); }
             }
