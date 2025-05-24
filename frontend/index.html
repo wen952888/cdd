@@ -9,11 +9,9 @@
 </head>
 <body>
 
-    <!-- Main Menu View -->
     <div id="main-menu-view" class="view active-view">
         <div class="menu-container auth-container">
             <h1 id="auth-title">十三水在线</h1>
-
             <div id="login-form" class="auth-form active-auth-form">
                 <h2>用户登录</h2>
                 <input type="tel" id="login-username" placeholder="手机号" autocomplete="username">
@@ -21,7 +19,6 @@
                 <button id="login-btn">登录</button>
                 <p class="auth-switch">还没有账户? <a href="#" id="show-register-link">立即注册</a></p>
             </div>
-
             <div id="register-form" class="auth-form">
                 <h2>用户注册</h2>
                 <input type="tel" id="register-username" placeholder="输入手机号作为用户名" autocomplete="username">
@@ -30,78 +27,53 @@
                 <button id="register-btn">注册</button>
                 <p class="auth-switch">已有账户? <a href="#" id="show-login-link">立即登录</a></p>
             </div>
-
             <div class="menu-options" id="game-options" style="display:none;">
-                <h3 id="welcome-message">游戏选项</h3>
-                <button id="create-room-btn">创建房间</button>
-                <input type="text" id="room-id-input" placeholder="输入房间ID加入">
-                <button id="join-room-btn">加入房间</button>
-                <button id="quick-start-btn">快速开始 (单人)</button>
-                <button id="logout-btn">退出登录</button>
+                <h3 id="welcome-message">游戏大厅</h3>
+                <div class="room-type-selection">
+                    <button class="room-btn" data-room-type="practice">试玩房间</button>
+                    <button class="room-btn" data-room-type="score" data-base-score="1">1分房</button>
+                    <button class="room-btn" data-room-type="score" data-base-score="2">2分房</button>
+                    <button class="room-btn" data-room-type="score" data-base-score="5">5分房</button>
+                    <button class="room-btn" data-room-type="score" data-base-score="10">10分房</button>
+                    <button class="room-btn" data-room-type="score" data-base-score="20">20分房</button>
+                </div>
+                <button id="logout-btn" class="logout-button">退出登录</button>
             </div>
             <div id="menu-message-area" class="message-area"></div>
         </div>
     </div>
 
-    <!-- Room View -->
     <div id="room-view" class="view">
         <div class="room-container">
             <h2 id="room-title">房间</h2>
-            <p>当前房间: <strong id="current-room-id-display">N/A</strong></p>
+            <p>房间类型: <strong id="room-type-display">N/A</strong> | 底分: <strong id="room-base-score-display">N/A</strong></p>
+            <p>当前房间ID: <strong id="current-room-id-display">N/A</strong></p>
             <div class="player-list-container">
-                <p>玩家列表:</p>
-                <ul id="player-list">
-                    <!-- Player list will be populated here -->
-                </ul>
+                <p>玩家列表:</p> <ul id="player-list"></ul>
             </div>
             <button id="start-game-from-room-btn">开始游戏</button>
-            <button id="leave-room-btn">离开房间</button>
+            <button id="leave-room-btn">返回大厅</button>
             <div id="room-message-area" class="message-area"></div>
         </div>
     </div>
 
-    <!-- Game View -->
     <div id="game-view" class="view">
-        <div class="game-table-header"> <!-- Optional header for game view -->
+        <div class="game-table-header">
              <span id="game-room-info">房间: N/A</span>
              <span id="game-user-info">玩家: N/A</span>
         </div>
-        <div class="game-container-inner"> <!-- Renamed original game-container to avoid conflict -->
-            <div class="player-area">
-                <h3>我的牌道</h3>
-                <div class="organized-rows">
-                    <div class="hand-row-label">头道 (3张): <span id="top-eval-text"></span></div>
-                    <div id="player-top-row" class="hand-row droppable-area" data-row-name="top" data-row-limit="3"></div>
-                    <div class="hand-row-label" id="middle-hand-header-container">
-                         <h3 id="middle-hand-header">我的手牌 / 中道 (剩余牌): <span id="middle-eval-text"></span></h3>
-                    </div>
-                    <div id="player-hand" class="player-hand hand-row droppable-area" data-row-name="initial_middle" data-row-limit="13"><p>等待发牌...</p></div>
-                    <div class="hand-row-label">尾道 (5张): <span id="bottom-eval-text"></span></div>
-                    <div id="player-bottom-row" class="hand-row droppable-area" data-row-name="bottom" data-row-limit="5"></div>
-                </div>
+        <div class="game-container-inner">
+            <div class="opponent-hands-container">
+                <div id="ai-player-1" class="opponent-area"><h4>AI 1 <span class="ai-hand-eval">(待摆牌)</span></h4><div class="opponent-hand-display"><div class="arranged-dui">头: <span id="ai1-top-cards">---</span></div><div class="arranged-dui">中: <span id="ai1-middle-cards">-----</span></div><div class="arranged-dui">尾: <span id="ai1-bottom-cards">-----</span></div></div></div>
+                <div id="ai-player-2" class="opponent-area"><h4>AI 2 <span class="ai-hand-eval">(待摆牌)</span></h4><div class="opponent-hand-display"><div class="arranged-dui">头: <span id="ai2-top-cards">---</span></div><div class="arranged-dui">中: <span id="ai2-middle-cards">-----</span></div><div class="arranged-dui">尾: <span id="ai2-bottom-cards">-----</span></div></div></div>
+                <div id="ai-player-3" class="opponent-area"><h4>AI 3 <span class="ai-hand-eval">(待摆牌)</span></h4><div class="opponent-hand-display"><div class="arranged-dui">头: <span id="ai3-top-cards">---</span></div><div class="arranged-dui">中: <span id="ai3-middle-cards">-----</span></div><div class="arranged-dui">尾: <span id="ai3-bottom-cards">-----</span></div></div></div>
             </div>
-            <div class="controls">
-                <button id="deal-button" style="display:none;">发牌</button>
-                <!-- Sort button removed as per auto-sort requirement -->
-                <button id="ai-reference-button" style="display:none;">AI参考</button>
-                <button id="ai-autoplay-button" style="display:none;">AI托管</button>
-                <button id="confirm-organization-button" style="display:none;" disabled>确认理牌</button>
-                <button id="compare-button" style="display:none;" disabled>比牌</button>
-                <button id="call-backend-button" title="测试与后端基础通讯" style="display:none;">测试后端</button>
-                <button id="back-to-room-btn">返回房间</button>
-            </div>
-            <div id="message-area" class="message-area">游戏消息将会显示在这里。</div>
-            <div id="score-area" class="score-area">总积分: --</div>
-            <div id="ai-reference-display" class="ai-reference-display" style="display:none;">
-                <h4>AI 推荐牌型:</h4>
-                <div><strong>头道:</strong> <div id="ai-top-ref" class="hand-row ai-ref-row"></div></div>
-                <div><strong>中道:</strong> <div id="ai-middle-ref" class="hand-row ai-ref-row"></div></div>
-                <div><strong>尾道:</strong> <div id="ai-bottom-ref" class="hand-row ai-ref-row"></div></div>
-            </div>
+            <div class="player-area"> <h3>我的牌道</h3> <div class="organized-rows"> <div class="hand-row-label">头道 (3张): <span id="top-eval-text"></span></div> <div id="player-top-row" class="hand-row droppable-area" data-row-name="top" data-row-limit="3"></div> <div class="hand-row-label" id="middle-hand-header-container"> <h3 id="middle-hand-header">我的手牌 / 中道 (剩余牌): <span id="middle-eval-text"></span></h3> </div> <div id="player-hand" class="player-hand hand-row droppable-area" data-row-name="initial_middle" data-row-limit="13"><p>等待发牌...</p></div> <div class="hand-row-label">尾道 (5张): <span id="bottom-eval-text"></span></div> <div id="player-bottom-row" class="hand-row droppable-area" data-row-name="bottom" data-row-limit="5"></div> </div> </div>
+            <div class="controls"> <button id="deal-button" style="display:none;">发牌/下一局</button> <button id="ai-reference-button" style="display:none;">AI参考</button> <button id="ai-autoplay-button" style="display:none;">AI托管</button> <button id="confirm-organization-button" style="display:none;" disabled>确认理牌</button> <button id="compare-button" style="display:none;" disabled>比牌</button> <button id="call-backend-button" title="测试与后端基础通讯" style="display:none;">测试后端</button> <button id="back-to-room-btn">返回房间</button> </div>
+            <div id="message-area" class="message-area">游戏消息将会显示在这里。</div> <div id="score-area" class="score-area">总积分: --</div>
+            <div id="ai-reference-display" class="ai-reference-display" style="display:none;"> <h4>AI 推荐牌型:</h4> <div><strong>头道:</strong> <div id="ai-top-ref" class="hand-row ai-ref-row"></div></div> <div><strong>中道:</strong> <div id="ai-middle-ref" class="hand-row ai-ref-row"></div></div> <div><strong>尾道:</strong> <div id="ai-bottom-ref" class="hand-row ai-ref-row"></div></div> </div>
         </div>
     </div>
-
-    <!-- AI Round Selector Popup (JS will manage its content and visibility) -->
     <div id="ai-round-selector" class="ai-round-selector-popup" style="display:none;"></div>
 
     <script src="js/game.js"></script>
