@@ -1,277 +1,267 @@
 /* frontend/css/style.css */
 
-body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    display: flex;
-    justify-content: center;
-    align-items: flex-start;
-    min-height: 100vh;
-    background-color: #367c3d; /* Casino green background */
+/* Reset and Basic Setup */
+html, body {
+    height: 100%; /* Ensure html and body take full height */
     margin: 0;
-    padding: 20px;
-    box-sizing: border-box;
+    padding: 0;
+    overflow: hidden; /* Prevent scrollbars on the body for a true fullscreen feel */
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #367c3d; /* Casino green background for the whole page */
     color: #333;
+    display: flex; /* Use flexbox to center game-container */
+    justify-content: center;
+    align-items: center;
 }
 
 .game-container {
-    background-color: #fdfdfd; /* Slightly off-white */
-    padding: 25px;
-    border-radius: 12px;
-    box-shadow: 0 6px 20px rgba(0,0,0,0.25);
-    text-align: center;
     width: 100%;
-    max-width: 850px; /* Slightly wider */
-    margin: 0 auto;
+    height: 100%;
+    max-width: none; /* Override previous max-width */
+    max-height: none; /* Override previous max-height */
+    margin: 0; /* No margin when fullscreen */
+    padding: 15px; /* Add some padding inside the container */
+    box-sizing: border-box; /* Include padding in width/height calculation */
+    background-color: #f0f3f7; /* A slightly different background for the game area itself */
+    border-radius: 0; /* No border-radius for fullscreen */
+    box-shadow: none; /* No box-shadow for fullscreen */
+    text-align: center;
+
+    display: flex;
+    flex-direction: column; /* Stack elements vertically */
+    justify-content: space-between; /* Distribute space, pushes controls/messages to bottom */
+    overflow-y: auto; /* Allow scrolling within game-container if content overflows */
 }
 
-h1 {
-    color: #2c3e50;
+/* Remove H1 styles if any were specific to it and not reset by its removal */
+/* h1 { ... } */
+
+.player-area {
+    margin-bottom: 15px; /* Adjust as needed */
+    padding: 10px;
+    border: 1px solid #dcdcdc;
+    border-radius: 6px;
+    background-color: #f7f9fc;
+    /* flex-grow: 1; /* Allow player-area to take up available space if needed */
+}
+
+.player-area h3 { /* Style for "我的牌道" or remove if h3 is removed */
     margin-top: 0;
-    margin-bottom: 25px;
-    font-weight: 300; /* Lighter font weight for modern look */
-    letter-spacing: 1px;
-    font-size: 2.2em;
-}
-
-.player-area, .initial-hand-area {
-    margin-bottom: 20px;
-    padding: 15px;
-    border: 1px solid #e0e0e0;
-    border-radius: 8px;
-    background-color: #f7f9fc; /* Light neutral background for sections */
-}
-
-.player-area h3, .initial-hand-area h3 {
-    margin-top: 0;
-    margin-bottom: 12px;
-    font-size: 1.15em;
+    margin-bottom: 10px;
+    font-size: 1.1em;
     color: #34495e;
     text-align: left;
     font-weight: 500;
 }
 
 .organized-rows .hand-row-label {
-    font-weight: 600; /* Bolder label */
-    margin-top: 10px;
-    margin-bottom: 5px;
+    font-weight: 600;
+    margin-top: 8px;
+    margin-bottom: 4px;
     text-align: left;
-    font-size: 0.95em;
+    font-size: 0.9em;
     color: #555f6b;
 }
-.hand-row-label span { /* Evaluation text */
+.hand-row-label span {
     font-weight: normal;
-    color: #2980b9; /* Blue for info */
+    color: #2980b9;
     font-style: italic;
 }
+/* Adjust style for the h3 inside middle-hand-header-container if needed */
+#middle-hand-header-container #middle-hand-header {
+    font-size: 0.9em !important; /* Match other labels */
+    /* margin-top: 8px !important; */
+    /* margin-bottom: 4px !important; */
+    text-align: left !important;
+}
 
-.hand-row, #player-hand {
+
+.hand-row, #player-hand.hand-row { /* Ensure #player-hand gets hand-row styles */
     display: flex;
     flex-wrap: wrap;
-    justify-content: flex-start; /* Align cards to the start */
+    justify-content: center; /* Center cards within rows if space allows */
     align-items: center;
-    gap: 10px; /* Increased gap */
-    min-height: 110px; /* Slightly taller */
-    padding: 10px;
-    border: 2px dashed #c0c9d3; /* More prominent dashed border */
-    border-radius: 6px;
-    background-color: #eef2f7; /* Lighter blueish tint for droppable areas */
-    margin-bottom: 10px;
-    cursor: default; /* Default cursor for the area itself */
+    gap: 6px; /* Reduced gap slightly for tighter fit */
+    min-height: 95px; /* Adjust based on card height + padding */
+    padding: 8px;
+    border: 1px dashed #b0b0b0;
+    border-radius: 5px;
+    background-color: #eef2f7;
+    margin-bottom: 8px;
 }
-#player-hand {
-    background-color: #e6f0ff; /* Different color for initial hand */
+
+#player-hand.player-hand { /* Specific styles for #player-hand if different from other .hand-row */
+    background-color: #e6f0ff; /* Original distinct background */
 }
-.hand-row:empty::after, #player-hand:empty::after {
+#player-hand.is-middle-row-style {
+    border-color: #86b7fe;
+    /* background-color: #e0f0e0; */ /* Or keep its distinct player-hand background */
+}
+
+
+.hand-row:empty::after, #player-hand.hand-row:empty::after {
     content: "将牌拖到此处";
-    color: #95a5a6;
+    color: #aaa;
     font-style: italic;
     display: block;
     width: 100%;
     text-align: center;
-    padding: 25px 0; /* More padding for empty state */
-    font-size: 0.9em;
+    padding: 20px 0;
 }
-#player-hand:empty::after {
+#player-hand.hand-row:empty::after { /* If #player-hand has the class hand-row */
     content: "请点击“发牌”";
 }
 
 
 /* --- CSS Poker Card Style --- */
 .card-css {
-    width: 70px; /* Slightly wider cards */
-    height: 100px; /* Standard proportion */
+    width: clamp(50px, 7vw, 65px); /* Responsive card width: min, preferred, max */
+    height: clamp(70px, 10vw, 95px); /* Responsive card height */
+    /* Or fixed size if preferred:
+    width: 60px;
+    height: 85px;
+    */
     background-color: white;
-    border: 1px solid #b0bec5; /* Softer border color */
+    border: 1px solid #999;
     color: black;
-    border-radius: 8px; /* More rounded corners */
-    box-shadow: 2px 2px 5px rgba(0,0,0,0.15);
+    border-radius: 5px; /* Slightly smaller radius */
+    box-shadow: 1px 1px 3px rgba(0,0,0,0.15);
     position: relative;
-    font-family: 'Georgia', 'Times New Roman', serif;
+    font-family: 'Georgia', serif;
     overflow: hidden;
     display: flex;
     flex-direction: column;
-    justify-content: center; /* Vertically center the large suit */
-    align-items: center; /* Horizontally center */
-    padding: 5px;
+    justify-content: center;
+    align-items: center;
+    padding: 3px; /* Reduced padding */
     box-sizing: border-box;
-    transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
+    transition: transform 0.15s ease-out, box-shadow 0.15s ease-out;
     user-select: none;
-    cursor: grab; /* Indicate draggable */
+    cursor: grab;
 }
 .card-css:active, .card-css.sortable-chosen, .card-css.sortable-drag {
-    cursor: grabbing !important; /* While dragging */
+    cursor: grabbing !important;
 }
 
-.card-css::before { /* Top-left rank and suit */
+.card-css::before {
     content: attr(data-rank) "\A" attr(data-suit);
     white-space: pre;
     position: absolute;
-    top: 6px;
-    left: 6px;
-    line-height: 1.2;
+    top: 4px; /* Adjusted for smaller padding */
+    left: 4px;
+    line-height: 1.1;
     text-align: center;
-    font-size: 18px; /* Larger rank/suit */
+    font-size: clamp(10px, 1.8vw, 14px); /* Responsive font size */
+    /* font-size: 14px; */ /* Fixed size */
     font-weight: bold;
     z-index: 1;
 }
-.card-css::after { /* Bottom-right rank and suit (inverted) */
+.card-css::after {
     content: attr(data-rank) "\A" attr(data-suit);
     white-space: pre;
     position: absolute;
-    bottom: 6px;
-    right: 6px;
+    bottom: 4px;
+    right: 4px;
     transform: rotate(180deg);
-    line-height: 1.2;
+    line-height: 1.1;
     text-align: center;
-    font-size: 18px;
+    font-size: clamp(10px, 1.8vw, 14px);
+    /* font-size: 14px; */
     font-weight: bold;
     z-index: 1;
 }
 
 .card-css.hearts,
 .card-css.diamonds {
-    color: #c0392b; /* Slightly desaturated red */
+    color: #D32F2F;
 }
 .card-css.spades,
 .card-css.clubs {
-    color: #2c3e50; /* Dark blue/grey for black suits */
+    color: #111111;
 }
 
-.card-center-suit { /* Large suit symbol in the middle */
-    font-size: 38px; /* Larger central suit */
+.card-center-suit {
+    font-size: clamp(20px, 4vw, 30px); /* Responsive */
+    /* font-size: 28px; */ /* Fixed */
     line-height: 1;
-    opacity: 0.9; /* Slightly transparent for subtlety */
+    opacity: 0.9;
 }
 
 /* SortableJS Visual Feedback */
-.droppable-area.sortable-ghost, /* Ghost class on the list */
-.card-css.sortable-ghost {      /* Ghost class on the card itself */
+.droppable-area.sortable-ghost,
+.card-css.sortable-ghost {
     opacity: 0.4;
-    background-color: #d1e7fd !important;
-    border: 2px dashed #0d6efd !important;
+    background-color: #c8ebfb !important;
+    border: 2px dashed #007bff !important;
 }
 .card-css.sortable-chosen {
-    opacity: 0.9;
-    transform: scale(1.08) translateY(-3px); /* More pronounced lift */
-    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    opacity: 0.8;
+    transform: scale(1.05) translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.25);
 }
-/* .sortable-drag is the element actually being dragged (usually a clone) */
-
 
 /* --- Controls and Message Area --- */
 .controls {
-    margin-top: 25px;
-    padding-top: 20px;
-    border-top: 1px solid #eeeeee;
+    margin-top: 10px; /* Reduced margin */
+    padding-top: 10px;
+    border-top: 1px solid #eee;
+    flex-shrink: 0; /* Prevent controls from shrinking too much */
 }
 .controls button {
-    padding: 12px 22px; /* Larger buttons */
-    margin: 8px;
+    padding: 8px 15px; /* Smaller buttons */
+    margin: 4px;
     border: none;
-    border-radius: 6px;
+    border-radius: 5px;
     background-color: #007bff;
     color: white;
     cursor: pointer;
-    font-size: 1em;
-    transition: background-color 0.2s ease, box-shadow 0.2s ease, transform 0.1s ease;
-    letter-spacing: 0.5px;
+    font-size: 0.9em; /* Smaller font */
+    transition: background-color 0.2s ease, box-shadow 0.2s ease;
 }
 .controls button:hover:not(:disabled) {
     background-color: #0056b3;
-    box-shadow: 0 3px 8px rgba(0,0,0,0.15);
-    transform: translateY(-1px);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 .controls button:disabled {
-    background-color: #ced4da;
+    background-color: #cccccc;
     cursor: not-allowed;
-    opacity: 0.6;
+    opacity: 0.7;
 }
 .controls button:active:not(:disabled) {
     background-color: #004085;
-    transform: translateY(0px);
 }
 
 .message-area, .score-area {
-    margin-top: 20px;
-    padding: 12px 15px;
-    border: 1px solid #ced4da;
-    min-height: 24px; /* Based on font size */
-    line-height: 1.5;
+    margin-top: 10px;
+    padding: 8px 10px; /* Smaller padding */
+    border: 1px dashed #ccc;
+    min-height: 20px;
+    line-height: 1.4;
     background-color: #f8f9fa;
-    border-radius: 6px;
-    font-size: 0.95em;
+    border-radius: 5px;
+    font-size: 0.85em; /* Smaller font */
     color: #495057;
     text-align: left;
+    flex-shrink: 0; /* Prevent from shrinking */
 }
 .message-area.error {
-    background-color: #f8d7da;
-    color: #721c24;
-    border-color: #f5c6cb;
+    background-color: #f8d7da; color: #721c24; border-color: #f5c6cb;
 }
 .message-area.info {
-    background-color: #d1ecf1;
-    color: #0c5460;
-    border-color: #bee5eb;
+    background-color: #d1ecf1; color: #0c5460; border-color: #bee5eb;
 }
 .score-area {
-    font-weight: bold;
-    color: #155724; /* Green for score */
-    background-color: #d4edda;
-    border-color: #c3e6cb;
+    font-weight: bold; color: #198754; background-color: #d4edda; border-color: #c3e6cb;
 }
 
-/* Initial placeholder text (redundant if :empty::after is used and p is cleared) */
-.hand-row p, #player-hand p {
-    color: #6c757d;
-    font-style: italic;
-    width: 100%;
-    text-align: center;
-    margin: 10px 0;
+.droppable-area.daoshui-warning {
+    border-color: #dc3545 !important;
+    background-color: #f8d7da !important;
 }
-
-/* Daoshui Warning */
-.hand-row.daoshui-warning {
-    border-color: #dc3545 !important; /* Red border for daoshui */
-    background-color: #f8d7da !important; /* Light red background */
-}
-.hand-row.daoshui-warning .hand-row-label span {
+.droppable-area.daoshui-warning .hand-row-label span, /* If label is inside */
+#middle-hand-header-container.daoshui-warning #middle-eval-text { /* For middle header eval span */
     color: #dc3545 !important;
 }
-/* frontend/css/style.css */
-
-/* ... (all your existing styles) ... */
-
-/* Style for #player-hand when it's acting as the confirmed middle row */
-#player-hand.is-middle-row-style {
-    border-color: #86b7fe; /* Example: A different border to indicate it's "set" */
-    background-color: #e6f0ff; /* Keep or change background */
-    /* You might want to make it look more like other 'hand-row' elements if desired */
-}
-
-/* Ensure droppable areas maintain some height even when empty, if not already handled */
-.droppable-area:empty {
-    min-height: 110px; /* Or whatever your card height + padding is */
-}
-#player-hand:empty::after { /* Overwrite generic droppable-area empty state if needed */
-    content: "请点击“发牌”"; /* Or specific message */
+#middle-hand-header-container.daoshui-warning #middle-hand-header{
+     color: #dc3545 !important;
 }
