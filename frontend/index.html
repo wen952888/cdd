@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>十三水游戏</title>
     <link rel="stylesheet" href="css/style.css">
-    <!-- SortableJS 必须在你的脚本之前加载 -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js" integrity="sha512-Eezs+g9Lq4TCCq0wae01s9PuNWzHYoCMkE97e2qdkYthpI0pzC3UGB03lgEHn2XM85hDOUF6qgqqszs+iXU4UA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 </head>
 <body>
@@ -17,7 +16,7 @@
                 <div class="hand-row-label">头道 (3张): <span id="top-eval-text"></span></div>
                 <div id="player-top-row" class="hand-row droppable-area" data-row-name="top" data-row-limit="3"></div>
 
-                <div class="hand-row-label" id="middle-hand-header-container"> <!-- 父级容器 -->
+                <div class="hand-row-label" id="middle-hand-header-container">
                      <h3 id="middle-hand-header" style="margin:0; font-size: 1em; color: #555f6b; font-weight:600; text-align: left;">
                         我的手牌 / 中道 (剩余牌): <span id="middle-eval-text" style="font-weight:normal; color: #2980b9; font-style:italic;"></span>
                      </h3>
@@ -35,8 +34,8 @@
             <button id="deal-button">发牌</button>
             <button id="confirm-organization-button" style="display:none;" disabled>确认理牌</button>
             <button id="compare-button" style="display:none;" disabled>比牌</button>
-            <button id="ai-reference-button">AI参考</button>
-            <button id="ai-takeover-button">AI托管</button>
+            <button id="ai-reference-button" disabled>AI参考</button>
+            <button id="ai-takeover-button" disabled>AI托管</button>
             <button id="lobby-button">大厅</button>
             <button id="points-button">积分</button>
         </div>
@@ -45,7 +44,6 @@
         <div id="score-area" class="score-area">得分: --</div>
     </div>
 
-    <!-- AI 托管局数选择模态框 -->
     <div id="ai-takeover-modal" class="modal" style="display:none;">
         <div class="modal-content">
             <h4>选择AI托管局数</h4>
@@ -56,8 +54,6 @@
         </div>
     </div>
 
-    <!-- Scripts: 确保 game.js, ai.js, ui.js, main.js 的顺序正确 -->
-    <!-- 并且这些文件确实存在于 js/ 目录下 -->
     <script src="js/game.js"></script>
     <script src="js/ai.js"></script>
     <script src="js/ui.js"></script>
