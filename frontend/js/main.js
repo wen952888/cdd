@@ -1,19 +1,29 @@
 // frontend/js/main.js
 
 document.addEventListener('DOMContentLoaded', () => {
+    // Ensure UI elements from ui.js are initialized first.
+    if (typeof initializeUiElements === "function") {
+        initializeUiElements();
+    } else {
+        // This is a critical failure if ui.js didn't load or define the function.
+        console.error("CRITICAL: initializeUiElements function from ui.js is not defined! UI will not work correctly.");
+        alert("A critical error occurred initializing the UI. Please refresh the page. (Error: UI_INIT_MISSING)");
+        return; // Stop further execution if UI can't be initialized
+    }
+
     // DOM Elements
     const dealButton = document.getElementById('deal-button');
     const confirmOrganizationButton = document.getElementById('confirm-organization-button');
     const compareButton = document.getElementById('compare-button');
     const callBackendButton = document.getElementById('call-backend-button');
-    const lobbyButton = document.getElementById('lobby-button'); // New
-    const pointsButton = document.getElementById('points-button'); // New
+    const lobbyButton = document.getElementById('lobby-button');
+    const pointsButton = document.getElementById('points-button');
     const initialAndMiddleHandElement = document.getElementById('player-hand');
     const topRowElement = document.getElementById('player-top-row');
     const bottomRowElement = document.getElementById('player-bottom-row');
     const middleHandHeader = document.getElementById('middle-hand-header');
     const topEvalTextElement = document.getElementById('top-eval-text');
-    const middleEvalTextElement = document.getElementById('middle-eval-text'); // Span inside H3
+    const middleEvalTextElement = document.getElementById('middle-eval-text');
     const bottomEvalTextElement = document.getElementById('bottom-eval-text');
 
     const API_BASE_URL = 'https://wenge.cloudns.ch/backend/';
@@ -26,7 +36,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Helper to safely call displayMessage
     const safeDisplayMessage = (msg, isErr = false) => {
         if (typeof displayMessage === "function") displayMessage(msg, isErr);
-        else isErr ? console.error(msg) : console.log(msg);
+        else isErr ? console.error(msg) : console.log(msg); // Fallback if displayMessage itself is an issue
     };
 
     function initializeSortable() {
@@ -85,12 +95,12 @@ document.addEventListener('DOMContentLoaded', () => {
         if(topEvalTextElement) topEvalTextElement.textContent = topC.length > 0 ? ` (${(topC.length===3 ? evalFunc(topC).message : '未完成') || '未完成'})` : '';
         if(bottomEvalTextElement) bottomEvalTextElement.textContent = botC.length > 0 ? ` (${(botC.length===5 ? evalFunc(botC).message : '未完成') || '未完成'})` : '';
 
-        if (middleHandHeader) { // Check if middleHandHeader (the H3's direct parent div) exists
-            const h3TitleElement = document.getElementById('middle-hand-header'); // The H3 itself
-            const spanEvalElement = document.getElementById('middle-eval-text'); // The span inside H3
+        if (middleHandHeader) { 
+            const h3TitleElement = document.getElementById('middle-hand-header'); 
+            const spanEvalElement = document.getElementById('middle-eval-text'); 
             if (h3TitleElement && spanEvalElement) {
                 if (midReady) {
-                    h3TitleElement.childNodes[0].nodeValue = `中道 (5张): `; // Only change text node part of H3
+                    h3TitleElement.childNodes[0].nodeValue = `中道 (5张): `; 
                     spanEvalElement.textContent = ` (${evalFunc(midCSource).message || '计算中...'})`;
                     initialAndMiddleHandElement.classList.add('is-middle-row-style');
                 } else {
@@ -139,7 +149,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         [topRowElement,initialAndMiddleHandElement,bottomRowElement].forEach(el => el && el.classList.remove('daoshui-warning','is-middle-row-style'));
         safeDisplayMessage("点击“发牌”开始。", false);
-        if(typeof displayScore === "function") displayScore("得分: --"); // Reset score display
+        if(typeof displayScore === "function") displayScore("得分: --");
         dealButton.disabled=false; confirmOrganizationButton.style.display='none'; confirmOrganizationButton.disabled=true; compareButton.style.display='none';
         console.log("Game Initialized.");
     }
@@ -149,10 +159,8 @@ document.addEventListener('DOMContentLoaded', () => {
         initializeGame(); safeDisplayMessage("发牌中...", false); dealButton.disabled=true;
         try {
             const res = await fetch(`${API_BASE_URL}deal_cards.php`);
-            console.log("Deal cards fetch response:", res);
             if(!res.ok) throw new Error(`发牌失败: ${res.status} ${await res.text()}`);
             const data = await res.json();
-            console.log("Data from deal_cards.php:", JSON.stringify(data).substring(0,200) + "..."); // Log snippet
             if(!data || !Array.isArray(data.cards) || data.cards.length!==13) throw new Error("牌数据错误。");
 
             playerFullHandSource = data.cards.map(cardFromServer => {
@@ -163,20 +171,15 @@ document.addEventListener('DOMContentLoaded', () => {
                     id: (cardFromServer.rank || 'X') + (cardFromServer.suitKey || 'Y') + Math.random().toString(36).substring(2, 7)
                 };
             }).filter(card => card.rank && card.suitKey);
-            console.log("playerFullHandSource mapped (before sort):", JSON.stringify(playerFullHandSource).substring(0,200) + "...");
 
-            // --- AUTO-SORT CARDS AFTER DEALING ---
             if (typeof sortCards === "function") {
-                playerFullHandSource = sortCards(playerFullHandSource); // Sorts descending by rank by default
-                console.log("playerFullHandSource (after sort):", JSON.stringify(playerFullHandSource).substring(0,200) + "...");
+                playerFullHandSource = sortCards(playerFullHandSource); 
             } else {
                 console.warn("sortCards function not available. Cards will not be auto-sorted.");
             }
-            // --- END AUTO-SORT ---
 
             initialAndMiddleHandElement.innerHTML='';
             playerFullHandSource.forEach(card => {
-                // console.log("Processing card for render:", JSON.stringify(card));
                 if (card && typeof renderCard === "function") initialAndMiddleHandElement.appendChild(renderCard(card, true));
                 else console.error("Cannot render card:", card, "renderCard available:", typeof renderCard === "function");
             });
@@ -220,15 +223,13 @@ document.addEventListener('DOMContentLoaded', () => {
         safeDisplayMessage("提交比牌中...",false); compareButton.disabled=true;
         if(playerOrganizedHand.middle.length!==5) playerOrganizedHand.middle=Array.from(initialAndMiddleHandElement.children).map(d=>d.cardData).filter(Boolean);
         const pL={top:playerOrganizedHand.top.map(c=>({rank:c.rank,suitKey:c.suitKey})), middle:playerOrganizedHand.middle.map(c=>({rank:c.rank,suitKey:c.suitKey})), bottom:playerOrganizedHand.bottom.map(c=>({rank:c.rank,suitKey:c.suitKey}))};
-        console.log("Payload to submit_hand.php:", JSON.stringify(pL));
         if(pL.top.length!==3||pL.middle.length!==5||pL.bottom.length!==5){
             safeDisplayMessage("错误:提交牌数不对。",true); compareButton.style.display='none'; dealButton.disabled=false; return;
         }
         try {
             const res = await fetch(`${API_BASE_URL}submit_hand.php`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(pL)});
-            console.log("Submit hand fetch response:", res);
             if(!res.ok) throw new Error(`比牌请求失败: ${res.status} ${await res.text()}`);
-            const rst = await res.json(); console.log("比牌结果:",rst);
+            const rst = await res.json(); 
             if(rst.success){ let msg=`服务器: ${rst.message||'完成.'}`; if(rst.daoshui)msg+=" (倒水)"; safeDisplayMessage(msg,rst.daoshui); }
             else safeDisplayMessage(`服务器错误: ${rst.message||'失败.'}`,true);
             if(typeof displayScore==="function"&&typeof rst.score!=="undefined")displayScore(`得分: ${rst.score}`);
@@ -238,39 +239,29 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     if (callBackendButton) {
-        console.log("callBackendButton element found:", callBackendButton);
         callBackendButton.addEventListener('click', async () => {
-            console.log("--- Test Backend Button Clicked! ---");
             safeDisplayMessage("正在测试后端通讯...", false);
             try {
                 const testEndpoint = `${API_BASE_URL}deal_cards.php`;
-                console.log("Test endpoint URL:", testEndpoint);
                 const response = await fetch(testEndpoint);
-                console.log("Test Backend - Fetch response received:", response);
                 if (!response.ok) {
                     const errorText = await response.text();
-                    console.error(`Test Backend - HTTP error! Status: ${response.status} - Response Text: ${errorText}`);
                     throw new Error(`HTTP error! ${response.status} - ${errorText}`);
                 }
                 const data = await response.json();
-                console.log("Test Backend - Backend response data:", data);
                 let msg = "后端通讯成功！";
                 if(data && data.cards && data.cards.length > 0) msg += ` (后端返回 ${data.cards.length} 张牌)`
                 else if(data && data.message) msg += ` 后端消息: ${data.message}`;
                 safeDisplayMessage(msg, false);
             } catch (error) {
-                console.error("Test Backend - 通讯测试捕获到错误:", error);
                 safeDisplayMessage(`后端通讯测试失败: ${error.message}`, true);
             }
         });
     } else console.error("callBackendButton element NOT found!");
 
-    // --- New Button Event Listeners ---
     if (lobbyButton) {
         lobbyButton.addEventListener('click', () => {
-            console.log("--- Lobby Button Clicked ---");
             safeDisplayMessage("大厅功能暂未实现。", false);
-            // Future: window.location.href = '/lobby.html'; // or similar
         });
     } else {
         console.error("Lobby button element NOT found!");
@@ -278,15 +269,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (pointsButton) {
         pointsButton.addEventListener('click', () => {
-            console.log("--- Points Button Clicked ---");
             safeDisplayMessage("积分查看功能暂未实现。", false);
-            // Future: displayPointsModal(); // or similar
         });
     } else {
         console.error("Points button element NOT found!");
     }
-    // --- End New Button Event Listeners ---
 
-    initializeGame();
+    initializeGame(); // This will call displayMessage, which now relies on initializeUiElements having run.
     initializeSortable();
 });
