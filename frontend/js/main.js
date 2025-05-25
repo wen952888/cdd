@@ -161,7 +161,16 @@ document.addEventListener('DOMContentLoaded', () => {
                     id: (cardFromServer.rank || 'X') + (cardFromServer.suitKey || 'Y') + Math.random().toString(36).substring(2, 7)
                 };
             }).filter(card => card.rank && card.suitKey);
-            console.log("playerFullHandSource mapped:", JSON.stringify(playerFullHandSource).substring(0,200) + "...");
+            console.log("playerFullHandSource mapped (before sort):", JSON.stringify(playerFullHandSource).substring(0,200) + "...");
+
+            // --- AUTO-SORT CARDS AFTER DEALING ---
+            if (typeof sortCards === "function") {
+                playerFullHandSource = sortCards(playerFullHandSource); // Sorts descending by rank by default
+                console.log("playerFullHandSource (after sort):", JSON.stringify(playerFullHandSource).substring(0,200) + "...");
+            } else {
+                console.warn("sortCards function not available. Cards will not be auto-sorted.");
+            }
+            // --- END AUTO-SORT ---
 
             initialAndMiddleHandElement.innerHTML='';
             playerFullHandSource.forEach(card => {
