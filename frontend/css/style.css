@@ -6,27 +6,140 @@ html, body {
     width: 100vw;
     margin: 0;
     padding: 0;
-    overflow: hidden;
+    overflow: hidden; /* Changed to hidden to prevent double scrollbars if app-container overflows */
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: #367c3d;
+    background-color: #367c3d; /* Dark green background for the whole page */
     color: #333;
 }
 
-.game-container {
+#app-container {
     width: 100%;
     height: 100%;
+    display: flex; /* Using flex to manage lobby/room visibility better */
+    flex-direction: column;
+    overflow-y: auto; /* Scroll on app-container if content overflows */
+}
+
+.lobby-container, .room-container {
+    width: 100%;
+    min-height: 100vh; /* Ensure it takes full viewport height */
+    max-width: none;
+    margin: 0;
+    padding: clamp(15px, 2.5vh, 20px);
+    box-sizing: border-box;
+    background-color: #e9edf2; /* Light background for lobby/room content areas */
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Center content horizontally */
+}
+
+.lobby-container h2, .room-container .room-header h2 {
+    color: #2c3e50;
+    margin-bottom: 20px;
+}
+
+.lobby-controls {
+    margin-bottom: 15px;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.lobby-controls input[type="text"] {
+    padding: 8px 12px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    font-size: clamp(0.85em, 2vw, 1em);
+    min-width: 180px;
+}
+
+.lobby-controls button,
+.room-header button,
+#room-list button {
+    padding: clamp(8px, 1.5vh, 11px) clamp(12px, 2.2vw, 18px);
+    border: none; border-radius: 5px; background-color: #007bff; color: white; cursor: pointer;
+    font-size: clamp(0.8em, 2vw, 0.95em); transition: background-color 0.2s ease;
+}
+.lobby-controls button:hover,
+.room-header button:hover,
+#room-list button:hover {
+    background-color: #0056b3;
+}
+#leave-room-button { background-color: #6c757d; }
+#leave-room-button:hover { background-color: #5a6268; }
+
+
+#room-list-container {
+    margin-top: 20px;
+    padding: 15px;
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 5px;
+    width: 100%;
+    max-width: 500px; /* Limit width of room list */
+    box-sizing: border-box;
+}
+#room-list-container h3 { margin-top: 0;}
+#room-list { list-style: none; padding: 0; }
+#room-list li {
+    padding: 8px 0;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+#room-list li:last-child { border-bottom: none; }
+
+
+.room-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #dee2e6;
+}
+#room-players-list {
+    margin-bottom: 15px;
+    text-align: left;
+    width: 100%;
+    font-size: clamp(0.9em, 2.1vw, 1em);
+}
+
+
+/* Game Container within Room Section */
+.room-container .game-container {
+    width: 100%; /* Game container takes full width of its parent in room */
+    padding: 0; /* Remove padding if room-container already has it */
+    /* Reset some game-container styles if they conflict with room-container */
+    background-color: #f0f3f7; /* Keep its distinct background */
+    /* margin-top: 10px; */ /* Adjust as needed */
+    /* min-height will be determined by its content */
+    /* overflow-y: visible; */ /* Let room-container handle scrolling if necessary */
+}
+
+
+/* Original game-container styles - some might need adjustment or removal if handled by .room-container */
+.game-container {
+    width: 100%;
+    /* height: 100%; -- This was causing issues with lobby/room flex */
     max-width: none;
     max-height: none;
-    margin: 0;
-    padding: clamp(10px, 2vh, 15px);
+    /* margin: 0; -- Handled by room-container or lobby-container */
+    /* padding: clamp(10px, 2vh, 15px); -- Handled by room-container or lobby-container */
     box-sizing: border-box;
     background-color: #f0f3f7;
     text-align: center;
     display: flex;
     flex-direction: column;
     align-items: stretch;
-    overflow-y: auto;
+    /* overflow-y: auto; -- Potentially handled by #app-container or .room-container */
 }
+
 
 .player-area {
     margin-bottom: clamp(10px, 2vh, 15px);
@@ -82,14 +195,7 @@ html, body {
     flex-wrap: wrap;
     justify-content: flex-start;
     align-items: center;
-    /* Original gap: clamp(4px, 0.8vw, 6px);
-       Increased by ~20% -> clamp(5px, 0.96vw, 7px); or round to clamp(5px, 1vw, 7px) */
     gap: clamp(5px, 1vw, 7px);
-    /* Original min-height: clamp(70px, 9.5vw, 105px);
-       Increased by 20% (approx for vw part, more for fixed parts)
-       Height should be based on new card height. New card height ~ clamp(80px, 10.1vw, 110px)
-       So min-height should be slightly more.
-    */
     min-height: clamp(85px, 11vw, 120px); /* Adjusted based on new card height */
     padding: clamp(6px, 1vw, 8px);
     border: 1px dashed #ced4da;
@@ -112,22 +218,10 @@ html, body {
 
 /* --- CSS Poker Card Style (Increased by 20%) --- */
 .card-css {
-    /* Original width: clamp(45px, 5.8vw, 65px); */
-    /* 5.8vw * 1.2 = 6.96vw */
-    /* 65px * 1.2 = 78px */
-    /* 45px * 1.2 = 54px */
     width: clamp(54px, 6.96vw, 78px);
-
-    /* Original height: clamp(63px, 8.12vw, 91px); */
-    /* 8.12vw * 1.2 = 9.744vw */
-    /* 91px * 1.2 = 109.2px (approx 109px) */
-    /* 63px * 1.2 = 75.6px (approx 76px) */
     height: clamp(76px, 9.74vw, 109px);
-
     background-color: #ffffff;
     border: 1px solid #adb5bd;
-    /* Original radius: clamp(3px, 0.6vw, 5px);
-       Increased by 20% -> clamp(3.6px, 0.72vw, 6px) -> round to clamp(4px, 0.7vw, 6px) */
     border-radius: clamp(4px, 0.7vw, 6px);
     box-shadow: 1px 1px 3px rgba(0,0,0,0.1);
     overflow: hidden;
@@ -148,8 +242,6 @@ html, body {
     height: 100%;
     object-fit: contain;
 }
-
-/* Text-based card styles are removed */
 
 /* SortableJS Visual Feedback Styles */
 .droppable-area.sortable-ghost,
@@ -182,6 +274,12 @@ html, body {
     border-radius: 5px; font-size: clamp(0.8em, 1.9vw, 0.95em); color: #212529;
     text-align: left; flex-shrink: 0; width: 100%; box-sizing: border-box;
 }
+#lobby-message-area { /* Specific style for lobby message area if needed */
+    width: 100%;
+    max-width: 500px; /* Consistent with room list */
+    text-align: center;
+}
+
 .message-area.error { background-color: #f8d7da; color: #721c24; border-color: #f5c2c7; }
 .message-area.info { background-color: #d1e7dd; color: #0f5132; border-color: #badbcc; }
 .score-area { font-weight: bold; color: #0a3622; background-color: #d1e7dd; border-color: #a3cfbb; }
@@ -191,5 +289,3 @@ html, body {
 .droppable-area.daoshui-warning .hand-row-label span,
 #middle-hand-header-container.daoshui-warning #middle-eval-text,
 #middle-hand-header-container.daoshui-warning #middle-hand-header { color: #b02a37 !important; }
-
-/* Styles for the Screen Orientation Message Overlay are handled by JS */
