@@ -1,6 +1,6 @@
 // frontend/js/ui.js
 
-const messageAreaElement = document.getElementById('message-area');
+// const messageAreaElement = document.getElementById('message-area'); // No longer global default
 const scoreAreaElement = document.getElementById('score-area');
 
 /**
@@ -19,27 +19,22 @@ function renderCard(card, isFaceUp = true) {
     let imgSrc = "";
 
     if (isFaceUp) {
-        // Ensure game.js functions and data are available
         if (typeof getCardImagePath !== 'function' || typeof RANK_FILENAME_PART === 'undefined' || typeof SUITS_DATA === 'undefined') {
             console.error("renderCard ERROR: Required functions/data from game.js are not available.");
             img.alt = "Error: Missing game data for card image";
-            // Consider setting a visible error placeholder for img.src if this happens
         } else {
-            imgSrc = getCardImagePath(card); // From game.js
-            // Construct alt text more robustly
+            imgSrc = getCardImagePath(card); 
             const rankPartForAlt = card && card.rank ? (RANK_FILENAME_PART[card.rank.toUpperCase()] || card.rank) : "Unknown Rank";
             const suitPartForAlt = card && card.suitKey && SUITS_DATA[card.suitKey] ? SUITS_DATA[card.suitKey].fileNamePart : "Unknown Suit";
             altText = `${rankPartForAlt} of ${suitPartForAlt}`;
-            // console.log(`renderCard: Setting FACE UP image for card ${JSON.stringify(card)} to src: ${imgSrc}`);
         }
     } else {
         if (typeof getCardBackImagePath !== 'function') {
             console.error("renderCard ERROR: getCardBackImagePath from game.js is not available.");
             img.alt = "Error: Missing game data for card back";
         } else {
-            imgSrc = getCardBackImagePath(); // From game.js
+            imgSrc = getCardBackImagePath(); 
             altText = "Card Back";
-            // console.log(`renderCard: Setting CARD BACK image. src: ${imgSrc}`);
         }
     }
     img.src = imgSrc;
@@ -52,11 +47,8 @@ function renderCard(card, isFaceUp = true) {
     img.onerror = function() {
         console.error(`renderCard IMAGE LOAD ERROR: Failed to load image. Attempted src: "${imgSrc}". Card data: ${JSON.stringify(card)}`);
         this.alt = `Failed to load: ${altText}`;
-        cardDiv.classList.add('card-image-load-error'); // For CSS to style broken images
-        // Optionally, you could set a generic placeholder image here:
-        // this.src = 'images/cards/image_load_error.png';
+        cardDiv.classList.add('card-image-load-error');
     };
-    // img.onload = function() { console.log(`Image loaded: ${imgSrc}`); }; // Optional success log
 
     cardDiv.appendChild(img);
 
@@ -67,13 +59,19 @@ function renderCard(card, isFaceUp = true) {
     return cardDiv;
 }
 
-function displayMessage(message, isError = false) {
-    if (!messageAreaElement) { console.warn("displayMessage: messageAreaElement not found."); return; }
-    messageAreaElement.textContent = message;
-    messageAreaElement.className = 'message-area';
-    if (isError) messageAreaElement.classList.add('error');
+function displayMessage(message, isError = false, targetElement = null) {
+    // Use provided targetElement or default to game's message area if in room, otherwise null (console log only)
+    const effectiveMessageArea = targetElement || (document.getElementById('room-section').style.display !== 'none' ? document.getElementById('message-area') : null);
+
+    if (!effectiveMessageArea) { 
+        console.warn("displayMessage: No target message area found or specified. Message:", message); 
+        return; 
+    }
+    effectiveMessageArea.textContent = message;
+    effectiveMessageArea.className = 'message-area'; // Reset classes
+    if (isError) effectiveMessageArea.classList.add('error');
     else if (message.toLowerCase().includes("backend says:") || message.toLowerCase().includes("服务器"))
-         messageAreaElement.classList.add('info');
+         effectiveMessageArea.classList.add('info');
 }
 
 function displayScore(scoreText) {
