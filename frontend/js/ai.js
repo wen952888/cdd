@@ -1,133 +1,187 @@
 // frontend/js/ai.js
 
+let aiReferenceSuggestions = []; // 用于存储多个AI建议
+let currentSuggestionIndex = 0;  // 当前显示的建议索引
+
 /**
- * AI参考功能：根据当前手牌，返回一个推荐的牌道组合。
- * 这只是一个非常基础的占位符，需要复杂的算法来实现。
- * @param {Array<Object>} playerCards - 玩家的13张牌对象数组。
- * @returns {Object|null} 返回一个对象 {top: [...], middle: [...], bottom: [...]} 或 null（如果无法建议）。
+ * 生成器函数：获取所有不倒水的牌道组合。
+ * @param {Array<Object>} cards - 13张牌对象数组。
  */
-function getAIReferenceOrganization(playerCards) {
-    console.log("AI 参考：接收到的牌", JSON.parse(JSON.stringify(playerCards)));
-    if (!playerCards || playerCards.length !== 13) {
-        console.error("AI 参考：牌数不为13张");
-        return null;
+function* getAllValidArrangements(cards) {
+    if (cards.length !== 13) {
+        console.error("getAllValidArrangements: 需要13张牌");
+        yield null; // 或者 throw error
+        return;
     }
 
-    // 极简占位符逻辑：尝试将牌平均分配或按某种简单规则
-    // 实际AI需要：
-    // 1. 枚举所有可能的牌道组合 (头3, 中5, 尾5)
-    // 2. 对每种组合进行评估 (使用 evaluateHand)
-    // 3. 确保组合不倒水 (使用 checkDaoshui)
-    // 4. 选择一个“最优”或“较好”的组合返回
-    //    “最优”的定义可能很复杂，比如期望得分最高，或者最不容易被打枪等。
+    const allCards = [...cards];
 
-    // 这是一个非常非常 naive 的实现，仅作演示，【【【【绝对不能用于实际逻辑】】】】
-    // 它仅仅是按牌力从大到小依次放入尾道、中道、头道，不考虑倒水和牌型组合优化
-    const sortedCards = sortCardsByRank([...playerCards]); // 假设 sortCardsByRank 存在且按牌力降序
-
-    const bottom = sortedCards.slice(0, 5);
-    const middle = sortedCards.slice(5, 10);
-    const top = sortedCards.slice(10, 13);
-    
-    // 【【【重要】】】这个 naive 实现很可能导致倒水，需要完整逻辑
-    // 应该先尝试组成最强的尾道，然后中道，再头道，并不断检查倒水
-    // 例如：先找同花顺、铁支等放入尾道
-
-    // 模拟一个稍微好一点的，但仍然非常简化的逻辑
-    // 目标：尽量不倒水，并尝试把最好的牌放尾道
-    // 这是一个NP难问题，真正的AI会用启发式搜索或蒙特卡洛树搜索等
-
-    // 尝试生成所有组合（非常耗时，仅用于少量牌或需要优化）
-    // 对于13张牌，组合数 C(13,3) * C(10,5) * C(5,5) = 286 * 252 * 1 = 72072
-    // 这个数量级可以暴力枚举，但每次评估和排序的成本要注意
-
-    let bestOrganization = null;
-    let bestScore = -Infinity; // 假设有一个评分函数能给组合打分
-
-    function generateCombinations(cards, path, remaining, results) {
-        if (path.length === 3) { // 头、中、尾都选好了
-            const [pTop, pMiddle, pBottom] = path;
-            const topInfo = evaluateHand(pTop);
-            const middleInfo = evaluateHand(pMiddle);
-            const bottomInfo = evaluateHand(pBottom);
-
-            if (!checkDaoshui(topInfo, middleInfo, bottomInfo)) {
-                // 假设有一个简单的评分，比如各道牌型等级之和
-                const currentScore = topInfo.type + middleInfo.type + bottomInfo.type;
-                if (currentScore > bestScore) {
-                    bestScore = currentScore;
-                    bestOrganization = { top: [...pTop], middle: [...pMiddle], bottom: [...pBottom] };
-                }
-            }
+    // 标准组合生成器 (C(n,k))
+    function* combinations(arr, k) {
+        if (k < 0 || k > arr.length) return;
+        if (k === 0) {
+            yield [];
             return;
         }
-
-        const currentStage = path.length; // 0 for top, 1 for middle, 2 for bottom
-        const numToSelect = currentStage === 0 ? 3 : 5;
-
-        if (remaining.length < numToSelect) return;
-
-        function findN(arr, n, currentSelection, startIndex, currentPathResults) {
-            if (currentSelection.length === n) {
-                const nextRemaining = arr.filter(c => !currentSelection.find(sel => sel.id === c.id));
-                generateCombinations(cards, [...path, [...currentSelection]], nextRemaining, results);
-                return;
-            }
-            if (startIndex >= arr.length) return;
-
-            // Include current element
-            currentSelection.push(arr[startIndex]);
-            findN(arr, n, currentSelection, startIndex + 1, currentPathResults);
-            currentSelection.pop(); // Backtrack
-
-            // Exclude current element
-            findN(arr, n, currentSelection, startIndex + 1, currentPathResults);
+        if (arr.length === k) {
+            yield [...arr];
+            return;
         }
-        findN(remaining, numToSelect, [], 0, results);
+        if (arr.length === 0 && k > 0) return;
+
+        const head = arr[0];
+        const tail = arr.slice(1);
+
+        for (const combo of combinations(tail, k - 1)) {
+            yield [head, ...combo];
+        }
+        for (const combo of combinations(tail, k)) {
+            yield combo;
+        }
     }
 
-    generateCombinations(playerCards, [], [...playerCards], []);
+    for (const topHand of combinations(allCards, 3)) {
+        const remainingAfterTop = allCards.filter(c => !topHand.find(tc => tc.id === c.id));
+        if (remainingAfterTop.length !== 10) continue; // 安全检查
 
+        for (const middleHand of combinations(remainingAfterTop, 5)) {
+            const bottomHand = remainingAfterTop.filter(c => !middleHand.find(mc => mc.id === c.id));
+            if (bottomHand.length !== 5) continue; // 安全检查
 
-    if (bestOrganization) {
-        console.log("AI 参考找到的最佳组合:", bestOrganization, "评分为:", bestScore);
-        return bestOrganization;
-    } else {
-         // 如果暴力枚举没找到（不太可能，除非评分或倒水逻辑有问题），返回naive的
-        console.warn("AI 参考：未能通过枚举找到不倒水的组合，返回naive版本（可能倒水）");
-        return { top, middle, bottom };
+            const topInfo = evaluateHand(topHand);
+            const middleInfo = evaluateHand(middleHand);
+            const bottomInfo = evaluateHand(bottomHand);
+
+            if (!checkDaoshui(topInfo, middleInfo, bottomInfo)) {
+                yield {
+                    top: [...topHand], middle: [...middleHand], bottom: [...bottomHand],
+                    topInfo, middleInfo, bottomInfo
+                };
+            }
+        }
     }
 }
 
+
 /**
- * AI托管功能：根据当前手牌，返回一个确定的牌道组合以供游戏直接使用。
- * @param {Array<Object>} playerCards - 玩家的13张牌对象数组。
- * @returns {Object|null} 返回一个对象 {top: [...], middle: [...], bottom: [...]} 或 null。
+ * AI评分函数：给一个合法的牌道组合打分。
+ * @param {Object} arrangement - 包含三道牌及牌型信息的对象。
+ * @returns {number} 分数。
  */
-function getAITakeoverOrganization(playerCards) {
-    // AI托管可以使用与AI参考相同的逻辑，或者更激进/保守的策略
-    // 目前直接复用参考逻辑
-    console.log("AI 托管：接收到的牌", JSON.parse(JSON.stringify(playerCards)));
-    const org = getAIReferenceOrganization(playerCards);
-    if (org) {
-        // 确保返回的牌仍然是原始牌对象的引用或具有相同ID的副本
-        // getAIReferenceOrganization内部的 bestOrganization = { top: [...pTop], ...} 使用了扩展运算符，是副本
-        // 这通常是好的，避免修改原始牌数据。
-        // 但要确保牌对象结构一致。
-        // 验证返回的牌确实是来自 playerCards (通过ID)
-        const checkCards = (organizedSet, originalSet) => {
-            const organizedIds = new Set([...organizedSet.top, ...organizedSet.middle, ...organizedSet.bottom].map(c => c.id));
-            const originalIds = new Set(originalSet.map(c => c.id));
-            if (organizedIds.size !== 13 || originalIds.size !== 13) return false;
-            for (const id of organizedIds) {
-                if (!originalIds.has(id)) return false;
-            }
-            return true;
-        };
-        if (!checkCards(org, playerCards)) {
-            console.error("AI 托管：返回的牌与原始牌不匹配！");
-            return null; // 防止使用错误的牌数据
+function scoreArrangement(arrangement) {
+    if (!arrangement) return -Infinity;
+    let score = 0;
+    // 基础分是牌型等级，可以加权重
+    score += arrangement.topInfo.type * 1;    // 例如头道权重低
+    score += arrangement.middleInfo.type * 2; // 中道权重中
+    score += arrangement.bottomInfo.type * 3; // 尾道权重高
+
+    // 根据牌型具体点数进行加分 (更细致的评分)
+    // 例如：葫芦比顺子分数高，但都是葫芦时，三条大的葫芦分更高
+    // 这里可以扩展很多，比如对特定牌型（如铁支、同花顺在尾道）给予巨大加分
+
+    // 示例：对子点数加成
+    const addPairBonus = (info) => {
+        if (info.type === HAND_TYPES.PAIR && info.ranks.length > 0) return info.ranks[0] * 0.1;
+        if (info.type === HAND_TYPES.TWO_PAIR && info.ranks.length > 0) return (info.ranks[0] + info.ranks[2]) * 0.1;
+        if (info.type === HAND_TYPES.THREE_OF_A_KIND && info.ranks.length > 0) return info.ranks[0] * 0.2;
+        // ... 更多具体牌型的点数加成
+        return 0;
+    };
+    score += addPairBonus(arrangement.topInfo);
+    score += addPairBonus(arrangement.middleInfo);
+    score += addPairBonus(arrangement.bottomInfo);
+    
+    return score;
+}
+
+
+/**
+ * AI参考功能：生成多个不同的、合理的牌道组合建议。
+ * @param {Array<Object>} playerCards - 玩家的13张牌对象数组。
+ * @param {number} count - 需要生成的建议数量。
+ */
+function generateAIReferenceSuggestions(playerCards, count = 3) {
+    aiReferenceSuggestions = [];
+    currentSuggestionIndex = 0;
+    if (!playerCards || playerCards.length !== 13) return;
+
+    const validArrangements = [];
+    for (const arrangement of getAllValidArrangements(playerCards)) {
+        if (arrangement) {
+            arrangement.score = scoreArrangement(arrangement);
+            validArrangements.push(arrangement);
         }
     }
-    return org;
+
+    // 按分数降序排列
+    validArrangements.sort((a, b) => b.score - a.score);
+
+    // 取前N个，或者如果少于N个则全部取出
+    aiReferenceSuggestions = validArrangements.slice(0, count);
+
+    if (aiReferenceSuggestions.length === 0) {
+        console.warn("AI未能生成任何有效的参考建议。");
+        // 可以尝试一个保底的、非常简单的摆法（即使可能倒水）
+        const sortedCards = sortCardsByRank([...playerCards]);
+        aiReferenceSuggestions.push({
+            top: sortedCards.slice(10, 13),
+            middle: sortedCards.slice(5, 10),
+            bottom: sortedCards.slice(0, 5),
+            score: -Infinity, // 标记为低质量
+            message: "保底建议 (可能倒水)"
+        });
+    }
+    console.log(`AI生成了 ${aiReferenceSuggestions.length} 个参考建议。`);
+}
+
+/**
+ * 获取下一个AI参考建议。
+ * @returns {Object|null} AI建议的牌道组合或null。
+ */
+function getNextAIReference() {
+    if (aiReferenceSuggestions.length === 0) return null;
+    const suggestion = aiReferenceSuggestions[currentSuggestionIndex];
+    currentSuggestionIndex = (currentSuggestionIndex + 1) % aiReferenceSuggestions.length; // 循环获取
+    return suggestion;
+}
+
+/**
+ * AI托管决策：从所有有效组合中选择最优的一个。
+ * @param {Array<Object>} playerCards - 玩家的13张牌对象数组。
+ * @returns {Object|null} 最优的牌道组合或null。
+ */
+function getAITakeoverOrganization(playerCards) {
+    if (!playerCards || playerCards.length !== 13) return null;
+
+    let bestArrangement = null;
+    let maxScore = -Infinity;
+
+    for (const arrangement of getAllValidArrangements(playerCards)) {
+        if (arrangement) {
+            const currentScore = scoreArrangement(arrangement);
+            if (currentScore > maxScore) {
+                maxScore = currentScore;
+                bestArrangement = {
+                    top: arrangement.top,
+                    middle: arrangement.middle,
+                    bottom: arrangement.bottom
+                };
+            }
+        }
+    }
+    if (bestArrangement) {
+        console.log("AI托管决策的最优组合:", bestArrangement, "评分为:", maxScore);
+    } else {
+        console.warn("AI托管未能找到最优组合，可能返回一个保底组合。");
+        // 保底：如果找不到任何不倒水的（理论上不应该发生，除非牌太差或逻辑问题）
+        // 就返回一个简单排序的（很可能倒水）
+        const sortedCards = sortCardsByRank([...playerCards]);
+        bestArrangement = {
+            top: sortedCards.slice(10, 13),
+            middle: sortedCards.slice(5, 10),
+            bottom: sortedCards.slice(0, 5)
+        };
+    }
+    return bestArrangement;
 }
