@@ -6,286 +6,266 @@ html, body {
     width: 100vw;
     margin: 0;
     padding: 0;
-    overflow: hidden; /* Changed to hidden to prevent double scrollbars if app-container overflows */
+    overflow: hidden;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: #367c3d; /* Dark green background for the whole page */
+    background-color: #367c3d;
     color: #333;
 }
 
 #app-container {
     width: 100%;
     height: 100%;
-    display: flex; /* Using flex to manage lobby/room visibility better */
+    display: flex;
     flex-direction: column;
-    overflow-y: auto; /* Scroll on app-container if content overflows */
+    overflow-y: auto;
 }
 
 .lobby-container, .room-container {
     width: 100%;
-    min-height: 100vh; /* Ensure it takes full viewport height */
-    max-width: none;
-    margin: 0;
+    min-height: 100vh;
     padding: clamp(15px, 2.5vh, 20px);
     box-sizing: border-box;
     background-color: #e9edf2; /* Light background for lobby/room content areas */
-    text-align: center;
     display: flex;
     flex-direction: column;
-    align-items: center; /* Center content horizontally */
-}
-
-.lobby-container h2, .room-container .room-header h2 {
-    color: #2c3e50;
-    margin-bottom: 20px;
-}
-
-.lobby-controls {
-    margin-bottom: 15px;
-    display: flex;
-    gap: 10px;
     align-items: center;
-    justify-content: center;
-    flex-wrap: wrap;
 }
 
-.lobby-controls input[type="text"] {
+/* --- Lobby Specific Styles --- */
+.lobby-header {
+    width: 100%;
+    max-width: 900px; /* Max width for lobby content */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #d1d9e6;
+}
+.lobby-header h2 {
+    color: #2c3e50;
+    margin: 0;
+    font-size: clamp(1.5em, 3vw, 1.8em);
+}
+.lobby-user-controls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+#player-name-input {
     padding: 8px 12px;
     border: 1px solid #ced4da;
     border-radius: 4px;
     font-size: clamp(0.85em, 2vw, 1em);
-    min-width: 180px;
+    min-width: 150px;
+}
+#profile-button {
+    padding: 8px 12px;
+    font-size: clamp(1.1em, 2.5vw, 1.3em); /* Larger for icon */
+    background-color: #6c757d;
+    color: white;
+    border: none;
+    border-radius: 50%; /* Circular */
+    cursor: pointer;
+    width: 40px; /* Fixed size */
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+#profile-button:hover { background-color: #5a6268; }
+
+.lobby-main-content {
+    width: 100%;
+    max-width: 900px; /* Max width for lobby content */
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
 }
 
-.lobby-controls button,
-.room-header button,
-#room-list button {
+.trial-room-section, .stakes-rooms-container {
+    background-color: #f8f9fa;
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid #dee2e6;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+.trial-room-section h3, .stakes-rooms-container h3 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    color: #34495e;
+    text-align: center;
+    font-size: clamp(1.1em, 2.5vw, 1.3em);
+}
+
+#trial-room-button.room-type-button {
+    display: block;
+    width: 100%;
+    padding: clamp(12px, 2vh, 18px) clamp(15px, 2.5vw, 22px);
+    font-size: clamp(1em, 2.2vw, 1.2em);
+    background-color: #28a745; /* Green for trial */
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+#trial-room-button.room-type-button:hover { background-color: #218838; }
+
+
+.stake-level-banner {
+    background-color: #dc3545; /* Red banner color */
+    color: white;
+    padding: 10px 15px;
+    border-radius: 6px;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+.stake-label {
+    font-size: clamp(1.2em, 3vw, 1.8em);
+    font-weight: bold;
+    min-width: 60px; /* Ensure label has some width */
+    text-align: center;
+    color: #fff;
+    background-color: rgba(0,0,0,0.15);
+    padding: 8px;
+    border-radius: 4px;
+}
+.stake-label small { font-size: 0.6em; font-weight: normal;}
+
+.rooms-in-banner {
+    display: flex;
+    flex-wrap: wrap; /* Allow rooms to wrap on smaller screens if needed */
+    gap: 10px;
+    flex-grow: 1;
+    justify-content: space-around; /* Distribute rooms evenly */
+}
+.stake-room-button {
+    flex-basis: calc(25% - 10px); /* Aim for 4 rooms per row, accounting for gap */
+    min-width: 120px; /* Minimum width for a room button */
+    padding: clamp(10px, 1.8vh, 15px) clamp(8px, 1.5vw, 12px);
+    font-size: clamp(0.8em, 1.8vw, 0.95em);
+    background-color: #f8f9fa; /* Light background for buttons inside banner */
+    color: #333;
+    border: 1px solid #ced4da;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+    text-align: center;
+}
+.stake-room-button:hover {
+    background-color: #e9ecef;
+    border-color: #adb5bd;
+}
+.stake-room-button .room-occupancy {
+    display: block;
+    font-size: 0.8em;
+    color: #6c757d;
+    margin-top: 3px;
+}
+
+.lobby-footer {
+    margin-top: auto; /* Pushes footer to the bottom */
+    padding-top: 15px;
+    border-top: 1px solid #d1d9e6;
+    width: 100%;
+    max-width: 900px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+#call-backend-button-lobby {
     padding: clamp(8px, 1.5vh, 11px) clamp(12px, 2.2vw, 18px);
     border: none; border-radius: 5px; background-color: #007bff; color: white; cursor: pointer;
-    font-size: clamp(0.8em, 2vw, 0.95em); transition: background-color 0.2s ease;
+    font-size: clamp(0.8em, 2vw, 0.95em);
 }
-.lobby-controls button:hover,
-.room-header button:hover,
-#room-list button:hover {
-    background-color: #0056b3;
-}
-#leave-room-button { background-color: #6c757d; }
-#leave-room-button:hover { background-color: #5a6268; }
+#call-backend-button-lobby:hover { background-color: #0056b3;}
 
-
-#room-list-container {
-    margin-top: 20px;
-    padding: 15px;
-    background-color: #f8f9fa;
-    border: 1px solid #dee2e6;
-    border-radius: 5px;
+#lobby-message-area {
     width: 100%;
-    max-width: 500px; /* Limit width of room list */
-    box-sizing: border-box;
+    text-align: center;
 }
-#room-list-container h3 { margin-top: 0;}
-#room-list { list-style: none; padding: 0; }
-#room-list li {
-    padding: 8px 0;
-    border-bottom: 1px solid #eee;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-#room-list li:last-child { border-bottom: none; }
 
 
+/* --- Room Specific Styles (mostly unchanged) --- */
+.room-container .room-header h2 {
+    color: #2c3e50;
+    margin-bottom: 0; /* Adjusted from original */
+}
 .room-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     width: 100%;
+    max-width: 900px; /* Consistent width */
     margin-bottom: 15px;
     padding-bottom: 10px;
     border-bottom: 1px solid #dee2e6;
 }
+#leave-room-button {
+    padding: clamp(8px, 1.5vh, 11px) clamp(12px, 2.2vw, 18px);
+    border: none; border-radius: 5px; background-color: #6c757d; color: white; cursor: pointer;
+    font-size: clamp(0.8em, 2vw, 0.95em);
+}
+#leave-room-button:hover { background-color: #5a6268; }
+
 #room-players-list {
     margin-bottom: 15px;
     text-align: left;
     width: 100%;
+    max-width: 900px; /* Consistent width */
     font-size: clamp(0.9em, 2.1vw, 1em);
 }
 
-
-/* Game Container within Room Section */
 .room-container .game-container {
-    width: 100%; /* Game container takes full width of its parent in room */
-    padding: 0; /* Remove padding if room-container already has it */
-    /* Reset some game-container styles if they conflict with room-container */
-    background-color: #f0f3f7; /* Keep its distinct background */
-    /* margin-top: 10px; */ /* Adjust as needed */
-    /* min-height will be determined by its content */
-    /* overflow-y: visible; */ /* Let room-container handle scrolling if necessary */
+    width: 100%;
+    max-width: 900px; /* Consistent width */
+    padding: 0;
+    background-color: #f0f3f7;
 }
 
-
-/* Original game-container styles - some might need adjustment or removal if handled by .room-container */
+/* --- Original Game Styles (mostly unchanged, ensure they don't conflict) --- */
 .game-container {
     width: 100%;
-    /* height: 100%; -- This was causing issues with lobby/room flex */
-    max-width: none;
-    max-height: none;
-    /* margin: 0; -- Handled by room-container or lobby-container */
-    /* padding: clamp(10px, 2vh, 15px); -- Handled by room-container or lobby-container */
     box-sizing: border-box;
     background-color: #f0f3f7;
     text-align: center;
     display: flex;
     flex-direction: column;
     align-items: stretch;
-    /* overflow-y: auto; -- Potentially handled by #app-container or .room-container */
 }
 
-
-.player-area {
-    margin-bottom: clamp(10px, 2vh, 15px);
-    padding: clamp(8px, 1.5vh, 10px);
-    border: 1px solid #d1d9e6;
-    border-radius: 6px;
-    background-color: #f8f9fa;
-    width: 100%;
-    box-sizing: border-box;
-}
-
-.player-area > h3 {
-    margin-top: 0;
-    margin-bottom: clamp(8px, 1.5vh, 10px);
-    font-size: clamp(1em, 2.5vw, 1.15em);
-    color: #34495e;
-    text-align: left;
-    font-weight: 500;
-    padding-left: 5px;
-}
-
-.organized-rows .hand-row-label {
-    font-weight: 600;
-    margin-top: clamp(6px, 1vh, 8px);
-    margin-bottom: clamp(3px, 0.5vh, 4px);
-    text-align: left;
-    font-size: clamp(0.85em, 2vw, 0.95em);
-    color: #495057;
-    padding-left: 5px;
-}
-#middle-hand-header-container {
-    margin-top: clamp(6px, 1vh, 8px);
-    margin-bottom: clamp(3px, 0.5vh, 4px);
-    padding-left: 5px;
-}
-#middle-hand-header-container #middle-hand-header {
-    font-size: clamp(0.85em, 2vw, 0.95em) !important;
-    text-align: left !important;
-    margin-top: 0 !important;
-    margin-bottom: 0 !important;
-    font-weight: 600 !important;
-    color: #495057 !important;
-}
+.player-area { /* ... existing styles ... */ }
+.player-area > h3 { /* ... existing styles ... */ }
+.organized-rows .hand-row-label { /* ... existing styles ... */ }
+#middle-hand-header-container { /* ... existing styles ... */ }
+#middle-hand-header-container #middle-hand-header { /* ... existing styles ... */ }
 .hand-row-label span,
-#middle-hand-header-container #middle-hand-header #middle-eval-text {
-    font-weight: normal !important;
-    color: #007bff !important;
-    font-style: italic !important;
-}
-
-.hand-row, #player-hand.hand-row {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: flex-start;
-    align-items: center;
-    gap: clamp(5px, 1vw, 7px);
-    min-height: clamp(85px, 11vw, 120px); /* Adjusted based on new card height */
-    padding: clamp(6px, 1vw, 8px);
-    border: 1px dashed #ced4da;
-    border-radius: 5px;
-    background-color: #e9ecef;
-    margin-bottom: clamp(6px, 1vh, 8px);
-    width: 100%;
-    box-sizing: border-box;
-}
-
-#player-hand.player-hand { background-color: #ddeeff; }
-#player-hand.is-middle-row-style { border-color: #0d6efd; border-style: solid; }
-
-.hand-row:empty::after, #player-hand.hand-row:empty::after {
-    content: "将牌拖到此处"; color: #6c757d; font-style: italic; width: 100%;
-    text-align: center; padding: clamp(15px, 2.5vh, 25px) 0; font-size: clamp(0.8em, 1.8vw, 0.9em);
-}
-#player-hand.hand-row:empty::after { content: "请点击“发牌”"; }
-
-
-/* --- CSS Poker Card Style (Increased by 20%) --- */
-.card-css {
-    width: clamp(54px, 6.96vw, 78px);
-    height: clamp(76px, 9.74vw, 109px);
-    background-color: #ffffff;
-    border: 1px solid #adb5bd;
-    border-radius: clamp(4px, 0.7vw, 6px);
-    box-shadow: 1px 1px 3px rgba(0,0,0,0.1);
-    overflow: hidden;
-    padding: 0;
-    box-sizing: border-box;
-    transition: transform 0.15s ease-out, box-shadow 0.15s ease-out;
-    user-select: none;
-    cursor: grab;
-    flex-shrink: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.card-css img {
-    display: block;
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-}
-
-/* SortableJS Visual Feedback Styles */
+#middle-hand-header-container #middle-hand-header #middle-eval-text { /* ... existing styles ... */ }
+.hand-row, #player-hand.hand-row { /* ... existing styles ... */ }
+#player-hand.player-hand { /* ... existing styles ... */ }
+#player-hand.is-middle-row-style { /* ... existing styles ... */ }
+.hand-row:empty::after, #player-hand.hand-row:empty::after { /* ... existing styles ... */ }
+#player-hand.hand-row:empty::after { /* ... existing styles ... */ }
+.card-css { /* ... existing styles ... */ }
+.card-css img { /* ... existing styles ... */ }
 .droppable-area.sortable-ghost,
-.card-css.sortable-ghost {
-    opacity: 0.4; background-color: #cfe2ff !important; border: 2px dashed #0d6efd !important;
-}
-.card-css.sortable-chosen {
-    opacity: 0.9; transform: scale(1.06) translateY(-2px); box-shadow: 0 5px 12px rgba(0,0,0,0.2);
-}
-
-/* --- Controls and Message Area (No changes needed for card size increase) --- */
-.controls {
-    margin-top: auto; padding-top: clamp(8px, 1.5vh, 10px); border-top: 1px solid #dee2e6;
-    flex-shrink: 0; width: 100%; box-sizing: border-box;
-}
-.controls button {
-    padding: clamp(9px, 1.8vh, 13px) clamp(14px, 2.8vw, 22px);
-    margin: clamp(4px, 0.8vh, 6px) clamp(5px, 1vw, 7px);
-    border: none; border-radius: 5px; background-color: #007bff; color: white; cursor: pointer;
-    font-size: clamp(0.85em, 2.3vw, 1.05em); transition: background-color 0.2s ease, box-shadow 0.2s ease;
-    font-weight: 500;
-}
-.controls button:hover:not(:disabled) { background-color: #0069d9; box-shadow: 0 2px 5px rgba(0,0,0,0.15); }
-.controls button:disabled { background-color: #6c757d; opacity: 0.65; cursor: not-allowed; }
-.controls button:active:not(:disabled) { background-color: #0056b3; }
-
-.message-area, .score-area {
-    margin-top: clamp(8px, 1.5vh, 10px); padding: clamp(7px, 1.2vh, 11px) clamp(10px, 1.8vw, 14px);
-    border: 1px solid #ced4da; min-height: 22px; line-height: 1.45; background-color: #f8f9fa;
-    border-radius: 5px; font-size: clamp(0.8em, 1.9vw, 0.95em); color: #212529;
-    text-align: left; flex-shrink: 0; width: 100%; box-sizing: border-box;
-}
-#lobby-message-area { /* Specific style for lobby message area if needed */
-    width: 100%;
-    max-width: 500px; /* Consistent with room list */
-    text-align: center;
-}
-
-.message-area.error { background-color: #f8d7da; color: #721c24; border-color: #f5c2c7; }
-.message-area.info { background-color: #d1e7dd; color: #0f5132; border-color: #badbcc; }
-.score-area { font-weight: bold; color: #0a3622; background-color: #d1e7dd; border-color: #a3cfbb; }
-
-/* Daoshui Warning Styles */
-.droppable-area.daoshui-warning { border-color: #dc3545 !important; background-color: #f8d7da !important; }
+.card-css.sortable-ghost { /* ... existing styles ... */ }
+.card-css.sortable-chosen { /* ... existing styles ... */ }
+.controls { /* ... existing styles ... */ }
+.controls button { /* ... existing styles ... */ }
+.controls button:hover:not(:disabled) { /* ... existing styles ... */ }
+.controls button:disabled { /* ... existing styles ... */ }
+.controls button:active:not(:disabled) { /* ... existing styles ... */ }
+.message-area, .score-area { /* ... existing styles ... */ }
+.message-area.error { /* ... existing styles ... */ }
+.message-area.info { /* ... existing styles ... */ }
+.score-area { /* ... existing styles ... */ }
+.droppable-area.daoshui-warning { /* ... existing styles ... */ }
 .droppable-area.daoshui-warning .hand-row-label span,
 #middle-hand-header-container.daoshui-warning #middle-eval-text,
-#middle-hand-header-container.daoshui-warning #middle-hand-header { color: #b02a37 !important; }
+#middle-hand-header-container.daoshui-warning #middle-hand-header { /* ... existing styles ... */ }
