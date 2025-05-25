@@ -105,43 +105,80 @@ function evaluateHand(cards) {
         return { type: HAND_TYPES.HIGH_CARD, message: "牌数据错误", ranks: [], originalCards: cards };
     }
 
-    // ** PASTE YOUR FULL, WORKING evaluateHand LOGIC HERE **
-    // This is a highly simplified placeholder for demonstration.
-    let ranks = cards.map(c => getRankValue(c)).sort((a, b) => b - a); // Sort ranks descending for high card
-    let message = HAND_TYPE_MESSAGES[HAND_TYPES.HIGH_CARD];
-    // Add more sophisticated logic here to determine actual hand type
-    // For example, if it's a pair, three of a kind, straight, flush, etc.
-    // and update 'message' and 'type' accordingly.
+    let type = HAND_TYPES.HIGH_CARD;
+    // Default evaluatedRanks for high card, sorted descending.
+    let evaluatedRanks = cards.map(c => getRankValue(c)).sort((a, b) => b - a);
 
-    // Example: Basic pair check (very simplified)
-    if (cardCount === 5 || cardCount === 3) { // Simplified
-        const rankCounts = {};
-        ranks.forEach(rank => rankCounts[rank] = (rankCounts[rank] || 0) + 1);
-        if (Object.values(rankCounts).includes(2)) message = HAND_TYPE_MESSAGES[HAND_TYPES.PAIR];
-        if (Object.values(rankCounts).includes(3)) message = HAND_TYPE_MESSAGES[HAND_TYPES.THREE_OF_A_KIND];
-        // This needs to be much more robust for all hand types.
+    const rankCounts = {};
+    cards.forEach(card => {
+        const rankVal = getRankValue(card);
+        rankCounts[rankVal] = (rankCounts[rankVal] || 0) + 1;
+    });
+
+    // Check for Three of a Kind
+    // Object.keys(rankCounts) gives ranks as strings, so parseInt is used.
+    const tripleRankStr = Object.keys(rankCounts).find(r => rankCounts[r] === 3);
+    if (tripleRankStr) {
+        const tripleRankVal = parseInt(tripleRankStr);
+        type = HAND_TYPES.THREE_OF_A_KIND;
+        const kickers = cards
+            .filter(c => getRankValue(c) !== tripleRankVal)
+            .map(c => getRankValue(c))
+            .sort((a, b) => b - a);
+        // Structure ranks for comparison: [TripleRank, TripleRank, TripleRank, Kicker1, Kicker2]
+        evaluatedRanks = [tripleRankVal, tripleRankVal, tripleRankVal, ...kickers];
+    } else {
+        // Check for Pairs if not Three of a Kind
+        const pairRankStrs = Object.keys(rankCounts).filter(r => rankCounts[r] === 2);
+        if (pairRankStrs.length === 1) { // One Pair
+            const pairRankVal = parseInt(pairRankStrs[0]);
+            type = HAND_TYPES.PAIR;
+            const kickers = cards
+                .filter(c => getRankValue(c) !== pairRankVal)
+                .map(c => getRankValue(c))
+                .sort((a, b) => b - a);
+            // Structure ranks for comparison: [PairRank, PairRank, Kicker1, Kicker2, Kicker3]
+            evaluatedRanks = [pairRankVal, pairRankVal, ...kickers];
+        }
+        // NOTE: This simplified version does not detect Two Pair.
+        // For a full implementation, Two Pair should be checked here if pairRankStrs.length === 2.
     }
 
-    return { type: HAND_TYPES.HIGH_CARD, ranks: ranks, message: message, originalCards: cards };
+    // **This is still a highly simplified placeholder.**
+    // It now correctly sets `type` and `ranks` for High Card, Pair, and Three of a Kind.
+    // Full evaluation logic for Straight, Flush, Full House, Four of a Kind, Straight Flush, and Two Pair is MISSING.
+    // You MUST provide your complete and correct logic for these for a fully functional game.
+
+    let message = HAND_TYPE_MESSAGES[type] || "计算中...";
+    if (type === HAND_TYPES.HIGH_CARD && evaluatedRanks.length === 0 && cardCount > 0) {
+        // Fallback if ranks somehow ended up empty but cards were present
+        message = "牌数据错误";
+    }
+
+
+    return { type: type, ranks: evaluatedRanks, message: message, originalCards: cards };
 }
 
 function compareHandInfos(handInfo1, handInfo2) {
     if (!handInfo1 || !handInfo2 || typeof handInfo1.type === 'undefined' || typeof handInfo2.type === 'undefined') {
         // console.warn("compareHandInfos: Invalid handInfo input", handInfo1, handInfo2);
-        return 0;
+        return 0; // Consider as tie or error
     }
+    // Compare by hand type first
     if (handInfo1.type !== handInfo2.type) {
         return handInfo1.type > handInfo2.type ? 1 : -1;
     }
-    // ** PASTE YOUR FULL, WORKING compareHandInfos LOGIC HERE for same-type comparisons **
-    // Placeholder: Compare by highest card if types are same (very simplified)
+    // If hand types are the same, compare by ranks
+    // The 'ranks' array should be structured by evaluateHand to allow direct comparison.
+    // e.g., for Pair: [PairRank, PairRank, Kicker1, Kicker2, Kicker3]
+    // e.g., for High Card: [Card1, Card2, Card3, Card4, Card5] (all sorted descending)
     if (handInfo1.ranks && handInfo2.ranks) {
         for (let i = 0; i < Math.min(handInfo1.ranks.length, handInfo2.ranks.length); i++) {
             if (handInfo1.ranks[i] > handInfo2.ranks[i]) return 1;
             if (handInfo1.ranks[i] < handInfo2.ranks[i]) return -1;
         }
     }
-    return 0; // Tie
+    return 0; // Tie if types and all compared ranks are identical
 }
 
 function checkDaoshui(topInfo, middleInfo, bottomInfo) {
@@ -150,17 +187,19 @@ function checkDaoshui(topInfo, middleInfo, bottomInfo) {
         typeof middleInfo.type === 'undefined' ||
         typeof bottomInfo.type === 'undefined') {
         // console.warn("checkDaoshui: One or more hand infos are incomplete.");
-        return true; // Fail safe, consider it daoshui
+        return true; // Fail safe, consider it daoshui if evaluation is incomplete
     }
-    // ** PASTE YOUR FULL, WORKING checkDaoshui LOGIC HERE **
+
+    // Daoshui if top row is stronger than middle row
     if (compareHandInfos(topInfo, middleInfo) > 0) {
-        // console.log("Daoshui: Top > Middle");
+        // console.log("Daoshui: Top > Middle", topInfo, middleInfo);
         return true;
     }
+    // Daoshui if middle row is stronger than bottom row
     if (compareHandInfos(middleInfo, bottomInfo) > 0) {
-        // console.log("Daoshui: Middle > Bottom");
+        // console.log("Daoshui: Middle > Bottom", middleInfo, bottomInfo);
         return true;
     }
-    return false;
+    return false; // Not Daoshui
 }
 // --- END: CRITICAL GAME LOGIC - REPLACE WITH YOUR FULL IMPLEMENTATIONS ---
