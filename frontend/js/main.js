@@ -6,6 +6,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const confirmOrganizationButton = document.getElementById('confirm-organization-button');
     const compareButton = document.getElementById('compare-button');
     const callBackendButton = document.getElementById('call-backend-button');
+    const lobbyButton = document.getElementById('lobby-button'); // New
+    const pointsButton = document.getElementById('points-button'); // New
     const initialAndMiddleHandElement = document.getElementById('player-hand');
     const topRowElement = document.getElementById('player-top-row');
     const bottomRowElement = document.getElementById('player-bottom-row');
@@ -137,7 +139,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         [topRowElement,initialAndMiddleHandElement,bottomRowElement].forEach(el => el && el.classList.remove('daoshui-warning','is-middle-row-style'));
         safeDisplayMessage("点击“发牌”开始。", false);
-        if(typeof displayScore === "function") displayScore("");
+        if(typeof displayScore === "function") displayScore("得分: --"); // Reset score display
         dealButton.disabled=false; confirmOrganizationButton.style.display='none'; confirmOrganizationButton.disabled=true; compareButton.style.display='none';
         console.log("Game Initialized.");
     }
@@ -262,6 +264,28 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     } else console.error("callBackendButton element NOT found!");
+
+    // --- New Button Event Listeners ---
+    if (lobbyButton) {
+        lobbyButton.addEventListener('click', () => {
+            console.log("--- Lobby Button Clicked ---");
+            safeDisplayMessage("大厅功能暂未实现。", false);
+            // Future: window.location.href = '/lobby.html'; // or similar
+        });
+    } else {
+        console.error("Lobby button element NOT found!");
+    }
+
+    if (pointsButton) {
+        pointsButton.addEventListener('click', () => {
+            console.log("--- Points Button Clicked ---");
+            safeDisplayMessage("积分查看功能暂未实现。", false);
+            // Future: displayPointsModal(); // or similar
+        });
+    } else {
+        console.error("Points button element NOT found!");
+    }
+    // --- End New Button Event Listeners ---
 
     initializeGame();
     initializeSortable();
