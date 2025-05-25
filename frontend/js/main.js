@@ -1,33 +1,17 @@
 // frontend/js/main.js
 
 document.addEventListener('DOMContentLoaded', () => {
-    // --- Lobby and Room DOM Elements ---
-    // const appContainer = document.getElementById('app-container'); // Not directly used for show/hide
-    const lobbySection = document.getElementById('lobby-section');
-    const roomSection = document.getElementById('room-section');
-
-    const playerNameInput = document.getElementById('player-name-input');
-    const createRoomButton = document.getElementById('create-room-button');
-    const joinRoomIdInput = document.getElementById('join-room-id-input');
-    const joinRoomButton = document.getElementById('join-room-button');
-    const roomListElement = document.getElementById('room-list');
-    const lobbyMessageArea = document.getElementById('lobby-message-area');
-    const callBackendButtonLobby = document.getElementById('call-backend-button-lobby');
-
-    const roomTitleElement = document.getElementById('room-title');
-    const playersInRoomTextElement = document.getElementById('players-in-room-text');
-    const leaveRoomButton = document.getElementById('leave-room-button');
-
-    // --- Original Game DOM Elements ---
+    // DOM Elements
     const dealButton = document.getElementById('deal-button');
     const confirmOrganizationButton = document.getElementById('confirm-organization-button');
     const compareButton = document.getElementById('compare-button');
+    const callBackendButton = document.getElementById('call-backend-button');
     const initialAndMiddleHandElement = document.getElementById('player-hand');
     const topRowElement = document.getElementById('player-top-row');
     const bottomRowElement = document.getElementById('player-bottom-row');
     const middleHandHeader = document.getElementById('middle-hand-header');
     const topEvalTextElement = document.getElementById('top-eval-text');
-    const middleEvalTextElement = document.getElementById('middle-eval-text');
+    const middleEvalTextElement = document.getElementById('middle-eval-text'); // Span inside H3
     const bottomEvalTextElement = document.getElementById('bottom-eval-text');
 
     const API_BASE_URL = 'https://wenge.cloudns.ch/backend/';
@@ -37,86 +21,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const MAX_SORTABLE_INIT_ATTEMPTS = 10, SORTABLE_INIT_DELAY = 200;
     let sortableInitializationAttempts = 0;
 
-    // --- Lobby/Room State ---
-    let currentPlayerName = '';
-    let currentRoomId = null;
-    let isGameActiveInRoom = false;
-
-    const safeDisplayMessage = (message, isError = false, areaElement = null) => {
-        const targetElement = areaElement || (lobbySection.style.display !== 'none' ? lobbyMessageArea : document.getElementById('message-area'));
-        if (typeof displayMessage === "function" && targetElement) {
-            displayMessage(message, isError, targetElement);
-        } else {
-            isError ? console.error(message) : console.log(message);
-        }
+    // Helper to safely call displayMessage
+    const safeDisplayMessage = (msg, isErr = false) => {
+        if (typeof displayMessage === "function") displayMessage(msg, isErr);
+        else isErr ? console.error(msg) : console.log(msg);
     };
 
-    function showLobby() {
-        lobbySection.style.display = 'flex';
-        roomSection.style.display = 'none';
-        currentRoomId = null;
-        isGameActiveInRoom = false;
-        playerNameInput.value = currentPlayerName || "玩家" + Math.floor(Math.random()*1000);
-        safeDisplayMessage("欢迎来到十三水！请创建或加入房间。", false, lobbyMessageArea);
-        initializeGame(); 
-    }
-
-    function showRoom(roomId, playerName) { // Simplified signature for this lobby version
-        lobbySection.style.display = 'none';
-        roomSection.style.display = 'flex';
-        currentRoomId = roomId; // This is the actual RoomID used
-        currentPlayerName = playerName;
-        roomTitleElement.textContent = `房间: ${roomId}`; // Display the actual RoomID
-        playersInRoomTextElement.textContent = `${playerName} (你)`;
-        isGameActiveInRoom = false;
-        
-        initializeGame(); 
-        safeDisplayMessage(`已加入房间 ${roomId}. 点击 "发牌 (开始游戏)" 开始。`, false);
-        dealButton.disabled = false;
-        dealButton.textContent = '发牌 (开始游戏)';
-        confirmOrganizationButton.style.display = 'none';
-        compareButton.style.display = 'none';
-    }
-
-    function handleCreateRoom() {
-        const name = playerNameInput.value.trim();
-        if (!name) {
-            safeDisplayMessage("请输入你的昵称！", true, lobbyMessageArea);
-            playerNameInput.focus();
-            return;
-        }
-        const newRoomId = "Room" + Math.floor(Math.random() * 9000 + 1000);
-        currentPlayerName = name;
-        // TODO: Add newRoomId to the #room-list dynamically for others to see (simulation)
-        // For now, just directly join
-        showRoom(newRoomId, currentPlayerName);
-        safeDisplayMessage(`房间 "${newRoomId}" 已创建. 等待其他玩家或开始游戏.`, false); // Game message area
-    }
-
-    function handleJoinRoom(roomIdToJoin = null) {
-        const name = playerNameInput.value.trim();
-        if (!name) {
-            safeDisplayMessage("请输入你的昵称！", true, lobbyMessageArea);
-            playerNameInput.focus();
-            return;
-        }
-        const roomId = roomIdToJoin || joinRoomIdInput.value.trim();
-        if (!roomId) {
-            safeDisplayMessage("请输入要加入的房间ID！", true, lobbyMessageArea);
-            joinRoomIdInput.focus();
-            return;
-        }
-        currentPlayerName = name;
-        // In a real app, check if room 'roomId' exists and is joinable
-        showRoom(roomId, currentPlayerName);
-        // Message will be set by showRoom
-    }
-
-    // initializeSortable, updateHandModelFromDOM, displayCurrentArrangementState,
-    // checkDaoshuiForUI, checkAllCardsOrganized, initializeGame,
-    // dealButton, confirmOrganizationButton, compareButton event listeners
-    // should largely remain the same as in the version that had the card size fix.
-    // Ensure these are present and correct from that version.
     function initializeSortable() {
         if (typeof Sortable === 'undefined') {
             sortableInitializationAttempts++;
@@ -173,12 +83,12 @@ document.addEventListener('DOMContentLoaded', () => {
         if(topEvalTextElement) topEvalTextElement.textContent = topC.length > 0 ? ` (${(topC.length===3 ? evalFunc(topC).message : '未完成') || '未完成'})` : '';
         if(bottomEvalTextElement) bottomEvalTextElement.textContent = botC.length > 0 ? ` (${(botC.length===5 ? evalFunc(botC).message : '未完成') || '未完成'})` : '';
 
-        if (middleHandHeader) { 
-            const h3TitleElement = document.getElementById('middle-hand-header'); 
-            const spanEvalElement = document.getElementById('middle-eval-text'); 
+        if (middleHandHeader) { // Check if middleHandHeader (the H3's direct parent div) exists
+            const h3TitleElement = document.getElementById('middle-hand-header'); // The H3 itself
+            const spanEvalElement = document.getElementById('middle-eval-text'); // The span inside H3
             if (h3TitleElement && spanEvalElement) {
                 if (midReady) {
-                    h3TitleElement.childNodes[0].nodeValue = `中道 (5张): `; 
+                    h3TitleElement.childNodes[0].nodeValue = `中道 (5张): `; // Only change text node part of H3
                     spanEvalElement.textContent = ` (${evalFunc(midCSource).message || '计算中...'})`;
                     initialAndMiddleHandElement.classList.add('is-middle-row-style');
                 } else {
@@ -207,15 +117,15 @@ document.addEventListener('DOMContentLoaded', () => {
         const midCount = initialAndMiddleHandElement.children.length;
         const topOK = playerOrganizedHand.top.length === 3, botOK = playerOrganizedHand.bottom.length === 5, midOK = midCount === 5;
         const allSet = topOK && botOK && midOK;
-        if (confirmOrganizationButton) confirmOrganizationButton.disabled = !allSet;
+        confirmOrganizationButton.disabled = !allSet;
         if(allSet && !silent) safeDisplayMessage("牌型已分配，请确认。", false);
         return allSet;
     }
-    
-    function initializeGame() { 
+
+    function initializeGame() {
         playerFullHandSource = []; playerOrganizedHand = {top:[],middle:[],bottom:[]};
         [topRowElement,bottomRowElement].forEach(el => el && (el.innerHTML = ''));
-        if(initialAndMiddleHandElement) initialAndMiddleHandElement.innerHTML='<p>点击 "发牌 (开始游戏)" 开始</p>';
+        if(initialAndMiddleHandElement) initialAndMiddleHandElement.innerHTML='<p>点击 "发牌" 开始</p>';
         [topEvalTextElement,middleEvalTextElement,bottomEvalTextElement].forEach(el => el && (el.textContent=''));
 
         const h3MidHeader = document.getElementById('middle-hand-header');
@@ -224,63 +134,23 @@ document.addEventListener('DOMContentLoaded', () => {
             h3MidHeader.childNodes[0].nodeValue = `我的手牌 / 中道 (剩余牌): `;
             spanMidEval.textContent = '';
         }
-        [topRowElement,initialAndMiddleHandElement,bottomRowElement].forEach(el => el && el.classList.remove('daoshui-warning','is-middle-row-style'));
-        
-        if (roomSection.style.display !== 'none') { 
-            safeDisplayMessage('点击 "发牌 (开始游戏)" 开始新一局。', false);
-        }
 
+        [topRowElement,initialAndMiddleHandElement,bottomRowElement].forEach(el => el && el.classList.remove('daoshui-warning','is-middle-row-style'));
+        safeDisplayMessage("点击“发牌”开始。", false);
         if(typeof displayScore === "function") displayScore("");
-        
-        if(dealButton) {
-            dealButton.disabled = false;
-            dealButton.textContent = '发牌 (开始游戏)';
-        }
-        if(confirmOrganizationButton) {
-            confirmOrganizationButton.style.display = 'none';
-            confirmOrganizationButton.disabled = true;
-        }
-        if(compareButton) {
-            compareButton.style.display = 'none';
-            compareButton.disabled = true;
-        }
+        dealButton.disabled=false; confirmOrganizationButton.style.display='none'; confirmOrganizationButton.disabled=true; compareButton.style.display='none';
+        console.log("Game Initialized.");
     }
 
-    // --- Event Listeners ---
-    if (createRoomButton) createRoomButton.addEventListener('click', handleCreateRoom);
-    if (joinRoomButton) joinRoomButton.addEventListener('click', () => handleJoinRoom()); // Uses input field
-    if (leaveRoomButton) leaveRoomButton.addEventListener('click', showLobby);
-
-    if (roomListElement) {
-        roomListElement.addEventListener('click', (event) => {
-            if (event.target.classList.contains('join-specific-room-button')) {
-                const roomIdToJoin = event.target.dataset.roomid;
-                handleJoinRoom(roomIdToJoin); // Pass specific room ID
-            }
-        });
-    }
-    
     dealButton.addEventListener('click', async () => {
-        console.log("--- Deal Button Clicked (Start Game in Room) ---");
-        playerFullHandSource = []; playerOrganizedHand = {top:[],middle:[],bottom:[]};
-        [topRowElement,bottomRowElement].forEach(el => el && (el.innerHTML = ''));
-        if(initialAndMiddleHandElement) initialAndMiddleHandElement.innerHTML='<p>发牌中...</p>';
-        [topEvalTextElement,middleEvalTextElement,bottomEvalTextElement].forEach(el => el && (el.textContent=''));
-         const h3MidHeader = document.getElementById('middle-hand-header');
-        const spanMidEval = document.getElementById('middle-eval-text');
-        if(h3MidHeader && spanMidEval) {
-            h3MidHeader.childNodes[0].nodeValue = `我的手牌 / 中道 (剩余牌): `;
-            spanMidEval.textContent = '';
-        }
-        [topRowElement,initialAndMiddleHandElement,bottomRowElement].forEach(el => el && el.classList.remove('daoshui-warning','is-middle-row-style'));
-
-        safeDisplayMessage("发牌中...", false); dealButton.disabled=true;
-        isGameActiveInRoom = true;
-
+        console.log("--- Deal Button Clicked ---");
+        initializeGame(); safeDisplayMessage("发牌中...", false); dealButton.disabled=true;
         try {
             const res = await fetch(`${API_BASE_URL}deal_cards.php`);
+            console.log("Deal cards fetch response:", res);
             if(!res.ok) throw new Error(`发牌失败: ${res.status} ${await res.text()}`);
             const data = await res.json();
+            console.log("Data from deal_cards.php:", JSON.stringify(data).substring(0,200) + "..."); // Log snippet
             if(!data || !Array.isArray(data.cards) || data.cards.length!==13) throw new Error("牌数据错误。");
 
             playerFullHandSource = data.cards.map(cardFromServer => {
@@ -291,24 +161,28 @@ document.addEventListener('DOMContentLoaded', () => {
                     id: (cardFromServer.rank || 'X') + (cardFromServer.suitKey || 'Y') + Math.random().toString(36).substring(2, 7)
                 };
             }).filter(card => card.rank && card.suitKey);
+            console.log("playerFullHandSource mapped (before sort):", JSON.stringify(playerFullHandSource).substring(0,200) + "...");
 
+            // --- AUTO-SORT CARDS AFTER DEALING ---
             if (typeof sortCards === "function") {
-                playerFullHandSource = sortCards(playerFullHandSource); 
+                playerFullHandSource = sortCards(playerFullHandSource); // Sorts descending by rank by default
+                console.log("playerFullHandSource (after sort):", JSON.stringify(playerFullHandSource).substring(0,200) + "...");
+            } else {
+                console.warn("sortCards function not available. Cards will not be auto-sorted.");
             }
+            // --- END AUTO-SORT ---
 
             initialAndMiddleHandElement.innerHTML='';
             playerFullHandSource.forEach(card => {
+                // console.log("Processing card for render:", JSON.stringify(card));
                 if (card && typeof renderCard === "function") initialAndMiddleHandElement.appendChild(renderCard(card, true));
+                else console.error("Cannot render card:", card, "renderCard available:", typeof renderCard === "function");
             });
             displayCurrentArrangementState(); safeDisplayMessage("请理牌。", false);
             confirmOrganizationButton.style.display='inline-block';
-            dealButton.textContent = '重新开始'; 
-            dealButton.disabled = false; 
-
         } catch(err) {
             console.error("发牌错误:", err); safeDisplayMessage(`错误: ${err.message}`,true);
             dealButton.disabled=false; confirmOrganizationButton.style.display='none';
-            isGameActiveInRoom = false;
         }
     });
 
@@ -344,13 +218,15 @@ document.addEventListener('DOMContentLoaded', () => {
         safeDisplayMessage("提交比牌中...",false); compareButton.disabled=true;
         if(playerOrganizedHand.middle.length!==5) playerOrganizedHand.middle=Array.from(initialAndMiddleHandElement.children).map(d=>d.cardData).filter(Boolean);
         const pL={top:playerOrganizedHand.top.map(c=>({rank:c.rank,suitKey:c.suitKey})), middle:playerOrganizedHand.middle.map(c=>({rank:c.rank,suitKey:c.suitKey})), bottom:playerOrganizedHand.bottom.map(c=>({rank:c.rank,suitKey:c.suitKey}))};
+        console.log("Payload to submit_hand.php:", JSON.stringify(pL));
         if(pL.top.length!==3||pL.middle.length!==5||pL.bottom.length!==5){
             safeDisplayMessage("错误:提交牌数不对。",true); compareButton.style.display='none'; dealButton.disabled=false; return;
         }
         try {
             const res = await fetch(`${API_BASE_URL}submit_hand.php`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(pL)});
+            console.log("Submit hand fetch response:", res);
             if(!res.ok) throw new Error(`比牌请求失败: ${res.status} ${await res.text()}`);
-            const rst = await res.json(); 
+            const rst = await res.json(); console.log("比牌结果:",rst);
             if(rst.success){ let msg=`服务器: ${rst.message||'完成.'}`; if(rst.daoshui)msg+=" (倒水)"; safeDisplayMessage(msg,rst.daoshui); }
             else safeDisplayMessage(`服务器错误: ${rst.message||'失败.'}`,true);
             if(typeof displayScore==="function"&&typeof rst.score!=="undefined")displayScore(`得分: ${rst.score}`);
@@ -359,30 +235,34 @@ document.addEventListener('DOMContentLoaded', () => {
         } finally { dealButton.disabled=false; compareButton.style.display='none'; }
     });
 
-    if (callBackendButtonLobby) {
-        callBackendButtonLobby.addEventListener('click', async () => {
-            console.log("--- Test Backend Button Clicked (Lobby)! ---");
-            safeDisplayMessage("正在测试后端通讯...", false, lobbyMessageArea);
+    if (callBackendButton) {
+        console.log("callBackendButton element found:", callBackendButton);
+        callBackendButton.addEventListener('click', async () => {
+            console.log("--- Test Backend Button Clicked! ---");
+            safeDisplayMessage("正在测试后端通讯...", false);
             try {
                 const testEndpoint = `${API_BASE_URL}deal_cards.php`;
+                console.log("Test endpoint URL:", testEndpoint);
                 const response = await fetch(testEndpoint);
+                console.log("Test Backend - Fetch response received:", response);
                 if (!response.ok) {
                     const errorText = await response.text();
+                    console.error(`Test Backend - HTTP error! Status: ${response.status} - Response Text: ${errorText}`);
                     throw new Error(`HTTP error! ${response.status} - ${errorText}`);
                 }
                 const data = await response.json();
+                console.log("Test Backend - Backend response data:", data);
                 let msg = "后端通讯成功！";
                 if(data && data.cards && data.cards.length > 0) msg += ` (后端返回 ${data.cards.length} 张牌)`
                 else if(data && data.message) msg += ` 后端消息: ${data.message}`;
-                safeDisplayMessage(msg, false, lobbyMessageArea);
+                safeDisplayMessage(msg, false);
             } catch (error) {
                 console.error("Test Backend - 通讯测试捕获到错误:", error);
-                safeDisplayMessage(`后端通讯测试失败: ${error.message}`, true, lobbyMessageArea);
+                safeDisplayMessage(`后端通讯测试失败: ${error.message}`, true);
             }
         });
-    }
+    } else console.error("callBackendButton element NOT found!");
 
-    // --- Initial Setup ---
-    showLobby();
+    initializeGame();
     initializeSortable();
 });
