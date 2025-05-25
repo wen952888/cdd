@@ -8,75 +8,44 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js" integrity="sha512-Eezs+g9Lq4TCCq0wae01s9PuNWzHYoCMkE97e2qdkYthpI0pzC3UGB03lgEHn2XM85hDOUF6qgqqszs+iXU4UA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 </head>
 <body>
-    <div id="app-container">
-        <!-- Lobby Section (Reverted to simpler design) -->
-        <div id="lobby-section" class="lobby-container">
-            <h2>游戏大厅</h2>
-            <div class="lobby-controls">
-                <input type="text" id="player-name-input" placeholder="输入你的昵称" value="玩家1">
-                <button id="create-room-button">创建房间</button>
-            </div>
-            <div class="lobby-controls">
-                 <input type="text" id="join-room-id-input" placeholder="输入房间ID加入 (例如 Room123)">
-                <button id="join-room-button">加入房间</button>
-            </div>
-            <div id="room-list-container">
-                <h3>可用房间 (模拟)</h3>
-                <ul id="room-list">
-                    <li>房间A (1/4) <button class="join-specific-room-button" data-roomid="RoomA">加入</button></li>
-                    <li>房间B (3/4) <button class="join-specific-room-button" data-roomid="RoomB">加入</button></li>
-                </ul>
-            </div>
-            <button id="call-backend-button-lobby" title="测试与后端基础通讯">测试后端</button>
-            <div id="lobby-message-area" class="message-area">欢迎来到十三水！</div>
-        </div>
+    <div class="game-container">
 
-        <!-- Room Section (contains the game - structure unchanged) -->
-        <div id="room-section" class="room-container" style="display:none;">
-            <div class="room-header">
-                <h2 id="room-title">房间: 尚未加入</h2>
-                <button id="leave-room-button">离开房间</button>
-            </div>
-            <div id="room-players-list">
-                <strong>玩家:</strong> <span id="players-in-room-text"></span>
-            </div>
+        <div class="player-area">
+            <h3>我的牌道</h3>
+            <div class="organized-rows">
+                <div class="hand-row-label">头道 (3张): <span id="top-eval-text"></span></div>
+                <div id="player-top-row" class="hand-row droppable-area" data-row-name="top" data-row-limit="3"></div>
 
-            <!-- Existing Game Container (structure unchanged) -->
-            <div class="game-container">
-                <div class="player-area">
-                    <h3>我的牌道</h3>
-                    <div class="organized-rows">
-                        <div class="hand-row-label">头道 (3张): <span id="top-eval-text"></span></div>
-                        <div id="player-top-row" class="hand-row droppable-area" data-row-name="top" data-row-limit="3"></div>
-
-                        <div class="hand-row-label" id="middle-hand-header-container">
-                             <h3 id="middle-hand-header" style="margin:0; font-size: 1em; color: #555f6b; font-weight:600; text-align: left;">
-                                我的手牌 / 中道 (剩余牌): <span id="middle-eval-text" style="font-weight:normal; color: #2980b9; font-style:italic;"></span>
-                             </h3>
-                        </div>
-                        <div id="player-hand" class="player-hand hand-row droppable-area" data-row-name="initial_middle" data-row-limit="13">
-                            <p>点击 "发牌" 开始</p>
-                        </div>
-
-                        <div class="hand-row-label">尾道 (5张): <span id="bottom-eval-text"></span></div>
-                        <div id="player-bottom-row" class="hand-row droppable-area" data-row-name="bottom" data-row-limit="5"></div>
-                    </div>
+                <div class="hand-row-label" id="middle-hand-header-container">
+                     <h3 id="middle-hand-header" style="margin:0; font-size: 1em; color: #555f6b; font-weight:600; text-align: left;">
+                        我的手牌 / 中道 (剩余牌): <span id="middle-eval-text" style="font-weight:normal; color: #2980b9; font-style:italic;"></span>
+                     </h3>
+                </div>
+                <div id="player-hand" class="player-hand hand-row droppable-area" data-row-name="initial_middle" data-row-limit="13">
+                    <p>点击 "发牌" 开始</p>
                 </div>
 
-                <div class="controls">
-                    <button id="deal-button">发牌 (开始游戏)</button>
-                    <button id="confirm-organization-button" style="display:none;" disabled>确认理牌</button>
-                    <button id="compare-button" style="display:none;" disabled>比牌</button>
-                </div>
-
-                <div id="message-area" class="message-area">游戏消息将会显示在这里。</div>
-                <div id="score-area" class="score-area">得分: --</div>
+                <div class="hand-row-label">尾道 (5张): <span id="bottom-eval-text"></span></div>
+                <div id="player-bottom-row" class="hand-row droppable-area" data-row-name="bottom" data-row-limit="5"></div>
             </div>
         </div>
+
+        <div class="controls">
+            <button id="deal-button">发牌</button>
+            <button id="confirm-organization-button" style="display:none;" disabled>确认理牌</button>
+            <button id="compare-button" style="display:none;" disabled>比牌</button>
+            <button id="lobby-button">大厅</button>
+            <button id="points-button">积分</button>
+            <button id="call-backend-button" title="测试与后端基础通讯">测试后端</button>
+        </div>
+
+        <div id="message-area" class="message-area">游戏消息将会显示在这里。</div>
+        <div id="score-area" class="score-area">得分: --</div>
     </div>
 
-    <script src="js/game.js"></script>
-    <script src="js/ui.js"></script>
-    <script src="js/main.js"></script>
+    <!-- Scripts: Correct order is CRITICAL -->
+    <script src="js/game.js"></script>  <!-- Defines data structures and core logic functions -->
+    <script src="js/ui.js"></script>    <!-- Defines UI rendering functions (like renderCard), uses game.js items -->
+    <script src="js/main.js"></script>  <!-- Main game flow, event handling, uses game.js and ui.js items -->
 </body>
 </html>
