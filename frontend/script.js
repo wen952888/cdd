@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const API_BASE_URL = '../api/'; // 相对于 frontend 目录
+    const API_BASE_URL = 'https://wenge.cloudns.ch/api/'; // 相对于 frontend 目录
 
     // 与后端 game_logic.php 中的定义保持一致
     const SUITS_ORDER = ["diamonds", "clubs", "hearts", "spades"];
