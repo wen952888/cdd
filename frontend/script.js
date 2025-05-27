@@ -1,8 +1,10 @@
 // frontend/script.js
 document.addEventListener('DOMContentLoaded', () => {
-    const API_BASE_URL = 'https://wenge.cloudns.ch/api'; // 相对于 frontend 目录
+    // --- 核心修改点在这里 ---
+    const API_BASE_URL = 'https://wenge.cloudns.ch/api/'; // 使用您的后端绝对URL
+    // --- 修改结束 ---
 
-    const SUITS_ORDER = ["diamonds", "clubs", "hearts", "spades"]; // 方块<梅花<红桃<黑桃
+    const SUITS_ORDER = ["diamonds", "clubs", "hearts", "spades"];
     const FILENAME_VALUES = {
         "3": "3", "4": "4", "5": "5", "6": "6", "7": "7", "8": "8", "9": "9", "10": "10",
         "J": "jack", "Q": "queen", "K": "king", "A": "ace", "2": "2"
@@ -33,13 +35,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function getCardFilename(card) {
         const valuePart = FILENAME_VALUES[card.displayValue];
-        if (!valuePart || card.displayValue === 'BACK') { // Handle 'BACK' for opponents
+        if (!valuePart || card.displayValue === 'BACK') {
             return 'images/cards/back.png';
         }
         return `images/cards/${valuePart}_of_${card.suit}.png`;
     }
     
-    function renderPlayerHand(playerId, handData, isHuman) { // handData can be array of cards or just count
+    function renderPlayerHand(playerId, handData, isHuman) {
         const playerArea = playerElements[playerId];
         if (!playerArea) return;
 
@@ -50,14 +52,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (isHuman && Array.isArray(handData)) {
             cardCount = handData.length;
-            cardsToRender = [...handData]; // Create a copy to sort
-            cardsToRender.sort((a, b) => { // Sort human player's hand
+            cardsToRender = [...handData];
+            cardsToRender.sort((a, b) => {
                 if (a.value === b.value) {
                     return SUITS_ORDER.indexOf(a.suit) - SUITS_ORDER.indexOf(b.suit);
                 }
                 return a.value - b.value;
             });
-        } else { // Opponent or count-based
+        } else {
             cardCount = typeof handData === 'number' ? handData : (Array.isArray(handData) ? handData.length : 0);
             cardsToRender = Array(cardCount).fill({ displayValue: 'BACK', suit: 'none' });
         }
@@ -83,13 +85,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
                 cardDiv.addEventListener('click', () => toggleCardSelection(card, cardDiv));
             } else {
-                cardDiv.style.backgroundImage = `url(${getCardFilename({displayValue: 'BACK'})})`; // Use 'BACK' for filename
+                cardDiv.style.backgroundImage = `url(${getCardFilename({displayValue: 'BACK'})})`;
                 if (isSidePlayer) {
-                    cardDiv.style.zIndex = index + 1; // Higher index = more "on top" for vertical stack
+                    cardDiv.style.zIndex = index + 1;
                 }
             }
             cardDiv.dataset.cardId = cardId;
-            cardDiv.dataset.cardData = JSON.stringify(card); // Store original card data
+            cardDiv.dataset.cardData = JSON.stringify(card);
             playerArea.hand.appendChild(cardDiv);
         });
     }
@@ -140,7 +142,7 @@ document.addEventListener('DOMContentLoaded', () => {
             selectedCards.splice(index, 1);
             cardDiv.classList.remove('selected');
         } else {
-            selectedCards.push(cardData); // Store the actual card object from player's hand
+            selectedCards.push(cardData);
             cardDiv.classList.add('selected');
         }
     }
@@ -174,8 +176,7 @@ document.addEventListener('DOMContentLoaded', () => {
         passButton.disabled = true;
 
         const payload = {
-            // gameId: currentGameState.gameId, // gameId is managed by session on backend
-            playerId: localPlayerId, // Backend knows this is 'player1' contextually
+            playerId: localPlayerId,
             action: action,
             cards: action === 'play' ? cards.map(c => ({ displayValue: c.displayValue, suit: c.suit, value: c.value })) : []
         };
@@ -236,18 +237,23 @@ document.addEventListener('DOMContentLoaded', () => {
         let rawResponseTextForDebug = "";
 
         try {
-            const response = await fetch(`${API_BASE_URL}deal.php`, { method: 'GET' });
+            const response = await fetch(`${API_BASE_URL}deal.php`, { method: 'GET' }); // 使用了上面定义的绝对URL
             
             rawResponseTextForDebug = await response.text(); 
 
             if (!response.ok) {
                 let errorMsg = `服务器错误 ${response.status}.`;
-                try { const errData = JSON.parse(rawResponseTextForDebug); errorMsg = errData.message || errorMsg; }
-                catch (e) { errorMsg += ` 响应: ${rawResponseTextForDebug.substring(0,200)}...`; }
+                // 尝试解析错误信息，如果后端返回JSON格式的错误
+                try { 
+                    const errData = JSON.parse(rawResponseTextForDebug); 
+                    errorMsg = errData.message || errorMsg; 
+                } catch (e) { // 如果不是JSON，显示部分原始文本
+                    errorMsg += ` 响应内容: ${rawResponseTextForDebug.substring(0,200)}...`; 
+                }
                 throw new Error(errorMsg);
             }
             
-            const initialState = JSON.parse(rawResponseTextForDebug);
+            const initialState = JSON.parse(rawResponseTextForDebug); // 尝试解析为JSON
             if (initialState.success) {
                 updateUIWithGameState(initialState.gameState);
             } else {
@@ -256,11 +262,14 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         } catch (error) {
             console.error("开始游戏时发生捕获的错误:", error);
-            if (error instanceof SyntaxError) { // Specifically catch JSON parsing errors
-                 messageArea.textContent = `开始游戏失败: 服务器返回无效数据 (非JSON)。请检查服务器日志。`;
+            if (error instanceof SyntaxError) { // 特别捕获JSON解析错误
+                 messageArea.textContent = `开始游戏失败: 服务器返回无效数据 (非JSON)。请直接访问后端API URL检查响应。`;
                  console.error("原始响应 (导致JSON解析失败):", rawResponseTextForDebug);
             } else {
                  messageArea.textContent = `开始游戏失败: ${error.message || '未知网络或脚本错误。'}`;
+            }
+            if (rawResponseTextForDebug && !(error instanceof SyntaxError)) { // 如果不是解析错误但有原始文本，也打印
+                console.error("原始响应文本（调试用）:", rawResponseTextForDebug);
             }
             startGameButton.disabled = false;
         } finally {
