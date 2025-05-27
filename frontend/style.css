@@ -3,9 +3,9 @@ body {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
     background-color: #FFFFFF;
     color: #333333;
-    display: flex; /* body 使用 flex 来居中 game-container */
+    display: flex;
     justify-content: center;
-    align-items: center; /* 垂直居中 game-container */
+    align-items: center;
     min-height: 100vh;
     margin: 0;
     padding: 10px;
@@ -15,15 +15,15 @@ body {
 
 .game-container {
     display: flex;
-    flex-direction: column; /* 主容器改为列布局 */
+    flex-direction: column;
     align-items: center;
     width: 100%;
-    max-width: 98%;
-    height: calc(100vh - 20px); /* 使 game-container 占据大部分视口高度 */
-    position: relative; /* 为可能的绝对定位子元素做准备 */
+    max-width: 98%; /* 或者一个固定的最大宽度如 1400px */
+    height: calc(100vh - 20px); /* 占据大部分视口高度 */
+    position: relative;
 }
 
-.top-and-middle-section { /* 新增一个包裹层，用于顶部玩家和中间区域 */
+.top-and-middle-section {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -31,18 +31,21 @@ body {
 }
 
 .player-area.opponent-top { /* 顶部玩家 (玩家2) */
-    width: 50%; /* 调整宽度 */
-    min-height: 140px; /* 调整高度 */
+    width: 50%; /* 可以根据内容调整 */
+    min-height: 130px;
     margin-bottom: 10px;
+    display: flex; /* 确保内部手牌能正常布局 */
+    flex-direction: column;
+    align-items: center;
 }
 
 .middle-section {
     display: flex;
-    justify-content: space-between;
+    justify-content: space-between; /* 将左右玩家推到边缘 */
     width: 100%;
-    align-items: stretch; /* 让子元素高度一致 */
+    align-items: stretch; /* 让子项在交叉轴上填满 */
     margin-bottom: 15px;
-    flex-grow: 1; /* 让中间部分占据剩余空间 */
+    flex-grow: 1; /* 占据剩余垂直空间 */
 }
 
 .player-area { /* 通用玩家区域样式 */
@@ -57,63 +60,62 @@ body {
     box-sizing: border-box;
 }
 
-/* 左右玩家特定样式 */
+/* 左右玩家区域特定样式 */
 #player-3-area, #player-4-area {
-    flex-basis: 15%; /* 调整基础宽度，因为旋转后高度会变成宽度 */
-    min-width: 120px; /* 旋转后，这个会像是高度 */
-    justify-content: center; /* 垂直居中旋转后的手牌 */
+    flex-basis: 120px; /* 旋转前的“宽度”，会影响旋转后的横向空间 */
+    flex-grow: 0;
+    justify-content: center; /* 主轴居中（旋转后是垂直方向） */
+    align-items: center;     /* 交叉轴居中（旋转后是水平方向） */
+    min-height: 250px; /* 确保有足够的垂直空间容纳旋转后的牌 */
+    overflow: visible; /* 允许牌旋转后稍微超出边界 */
 }
 
 #player-3-area .hand, #player-4-area .hand {
     display: flex;
-    /* 对于旋转，flex-direction 会影响主轴，可能需要调整为 row 或 column-reverse */
-    /* 我们将直接在 .card 上应用旋转后的偏移 */
-    position: relative; /* 为卡牌的绝对定位或transform做准备 */
+    /* 对于旋转的牌，flex布局在旋转后作用于新的坐标系 */
+    /* 我们让牌在旋转前是“水平”排列的，通过调整每个牌的margin实现重叠 */
+    flex-direction: row; /* 牌在旋转前是行排列 */
+    align-items: center; /* 牌在旋转前垂直居中 */
+    justify-content: center; /* 牌在旋转前水平居中 */
     width: auto; /* 手牌容器宽度由内容决定 */
-    height: 100%; /* 尝试让手牌区域填充 */
+    height: 70px; /* 手牌容器高度大约是牌旋转后的“宽度” */
+    position: relative; /* 使得内部的牌可以用z-index */
 }
 
-/* 旋转应用 */
-#player-3-area .hand {
-    /* transform: rotate(90deg); */ /* 顺时针旋转 */
-    /* transform-origin: center center; */
-}
-#player-4-area .hand {
-    /* transform: rotate(-90deg); */ /* 逆时针旋转 */
-    /* transform-origin: center center; */
-}
-/* 注意：直接旋转 .hand 容器会导致其内部 flex 布局行为改变。
-   更稳妥的做法是旋转卡牌本身，或者为旋转后的手牌设计新的布局。
-   一个简化的方法是让手牌容器本身变窄高，然后卡牌在里面正常横向排列，再整体旋转容器。
-   但最直接的旋转效果是旋转每张牌，但这会使重叠复杂化。
-
-   我们将尝试一个不同的策略：让左右玩家区域本身变高窄，然后在里面横向排列牌背，
-   最后再考虑是否真的需要CSS旋转，或者仅通过视觉暗示。
-   真正的CSS旋转手牌并保持良好布局非常复杂。
-
-   替代方案：不直接旋转，而是让左右玩家的牌垂直堆叠，暗示侧面视角。
-*/
-#player-3-area .hand, #player-4-area .hand {
-    flex-direction: column; /* 改为垂直排列牌 */
-    align-items: center; /* 水平居中 */
-    justify-content: flex-start; /* 从顶部开始排列 */
-    height: auto; /* 高度由内容决定 */
-    width: 100%;
+/* 对左右玩家的每个牌背应用旋转和位移来实现重叠 */
+#player-3-area .hand .card,
+#player-4-area .hand .card {
+    width: 45px;  /* 牌的原始宽度 */
+    height: 70px; /* 牌的原始高度 */
+    margin: 0;    /* 清除默认margin */
+    position: relative; /* 允许z-index */
+    /* transform-origin: center center; // 默认就是中心 */
 }
 
-#player-3-area .hand .card, #player-4-area .hand .card {
-    margin: -60px 0 0 0; /* 垂直重叠，负的上边距 */
-    /* 移除横向重叠的 margin-right */
+#player-3-area .hand .card {
+    transform: rotate(90deg);
+    /* 通过margin-bottom（旋转后作用于其“右侧”）来实现重叠 */
+    /* 由于父容器是flex row, 兄弟元素间的margin会影响它们 */
 }
-#player-3-area .hand .card:first-child, #player-4-area .hand .card:first-child {
-    margin-top: 0;
+/* 使用相邻兄弟选择器来创建重叠效果 */
+#player-3-area .hand .card + .card {
+    margin-left: -38px; /* 牌旋转前是水平排列，用margin-left重叠 */
+                        /* 旋转后，这个margin-left仍然作用于元素间“左”的关系 */
+}
+
+
+#player-4-area .hand .card {
+    transform: rotate(-90deg);
+}
+#player-4-area .hand .card + .card {
+    margin-left: -38px; /* 同上 */
 }
 
 
 .human-player-area {
-    width: 95%; /* 主玩家区域宽度 */
-    margin-top: auto; /* !!! 关键：将此区域推到 .game-container 的底部 !!! */
-    padding-bottom: 10px; /* 底部留一些空间 */
+    width: 95%;
+    margin-top: auto; /* 将此区域推到 .game-container 的底部 */
+    padding-bottom: 10px;
     background-color: #f0f0f0;
     min-height: 180px; /* 确保有足够高度 */
 }
@@ -122,10 +124,10 @@ body {
     border: 2px dashed #bbbbbb;
     border-radius: 8px;
     padding: 15px;
-    min-height: 180px; /* 调整出牌区最小高度 */
-    flex-basis: 60%; /* 出牌区占据中间大部分宽度 */
-    flex-grow: 1;
-    margin: 0 10px; /* 调整与左右玩家的间距 */
+    min-height: 180px;
+    flex-basis: auto;
+    flex-grow: 1; /* 占据中间主要空间 */
+    margin: 0 10px; /* 与左右玩家区域的间距 */
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -152,7 +154,7 @@ body {
 .hand { /* 通用手牌容器 */
     display: flex;
     justify-content: center;
-    align-items: flex-end;
+    align-items: flex-end; /* 默认底部对齐 */
     flex-wrap: wrap;
     padding-top: 10px;
     min-height: 100px;
@@ -166,7 +168,7 @@ body {
     margin: 0 -28px 0 0; /* 横向重叠 */
 }
 
-.card { /* 通用卡牌样式，会被特定区域覆盖 */
+.card { /* 通用卡牌样式 */
     background-color: #FFFFFF;
     background-size: contain;
     background-repeat: no-repeat;
@@ -182,37 +184,37 @@ body {
 .played-cards-display .card {
     margin: 2px;
     cursor: default;
-    width: 60px; /* 统一出牌区卡牌大小 */
+    width: 60px;
     height: 90px;
 }
 
-.human-player-area .hand .card:last-child { /* 确保人类玩家最后一张牌不被切掉 */
+.human-player-area .hand .card:last-child {
     margin-right: 0;
 }
 
 .card.selected {
     transform: translateY(-15px) scale(1.03);
     box-shadow: 0px 8px 12px rgba(0,0,0,0.2);
-    z-index: 10;
+    z-index: 10; /* 确保选中的牌在最上层 */
 }
 
-/* 对手牌背的样式 (包括顶部和左右) */
+/* 对手牌背的通用样式 */
 .opponent-area .hand .card {
-    width: 45px;
-    height: 70px;
+    /* width, height, border等已在上面 player-3/4-area .hand .card 中定义 */
     cursor: default;
     border-color: #aaaaaa;
     box-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+    /* z-index 由JS控制 */
 }
 
-/* 对手（顶部）牌的横向重叠 */
-.player-area.opponent-top .hand .card {
+.player-area.opponent-top .hand .card { /* 顶部对手的牌 */
+    width: 45px;
+    height: 70px;
     margin: 0 -35px 0 0; /* 横向重叠 */
 }
 .player-area.opponent-top .hand .card:last-child {
     margin-right: 0;
 }
-
 
 .controls {
     margin-top: 20px;
