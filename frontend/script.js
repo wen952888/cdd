@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let localPlayerId = 'player1';
     let selectedCards = [];
     let currentGameState = null;
-    let draggedCardData = null; // 用于存储拖拽的卡牌数据
+    let draggedCardData = null;
 
     const playerElements = {
         player1: { hand: document.getElementById('player-1-hand'), countDisplay: document.getElementById('player-1-card-count'), isHuman: true, name: "玩家 1 (您)" },
@@ -26,7 +26,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const startGameButton = document.getElementById('start-game-button');
     const messageArea = document.getElementById('message-area');
     const loadingIndicator = document.getElementById('loading-indicator');
-    const playAreaElement = document.getElementById('play-area'); // 获取出牌区元素
+    const playAreaElement = document.getElementById('play-area');
 
     function showLoading(show) {
         loadingIndicator.style.display = show ? 'block' : 'none';
@@ -64,26 +64,38 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (playerArea.countDisplay) playerArea.countDisplay.textContent = cardCount;
         if (cardCount === 0 && !isHuman) {
-            handElement.style.height = 'auto';
+            handElement.style.width = 'auto';
+            handElement.style.height = 'auto'; // Reset if dynamically set
             return;
         }
 
         const isSidePlayer = playerId === 'player3' || playerId === 'player4';
-        const baseCardWidth = isHuman ? 60 : 45;
-        const baseCardHeight = isHuman ? 90 : 70;
-        const overlapPx = isHuman ? 28 : (playerId === 'player2' ? 35 : 38);
+        const baseCardWidth = isHuman ? 60 : 45;  // 牌的原始宽度
+        const baseCardHeight = isHuman ? 90 : 70; // 牌的原始高度
+        // overlapPx 定义牌与牌之间的视觉重叠距离
+        // 对于旋转后的左右玩家，这个重叠是基于原始宽度的，作用于旋转后的垂直方向
+        const overlapPx = isHuman ? 28 : (playerId === 'player2' ? 35 : (baseCardWidth * 0.70)); // 左右玩家重叠其原始宽度的70%
 
+        // --- 动态调整手牌容器尺寸 ---
         if (isSidePlayer && cardCount > 0) {
+            // 旋转后，容器的视觉宽度约等于一张牌的原始高度
             handElement.style.width = `${baseCardHeight}px`;
-            const totalVisualHeightAfterRotation = baseCardWidth + (cardCount - 1) * (baseCardWidth - overlapPx * 0.7);
-            handElement.style.height = `${Math.max(totalVisualHeightAfterRotation, baseCardHeight)}px`;
-        } else if (playerId === 'player2' && cardCount > 0) {
+            // 容器的视觉高度是所有牌旋转后垂直堆叠的总高度
+            // 每张牌贡献 (原始宽度 - 重叠量) 的高度，第一张牌贡献完整原始宽度
+            const totalVisualHeight = baseCardWidth + (cardCount > 1 ? (cardCount - 1) * (baseCardWidth - overlapPx) : 0);
+            handElement.style.height = `${Math.max(totalVisualHeight, baseCardHeight)}px`;
+            handElement.style.position = 'relative'; // 确保是绝对定位的上下文
+            // handElement.style.border = '1px dashed blue'; // 调试边框
+        } else if (playerId === 'player2' && cardCount > 0) { // 顶部玩家
             handElement.style.width = '100%';
             handElement.style.height = `${baseCardHeight}px`;
-        } else if (isHuman) {
+            handElement.style.position = 'relative';
+        } else if (isHuman) { // 人类玩家
             handElement.style.width = '100%';
-            handElement.style.height = 'auto';
+            handElement.style.height = 'auto'; // or min-height
+            handElement.style.position = 'relative';
         }
+
 
         cardsToRenderObjects.forEach((card, index) => {
             const cardDiv = document.createElement('div');
@@ -95,46 +107,70 @@ document.addEventListener('DOMContentLoaded', () => {
             if (isHuman && card.displayValue !== 'BACK') {
                 cardId = `${FILENAME_VALUES[card.displayValue]}_${card.suit}`;
                 cardDiv.style.backgroundImage = `url(${getCardFilename(card)})`;
-                
-                // --- 拖拽功能 ---
                 cardDiv.draggable = true;
                 cardDiv.addEventListener('dragstart', (event) => {
-                    if (currentGameState && currentGameState.currentPlayer === localPlayerId) { // 只在轮到当前玩家时允许拖拽
+                    if (currentGameState && currentGameState.currentPlayer === localPlayerId) {
                         draggedCardData = card;
                         event.dataTransfer.setData('text/plain', JSON.stringify(card));
                         event.dataTransfer.effectAllowed = 'move';
-                        event.target.classList.add('dragging'); // 对实际拖动的元素添加样式
-                    } else {
-                        event.preventDefault(); // 如果不是当前玩家，阻止拖拽
-                    }
+                        event.target.classList.add('dragging');
+                    } else { event.preventDefault(); }
                 });
                 cardDiv.addEventListener('dragend', (event) => {
                     event.target.classList.remove('dragging');
                     draggedCardData = null;
                 });
-                // --- 拖拽功能结束 ---
-
                 if (selectedCards.find(sc => sc.displayValue === card.displayValue && sc.suit === card.suit)) {
                     cardDiv.classList.add('selected');
                 }
                 cardDiv.addEventListener('click', () => toggleCardSelection(card, cardDiv));
                 cardDiv.style.marginRight = (index === cardCount - 1) ? '0' : `-${overlapPx}px`;
-            } else {
+            } else { // 对手牌（牌背）
                 cardDiv.style.backgroundImage = `url(${getCardFilename({displayValue: 'BACK'})})`;
+                
                 if (isSidePlayer) {
                     cardDiv.style.position = 'absolute';
-                    cardDiv.style.zIndex = index + 1;
-                    const horizontalOffsetBeforeRotation = index * (baseCardWidth - overlapPx);
-                    cardDiv.style.left = `${horizontalOffsetBeforeRotation}px`; 
-                    cardDiv.style.top = `50%`; 
-                    if (playerId === 'player3') { 
-                        cardDiv.style.transformOrigin = '0% 50%'; 
-                        cardDiv.style.transform = `translateY(-50%) rotate(90deg)`; 
-                    } else if (playerId === 'player4') { 
-                        cardDiv.style.transformOrigin = '100% 50%'; 
-                        cardDiv.style.transform = `translateY(-50%) rotate(-90deg)`;
+                    cardDiv.style.zIndex = index;
+                    
+                    // --- 上下伸缩的核心定位逻辑 ---
+                    // 牌旋转后，其视觉高度是 baseCardWidth
+                    // 我们希望牌在父容器 .hand 的水平中心对齐
+                    // top 属性控制垂直堆叠
+
+                    const verticalCardOffset = index * (baseCardWidth - overlapPx);
+                    cardDiv.style.top = `${verticalCardOffset}px`;
+
+                    // 水平居中：旋转后的牌的视觉宽度是 baseCardHeight
+                    // 父容器 .hand 的宽度也是 baseCardHeight
+                    // 所以 left 应该是 (父容器宽度 - 牌视觉宽度) / 2 = (baseCardHeight - baseCardHeight) / 2 = 0
+                    // 但由于transform-origin默认为center，旋转后牌的左上角不再是(0,0)
+                    // 我们需要调整使牌的“新”中心与父容器的中心对齐
+                    
+                    cardDiv.style.left = '50%'; // 将牌的 transform-origin 参考点移到容器中线
+
+                    if (playerId === 'player3') { // 左边玩家，顺时针转90度
+                        // 旋转后，牌的左边缘是其原始的上边缘。
+                        // transform-origin 默认是 'center center' (50% 50%)
+                        // 旋转90度后，原始的水平中心线变成了垂直中心线。
+                        // 我们想让这条垂直中心线对齐父容器的水平中心 (left: 50%)
+                        // 然后需要将牌向上平移自身高度的一半（原始宽度的一半）
+                        cardDiv.style.transform = `translateX(-${baseCardHeight/2}px) translateY(-${baseCardWidth/2}px) rotate(90deg) translateY(${baseCardWidth/2}px)`;
+                        // 更简单的（如果transform-origin是牌的中心）
+                        // cardDiv.style.transform = `translateX(-50%) rotate(90deg)`; // 假设父容器已正确设置宽度
+                    } else if (playerId === 'player4') { // 右边玩家，逆时针转90度
+                        cardDiv.style.transform = `translateX(-${baseCardHeight/2}px) translateY(-${baseCardWidth/2}px) rotate(-90deg) translateY(${baseCardWidth/2}px)`;
+                        // cardDiv.style.transform = `translateX(-50%) rotate(-90deg)`;
                     }
-                } else if (playerId === 'player2') {
+                    // 最终方案：直接设置transform-origin为牌的中心，然后用translateX(-50%)来居中
+                    cardDiv.style.transformOrigin = 'center center';
+                    if (playerId === 'player3') {
+                        cardDiv.style.transform = `translateX(-50%) rotate(90deg)`;
+                    } else if (playerId === 'player4') {
+                        cardDiv.style.transform = `translateX(-50%) rotate(-90deg)`;
+                    }
+
+
+                } else if (playerId === 'player2') { // 顶部玩家
                     cardDiv.style.position = 'relative';
                     cardDiv.style.marginRight = (index === cardCount - 1) ? '0' : `-${overlapPx}px`;
                 }
@@ -146,9 +182,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function renderAllHands(gameState) {
-        if (!gameState || !gameState.playerCardCounts) {
-             console.warn("RenderAllHands: gameState or playerCardCounts missing", gameState); return;
-        }
+        if (!gameState || !gameState.playerCardCounts) { console.warn("RenderAllHands: gameState or playerCardCounts missing", gameState); return; }
         renderPlayerHand(localPlayerId, gameState.hands?.[localPlayerId] || [], true); 
         for (const playerId in playerElements) {
             if (playerId !== localPlayerId) {
@@ -158,167 +192,18 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    function renderPlayedCards(lastPlayed) {
-        playedCardsDisplay.innerHTML = ''; lastPlayedPlayerInfo.textContent = '';
-        if (lastPlayed && lastPlayed.cards && lastPlayed.cards.length > 0) {
-            lastPlayedPlayerInfo.textContent = `${playerElements[lastPlayed.playerId]?.name || lastPlayed.playerId} 打出:`;
-            lastPlayed.cards.forEach(card => {
-                const cardDiv = document.createElement('div'); cardDiv.classList.add('card');
-                cardDiv.style.width = '60px'; cardDiv.style.height = '90px';
-                cardDiv.style.backgroundImage = `url(${getCardFilename(card)})`;
-                cardDiv.style.cursor = 'default'; cardDiv.style.margin = '2px';
-                cardDiv.style.position = 'relative';
-                playedCardsDisplay.appendChild(cardDiv);
-            });
-        } else { lastPlayedPlayerInfo.textContent = '出牌区已清空'; }
-    }
+    function renderPlayedCards(lastPlayed) { /* ... (保持不变) ... */ }
+    function toggleCardSelection(cardData, cardDiv) { /* ... (保持不变) ... */ }
+    function updateUIWithGameState(gameState) { /* ... (保持不变) ... */ }
+    async function sendActionToServer(action, cards = []) { /* ... (保持不变) ... */ }
 
-    function toggleCardSelection(cardData, cardDiv) {
-        if (currentGameState && currentGameState.currentPlayer !== localPlayerId) {
-            messageArea.textContent = "还没轮到您！"; return;
-        }
-        const cardIdentifier = `${cardData.displayValue}_${cardData.suit}`;
-        const index = selectedCards.findIndex(sc => `${sc.displayValue}_${sc.suit}` === cardIdentifier);
-        if (index > -1) {
-            selectedCards.splice(index, 1); cardDiv.classList.remove('selected');
-        } else {
-            selectedCards.push(cardData); cardDiv.classList.add('selected');
-        }
-    }
-    
-    function updateUIWithGameState(gameState) {
-        currentGameState = gameState; selectedCards = []; 
-        renderAllHands(gameState); renderPlayedCards(gameState.lastPlayedHand);
-        messageArea.textContent = gameState.message || `轮到 ${playerElements[gameState.currentPlayer]?.name || gameState.currentPlayer}`;
-        if (gameState.gameOver) {
-            messageArea.textContent = `游戏结束！${playerElements[gameState.winner]?.name || gameState.winner} 获胜！ ${gameState.message || ''}`;
-            playButton.disabled = true; passButton.disabled = true; startGameButton.disabled = false;
-        } else {
-            playButton.disabled = gameState.currentPlayer !== localPlayerId;
-            passButton.disabled = gameState.currentPlayer !== localPlayerId || (gameState.currentPlayer === gameState.roundLeadPlayer && (!gameState.lastPlayedHand || gameState.lastPlayedHand.cards.length === 0));
-            startGameButton.disabled = false;
-        }
-    }
+    playButton.addEventListener('click', () => { /* ... (保持不变) ... */ });
+    passButton.addEventListener('click', () => { /* ... (保持不变) ... */ });
+    startGameButton.addEventListener('click', async () => { /* ... (保持不变) ... */ });
 
-    async function sendActionToServer(action, cards = []) {
-        if (!currentGameState || currentGameState.gameOver) return;
-        showLoading(true); playButton.disabled = true; passButton.disabled = true;
-        const payload = {
-            playerId: localPlayerId, action: action,
-            cards: action === 'play' ? cards.map(c => ({ displayValue: c.displayValue, suit: c.suit, value: c.value })) : []
-        };
-        let rawResponseTextForDebug = "";
-        try {
-            const response = await fetch(`${API_BASE_URL}submit_hand.php`, {
-                method: 'POST', headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload), credentials: 'include'
-            });
-            rawResponseTextForDebug = await response.text();
-            if (!response.ok) {
-                let errorMsg = `服务器错误 ${response.status}.`;
-                try { const errData = JSON.parse(rawResponseTextForDebug); errorMsg = errData.message || errorMsg; }
-                catch (e) { errorMsg += ` 响应: ${rawResponseTextForDebug.substring(0,100)}...`; }
-                throw new Error(errorMsg);
-            }
-            const newState = JSON.parse(rawResponseTextForDebug);
-            if (newState.success) {
-                updateUIWithGameState(newState.gameState);
-            } else {
-                messageArea.textContent = `操作失败: ${newState.message}`;
-                if (newState.gameState && newState.gameState.currentPlayer) {
-                     updateUIWithGameState(newState.gameState);
-                } else if (currentGameState && currentGameState.currentPlayer === localPlayerId && !currentGameState.gameOver) {
-                    playButton.disabled = false;
-                    passButton.disabled = currentGameState.currentPlayer === currentGameState.roundLeadPlayer && (!currentGameState.lastPlayedHand || currentGameState.lastPlayedHand.cards.length === 0);
-                }
-            }
-        } catch (error) {
-            console.error("操作失败时捕获的错误:", error);
-            if (error instanceof SyntaxError) {
-                 messageArea.textContent = `操作失败: 服务器返回无效数据。`;
-                 console.error("原始响应 (导致JSON解析失败):", rawResponseTextForDebug);
-            } else {
-                messageArea.textContent = `操作失败: ${error.message || '未知错误。'}`;
-            }
-            if (currentGameState && currentGameState.currentPlayer === localPlayerId && !currentGameState.gameOver) {
-                 playButton.disabled = false; passButton.disabled = false;
-            }
-        } finally { showLoading(false); }
-    }
-
-    playButton.addEventListener('click', () => {
-        if (selectedCards.length === 0) { messageArea.textContent = "请先选择要出的牌！"; return; }
-        sendActionToServer('play', selectedCards); // selectedCards 是对象数组
-    });
-    passButton.addEventListener('click', () => sendActionToServer('pass'));
-
-    startGameButton.addEventListener('click', async () => {
-        showLoading(true); startGameButton.disabled = true; messageArea.textContent = "正在开始新游戏...";
-        let rawResponseTextForDebug = "";
-        try {
-            const response = await fetch(`${API_BASE_URL}deal.php`, { method: 'GET', credentials: 'include' });
-            rawResponseTextForDebug = await response.text();
-            if (!response.ok) {
-                let errorMsg = `服务器错误 ${response.status}.`;
-                try { const errData = JSON.parse(rawResponseTextForDebug); errorMsg = errData.message || errorMsg; }
-                catch (e) { errorMsg += ` 响应内容: ${rawResponseTextForDebug.substring(0,200)}...`; }
-                throw new Error(errorMsg);
-            }
-            const initialState = JSON.parse(rawResponseTextForDebug);
-            if (initialState.success) {
-                updateUIWithGameState(initialState.gameState);
-            } else {
-                messageArea.textContent = `开始游戏失败: ${initialState.message || '服务器返回了操作失败。'}`;
-                startGameButton.disabled = false;
-            }
-        } catch (error) {
-            console.error("开始游戏时发生捕获的错误:", error);
-            if (error instanceof SyntaxError) {
-                 messageArea.textContent = `开始游戏失败: 服务器返回无效数据 (非JSON)。请直接访问后端API URL检查响应。`;
-                 console.error("原始响应 (导致JSON解析失败):", rawResponseTextForDebug);
-            } else {
-                 messageArea.textContent = `开始游戏失败: ${error.message || '未知网络或脚本错误。'}`;
-            }
-            startGameButton.disabled = false;
-        } finally { showLoading(false); }
-    });
-
-    // --- 拖放目标事件 (绑定到出牌区) ---
-    playAreaElement.addEventListener('dragover', (event) => {
-        event.preventDefault(); // 允许放置
-        event.dataTransfer.dropEffect = 'move';
-        playAreaElement.classList.add('drag-over');
-    });
-
-    playAreaElement.addEventListener('dragleave', () => {
-        playAreaElement.classList.remove('drag-over');
-    });
-
-    playAreaElement.addEventListener('drop', (event) => {
-        event.preventDefault();
-        playAreaElement.classList.remove('drag-over');
-
-        if (draggedCardData && currentGameState && currentGameState.currentPlayer === localPlayerId) {
-            // 确保 draggedCardData 是我们期望的卡牌对象格式
-            const cardToPlay = {
-                displayValue: draggedCardData.displayValue,
-                suit: draggedCardData.suit,
-                value: draggedCardData.value
-            };
-            // 确保当前没有其他选中的牌，或者只处理拖拽的这张
-            selectedCards = []; // 清空通过点击选中的牌
-            // TODO: 更好的做法是，如果拖拽了一张牌，就只打这一张，忽略 selectedCards
-
-            sendActionToServer('play', [cardToPlay]); // 发送单张牌
-        } else {
-            if (!draggedCardData) console.warn("Drop event but no draggedCardData, or data was cleared.");
-            else if (currentGameState && currentGameState.currentPlayer !== localPlayerId) messageArea.textContent = "还没轮到您出牌！";
-            else console.warn("Drop event, but state invalid or not current player's turn.");
-        }
-        draggedCardData = null; // 清理拖拽数据
-    });
-    // --- 拖放目标事件结束 ---
-
+    playAreaElement.addEventListener('dragover', (event) => { /* ... (保持不变) ... */ });
+    playAreaElement.addEventListener('dragleave', () => { /* ... (保持不变) ... */ });
+    playAreaElement.addEventListener('drop', (event) => { /* ... (保持不变) ... */ });
 
     playButton.disabled = true; passButton.disabled = true;
 });
