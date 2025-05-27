@@ -1,14 +1,14 @@
 /* frontend/style.css */
 body {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-    background-color: #FFFFFF; /* 全局纯白背景 */
-    color: #333333; /* 主要文字颜色 */
+    background-color: #FFFFFF;
+    color: #333333;
     display: flex;
     justify-content: center;
     align-items: center;
     min-height: 100vh;
     margin: 0;
-    padding: 10px; /* 页面边缘留白 */
+    padding: 10px;
     box-sizing: border-box;
     overflow-x: hidden;
 }
@@ -36,7 +36,6 @@ body {
     width: 60%;
     min-height: 130px;
     margin-bottom: 10px;
-    /* 移除背景和边框 */
     background-color: transparent;
     border: none;
     box-shadow: none;
@@ -46,19 +45,16 @@ body {
     display: flex;
     justify-content: space-between;
     width: 100%;
-    align-items: stretch;
+    align-items: center; /* 改为 center 以更好地对齐旋转后的内容 */
     margin-bottom: 15px;
     flex-grow: 1;
 }
 
-.player-area { /* 通用玩家区域样式 - 移除视觉元素 */
-    /* border: 1px solid #cccccc; */ /* 移除边框 */
+.player-area {
     border: none;
-    border-radius: 0; /* 移除圆角，如果边框没了也不需要了 */
+    border-radius: 0;
     padding: 10px;
-    /* background-color: #f9f9f9; */ /* 移除背景色 */
     background-color: transparent;
-    /* box-shadow: 0 1px 3px rgba(0,0,0,0.1); */ /* 移除阴影 */
     box-shadow: none;
     display: flex;
     flex-direction: column;
@@ -66,47 +62,69 @@ body {
     box-sizing: border-box;
 }
 
-/* 左右玩家特定样式 */
+/* 左右玩家区域特定样式 */
 .player-area.side-player {
-    flex-basis: 100px;
+    flex-basis: 150px; /* 给予足够的“宽度”基础，旋转后这部分会影响垂直空间 */
     flex-grow: 0;
-    min-height: 220px;
-    justify-content: flex-start;
-    padding-top: 20px;
+    min-height: 250px; /* 主轴（垂直）的最小高度 */
+    justify-content: center; /* 尝试在主轴（垂直）上居中手牌容器 */
+    position: relative; /* 为手牌容器的可能的绝对定位或transform调整 */
 }
 
 .player-area.side-player .hand {
-    flex-direction: column;
-    align-items: center;
-    justify-content: flex-start;
-    width: 100%;
-    height: auto;
-    padding-top: 0;
+    display: flex;
+    /* flex-direction: row; // 卡牌在旋转前是水平排列的 */
+    /* 改变策略：让手牌容器本身去适应旋转后的卡牌 */
+    width: auto; /* 或者一个固定的值，例如等于一张牌的高度 */
+    height: auto; /* 或者一个固定的值，例如等于多张牌叠起来的宽度 */
+    align-items: center; /* 交叉轴居中 */
+    justify-content: center; /* 主轴居中 */
+    transform-style: preserve-3d; /* 如果需要更复杂的3D堆叠 */
+    /* padding: 20px 0; */ /* 给旋转后的牌一些上下空间 */
 }
 
+/* 对左右玩家的每个牌背应用旋转和位移来实现重叠 */
 .player-area.side-player .hand .card {
-    margin: -60px 0 0 0;
-    transform: none !important;
+    width: 45px;  /* 牌的原始宽度 */
+    height: 70px; /* 牌的原始高度 */
+    margin: 0;    /* 重置 margin */
+    position: absolute; /* 使用绝对定位来堆叠旋转的牌 */
+    /* transform-origin: center center; (默认) */
+    /* z-index 由JS设置 */
 }
-.player-area.side-player .hand .card:first-child {
-    margin-top: 0;
+
+#player-3-area .hand .card {
+    transform-origin: center; /* 确保以中心旋转 */
+    transform: rotate(90deg);
+    /* 绝对定位后，通过 top/left 和 transform: translate() 来调整位置和重叠 */
+    /* 假设父容器 .hand 有一定高度，牌的中心大致对齐 */
+    /* left: 50%; */ /* 水平居中 */
+    /* transform: translateX(-50%) rotate(90deg); */ /* 先居中再旋转 */
 }
+
+#player-4-area .hand .card {
+    transform-origin: center;
+    transform: rotate(-90deg);
+    /* left: 50%; */
+    /* transform: translateX(-50%) rotate(-90deg); */
+}
+
+/* 通过JavaScript动态计算和设置每个卡牌的 top/left 和 z-index 会更精确 */
+/* 这里CSS只做基础旋转，JS负责精细布局 */
 
 
 .human-player-area {
     width: 95%;
     margin-top: auto;
     padding-bottom: 10px;
-    /* background-color: #f0f0f0; */ /* 移除背景色 */
     background-color: transparent;
     min-height: 180px;
     flex-shrink: 0;
-    border: none; /* 确保人类玩家区域也无边框 */
-    box-shadow: none; /* 确保人类玩家区域也无阴影 */
+    border: none;
+    box-shadow: none;
 }
 
 .play-area {
-    /* border: 2px dashed #bbbbbb; */ /* 移除边框 */
     border: none;
     border-radius: 0;
     padding: 15px;
@@ -114,13 +132,12 @@ body {
     flex-basis: auto;
     flex-grow: 1;
     margin: 0 10px;
-    /* background-color: #e9e9e9; */ /* 移除背景色 */
     background-color: transparent;
 }
 
 .last-played-player {
     font-size: 0.9em;
-    color: #0056b3; /* 可以保留，或者改为更中性的颜色 */
+    color: #0056b3;
     margin-bottom: 8px;
     min-height: 1.2em;
 }
@@ -142,12 +159,14 @@ body {
     padding-top: 10px;
     min-height: 100px;
     width: 100%;
+    position: relative; /* 为绝对定位的子元素（旋转的牌）提供上下文 */
 }
 
 .human-player-area .hand .card {
     width: 60px;
     height: 90px;
     margin: 0 -28px 0 0;
+    position: relative; /* 确保 z-index 生效 */
 }
 
 .card {
@@ -155,13 +174,11 @@ body {
     background-size: contain;
     background-repeat: no-repeat;
     background-position: center;
-    border: 1px solid #999999; /* 卡牌本身的边框可以保留，以区分卡牌 */
-    /* 如果也想移除卡牌边框，可以设为: border: none; 或 border: 1px solid transparent; */
+    border: 1px solid #999999;
     border-radius: 5px;
     cursor: pointer;
     transition: transform 0.15s ease-out, box-shadow 0.15s ease-out;
-    box-shadow: 2px 2px 4px rgba(0,0,0,0.15); /* 卡牌的轻微阴影可以保留，增加立体感 */
-    /* 如果想完全无阴影: box-shadow: none; */
+    box-shadow: 2px 2px 4px rgba(0,0,0,0.15);
     overflow: hidden;
 }
 
@@ -182,80 +199,42 @@ body {
     z-index: 10;
 }
 
-.opponent-area .hand .card {
-    width: 45px;
-    height: 70px;
+.opponent-area .hand .card { /* 通用对手牌样式 */
+    /* width, height, border, shadow 已在上面定义或将被特定样式覆盖 */
     cursor: default;
-    border-color: #aaaaaa; /* 对手牌背边框颜色 */
-    box-shadow: 1px 1px 2px rgba(0,0,0,0.1); /* 对手牌背阴影 */
 }
 
 .player-area.opponent-top .hand .card {
+    width: 45px;
+    height: 70px;
     margin: 0 -35px 0 0;
+    position: relative; /* 确保 z-index 生效 */
 }
 .player-area.opponent-top .hand .card:last-child {
     margin-right: 0;
 }
 
-.controls {
-    margin-top: 20px;
-}
-
+.controls { margin-top: 20px; }
 .controls button {
-    padding: 10px 15px;
-    margin: 0 6px;
-    font-size: 0.95em;
-    border-radius: 5px;
-    border: 1px solid #cccccc; /* 按钮边框可以保留，或改为更浅/移除 */
-    cursor: pointer;
-    background-color: #f8f9fa; /* 按钮一个非常浅的灰色背景，与纯白区分 */
-    color: #333333;
-    font-weight: bold;
-    transition: background-color 0.1s, transform 0.05s;
+    padding: 10px 15px; margin: 0 6px; font-size: 0.95em; border-radius: 5px;
+    border: 1px solid #cccccc; cursor: pointer; background-color: #f8f9fa;
+    color: #333333; font-weight: bold; transition: background-color 0.1s, transform 0.05s;
 }
 .controls button:disabled {
-    background-color: #e9ecef;
-    color: #adb5bd;
-    border-color: #dee2e6;
-    cursor: not-allowed;
+    background-color: #e9ecef; color: #adb5bd; border-color: #dee2e6; cursor: not-allowed;
 }
-
-.controls button:not(:disabled):hover {
-    background-color: #e2e6ea;
-    border-color: #ced4da;
-}
-.controls button:not(:disabled):active {
-    transform: scale(0.98);
-    background-color: #d3d9df;
-}
-
+.controls button:not(:disabled):hover { background-color: #e2e6ea; border-color: #ced4da; }
+.controls button:not(:disabled):active { transform: scale(0.98); background-color: #d3d9df; }
 #message-area {
-    margin-top: 15px;
-    font-weight: bold;
-    font-size: 1em;
-    min-height: 22px;
-    color: #555555; /* 消息区文字改为深灰色 */
-    text-align: center;
+    margin-top: 15px; font-weight: bold; font-size: 1em; min-height: 22px;
+    color: #555555; text-align: center;
 }
-
-h2 { /* 玩家标题 */
-    margin-top: 0;
-    margin-bottom: 8px;
-    font-size: 1.1em;
-    color: #666666; /* 标题颜色改为稍浅的灰色 */
-    text-align: center;
-    font-weight: normal; /* 可以尝试去除加粗，使其更柔和 */
+h2 {
+    margin-top: 0; margin-bottom: 8px; font-size: 1.1em; color: #666666;
+    text-align: center; font-weight: normal;
 }
-
 #loading-indicator {
-    position: fixed;
-    top: 10px;
-    left: 50%;
-    transform: translateX(-50%);
-    background-color: rgba(80,80,80,0.85); /* 加载提示背景可以保留一点对比 */
-    color: white;
-    padding: 8px 15px;
-    border-radius: 4px;
-    z-index: 1000;
-    font-size: 0.9em;
+    position: fixed; top: 10px; left: 50%; transform: translateX(-50%);
+    background-color: rgba(80,80,80,0.85); color: white; padding: 8px 15px;
+    border-radius: 4px; z-index: 1000; font-size: 0.9em;
 }
