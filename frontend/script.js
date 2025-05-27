@@ -1,6 +1,6 @@
 // frontend/script.js
 document.addEventListener('DOMContentLoaded', () => {
-    const API_BASE_URL = '../api/'; // 相对于 frontend 目录
+    const API_BASE_URL = 'https://wenge.cloudns.ch/api'; // 相对于 frontend 目录
 
     const SUITS_ORDER = ["diamonds", "clubs", "hearts", "spades"]; // 方块<梅花<红桃<黑桃
     const FILENAME_VALUES = {
