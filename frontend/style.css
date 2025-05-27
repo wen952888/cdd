@@ -45,7 +45,7 @@ body {
     display: flex;
     justify-content: space-between;
     width: 100%;
-    align-items: center; /* 改为 center 以更好地对齐旋转后的内容 */
+    align-items: center;
     margin-bottom: 15px;
     flex-grow: 1;
 }
@@ -62,55 +62,38 @@ body {
     box-sizing: border-box;
 }
 
-/* 左右玩家区域特定样式 */
 .player-area.side-player {
-    flex-basis: 150px; /* 给予足够的“宽度”基础，旋转后这部分会影响垂直空间 */
+    flex-basis: 150px;
     flex-grow: 0;
-    min-height: 250px; /* 主轴（垂直）的最小高度 */
-    justify-content: center; /* 尝试在主轴（垂直）上居中手牌容器 */
-    position: relative; /* 为手牌容器的可能的绝对定位或transform调整 */
+    min-height: 250px;
+    justify-content: center;
+    position: relative;
 }
 
 .player-area.side-player .hand {
     display: flex;
-    /* flex-direction: row; // 卡牌在旋转前是水平排列的 */
-    /* 改变策略：让手牌容器本身去适应旋转后的卡牌 */
-    width: auto; /* 或者一个固定的值，例如等于一张牌的高度 */
-    height: auto; /* 或者一个固定的值，例如等于多张牌叠起来的宽度 */
-    align-items: center; /* 交叉轴居中 */
-    justify-content: center; /* 主轴居中 */
-    transform-style: preserve-3d; /* 如果需要更复杂的3D堆叠 */
-    /* padding: 20px 0; */ /* 给旋转后的牌一些上下空间 */
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    width: auto;
+    height: 70px;
+    position: relative;
 }
 
-/* 对左右玩家的每个牌背应用旋转和位移来实现重叠 */
 .player-area.side-player .hand .card {
-    width: 45px;  /* 牌的原始宽度 */
-    height: 70px; /* 牌的原始高度 */
-    margin: 0;    /* 重置 margin */
-    position: absolute; /* 使用绝对定位来堆叠旋转的牌 */
-    /* transform-origin: center center; (默认) */
-    /* z-index 由JS设置 */
+    width: 45px;
+    height: 70px;
+    margin: 0;
+    position: absolute;
 }
 
 #player-3-area .hand .card {
-    transform-origin: center; /* 确保以中心旋转 */
-    transform: rotate(90deg);
-    /* 绝对定位后，通过 top/left 和 transform: translate() 来调整位置和重叠 */
-    /* 假设父容器 .hand 有一定高度，牌的中心大致对齐 */
-    /* left: 50%; */ /* 水平居中 */
-    /* transform: translateX(-50%) rotate(90deg); */ /* 先居中再旋转 */
+    transform-origin: 0% 50%;
 }
 
 #player-4-area .hand .card {
-    transform-origin: center;
-    transform: rotate(-90deg);
-    /* left: 50%; */
-    /* transform: translateX(-50%) rotate(-90deg); */
+    transform-origin: 100% 50%;
 }
-
-/* 通过JavaScript动态计算和设置每个卡牌的 top/left 和 z-index 会更精确 */
-/* 这里CSS只做基础旋转，JS负责精细布局 */
 
 
 .human-player-area {
@@ -125,15 +108,25 @@ body {
 }
 
 .play-area {
-    border: none;
-    border-radius: 0;
+    border: none; /* 原始边框移除 */
+    border-radius: 8px; /* 可以保留一点圆角给背景高亮 */
     padding: 15px;
     min-height: 180px;
     flex-basis: auto;
     flex-grow: 1;
     margin: 0 10px;
-    background-color: transparent;
+    background-color: transparent; /* 默认透明 */
+    transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out; /* 添加过渡效果 */
+    border: 2px dashed #e0e0e0; /* 给一个非常浅的虚线边框作为默认状态 */
 }
+
+/* 当拖拽物悬停在可放置区域上时的样式 */
+.play-area.drag-over {
+    background-color: #e6ffed; /* 淡绿色背景提示 */
+    border-color: #28a745; /* 绿色实线边框 */
+    border-style: solid;
+}
+
 
 .last-played-player {
     font-size: 0.9em;
@@ -156,18 +149,23 @@ body {
     justify-content: center;
     align-items: flex-end;
     flex-wrap: wrap;
-    padding-top: 10px;
+    padding-top: 25px;
     min-height: 100px;
     width: 100%;
-    position: relative; /* 为绝对定位的子元素（旋转的牌）提供上下文 */
+    position: relative;
 }
 
 .human-player-area .hand .card {
     width: 60px;
     height: 90px;
     margin: 0 -28px 0 0;
-    position: relative; /* 确保 z-index 生效 */
+    position: relative;
+    transition: transform 0.2s ease-out, box-shadow 0.2s ease-out, opacity 0.2s ease-out; /* 添加opacity过渡 */
 }
+.human-player-area .hand .card:last-child {
+    margin-right: 0;
+}
+
 
 .card {
     background-color: #FFFFFF;
@@ -177,38 +175,44 @@ body {
     border: 1px solid #999999;
     border-radius: 5px;
     cursor: pointer;
-    transition: transform 0.15s ease-out, box-shadow 0.15s ease-out;
     box-shadow: 2px 2px 4px rgba(0,0,0,0.15);
     overflow: hidden;
 }
+
+/* 当卡牌被拖拽时的样式 */
+.card.dragging {
+    opacity: 0.4;
+    transform: scale(0.95); /* 可以稍微缩小一点被拖拽的牌 */
+    box-shadow: 0 0 10px rgba(0, 123, 255, 0.5); /* 蓝色辉光效果 */
+    border-color: #007bff;
+}
+
 
 .played-cards-display .card {
     margin: 2px;
     cursor: default;
     width: 60px;
     height: 90px;
-}
-
-.human-player-area .hand .card:last-child {
-    margin-right: 0;
+    position: relative;
 }
 
 .card.selected {
-    transform: translateY(-15px) scale(1.03);
-    box-shadow: 0px 8px 12px rgba(0,0,0,0.2);
-    z-index: 10;
+    transform: translateY(-20px) scale(1.05);
+    box-shadow: 0px 10px 15px rgba(0,0,0,0.3);
+    z-index: 100;
 }
 
-.opponent-area .hand .card { /* 通用对手牌样式 */
-    /* width, height, border, shadow 已在上面定义或将被特定样式覆盖 */
+.opponent-area .hand .card {
     cursor: default;
+    border-color: #aaaaaa;
+    box-shadow: 1px 1px 2px rgba(0,0,0,0.1);
 }
 
 .player-area.opponent-top .hand .card {
     width: 45px;
     height: 70px;
     margin: 0 -35px 0 0;
-    position: relative; /* 确保 z-index 生效 */
+    position: relative;
 }
 .player-area.opponent-top .hand .card:last-child {
     margin-right: 0;
