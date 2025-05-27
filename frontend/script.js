@@ -63,7 +63,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!handCards || cardCount === 0) return;
 
 
-        if (isHuman && handCards && Array.isArray(handCards)) { // 确保 handCards 是数组
+        if (isHuman && handCards && Array.isArray(handCards)) { 
             handCards.sort((a, b) => {
                 if (a.value === b.value) {
                     return SUITS_ORDER.indexOf(a.suit) - SUITS_ORDER.indexOf(b.suit);
@@ -74,18 +74,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const isSidePlayer = playerId === 'player3' || playerId === 'player4';
         
-        // 如果是模拟的牌背数组，则直接使用cardCount
         const cardsToRender = (isHuman || !Array.isArray(handCards) || typeof handCards[0] === 'number') 
                             ? Array(cardCount).fill({ displayValue: 'BACK', suit: 'none' }) 
                             : handCards;
 
-        let zIndexCounter = cardsToRender.length; // 用于从高到低分配z-index
+        let zIndexCounter = cardsToRender.length; 
 
         cardsToRender.forEach((card, index) => {
             const cardDiv = document.createElement('div');
             cardDiv.classList.add('card');
             
-            let cardId = `back_${index}`; // 默认ID
+            let cardId = `back_${index}`; 
             let cardDataForStorage = card;
 
             if (isHuman && card.displayValue !== 'BACK') {
@@ -95,17 +94,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     cardDiv.classList.add('selected');
                 }
                 cardDiv.addEventListener('click', () => toggleCardSelection(card, cardDiv));
-            } else { // 对手牌或模拟牌背
+            } else { 
                 cardDiv.style.backgroundImage = `url(images/cards/back.png)`;
                 if (isSidePlayer) {
-                    // 为了让HTML中后出现的牌（通常视觉上是“更靠前”或“最上面”的牌）有更高的z-index
-                    // 我们从一个较高的数字开始递减。
-                    // 或者，如果希望HTML中第一张牌在最上面，则从1开始递增。
-                    // 当前CSS的重叠方式（margin-left负值），HTML中后出现的牌会覆盖先出现的。
-                    // 如果要反转这个视觉效果，就需要调整z-index。
-                    // 例如，让第一张牌在最上面：
-                    // cardDiv.style.zIndex = cardsToRender.length - index;
-                    // 或者让最后一张牌在最上面（默认行为，但明确设置也可以）：
                     cardDiv.style.zIndex = index + 1;
                 }
             }
@@ -116,19 +107,16 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function renderAllHands(gameState) {
-        if (!gameState || !gameState.playerCardCounts) { // 依赖 playerCardCounts
+        if (!gameState || !gameState.playerCardCounts) { 
              console.warn("RenderAllHands: gameState or gameState.playerCardCounts is missing");
              return;
         }
         
-        // 渲染人类玩家
         renderPlayerHand(localPlayerId, gameState.hands?.[localPlayerId], true); 
         
         for (const playerId in playerElements) {
-            if (playerId !== localPlayerId) { // 渲染对手
-                // 对手的手牌数量来自 gameState.playerCardCounts
+            if (playerId !== localPlayerId) { 
                 const opponentCardCount = gameState.playerCardCounts[playerId] !== undefined ? gameState.playerCardCounts[playerId] : 0;
-                // 传递数量给 renderPlayerHand，它会据此创建牌背数组
                 renderPlayerHand(playerId, Array(opponentCardCount).fill({displayValue: 'BACK'}), false); 
             }
         }
@@ -214,8 +202,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 body: JSON.stringify(payload)
             });
             if (!response.ok) {
-                const errorData = await response.json().catch(() => ({ message: `服务器错误: ${response.status}` }));
-                throw new Error(errorData.message || `请求失败: ${response.status}`);
+                let errorText = `服务器错误: ${response.status}`;
+                try {
+                    const errorData = await response.json();
+                    errorText = errorData.message || errorText;
+                } catch (e) {
+                    errorText = response.statusText || errorText;
+                }
+                throw new Error(errorText);
             }
             const newState = await response.json();
             if (newState.success) {
@@ -229,7 +223,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         } catch (error) {
             console.error("操作失败:", error);
-            messageArea.textContent = `操作失败: ${error.message}`;
+            messageArea.textContent = `操作失败: ${error.message || error.toString()}`;
             if (currentGameState && currentGameState.currentPlayer === localPlayerId && !currentGameState.gameOver) {
                  playButton.disabled = false;
                  passButton.disabled = false;
@@ -261,10 +255,21 @@ document.addEventListener('DOMContentLoaded', () => {
         startGameButton.disabled = true;
         messageArea.textContent = "正在开始新游戏...";
         try {
-            const response = await fetch(`${API_BASE_URL}deal.php`, { method: 'POST' });
+            // --- 修改点在这里 ---
+            const response = await fetch(`${API_BASE_URL}deal.php`, { method: 'GET' });
+            // 如果担心GET缓存，可以添加一个时间戳参数：
+            // const response = await fetch(`${API_BASE_URL}deal.php?t=${new Date().getTime()}`, { method: 'GET' });
+            // --- 修改结束 ---
+
             if (!response.ok) {
-                const errorData = await response.json().catch(() => ({ message: `服务器错误: ${response.status}` }));
-                throw new Error(errorData.message || `请求失败: ${response.status}`);
+                let errorText = `服务器错误: ${response.status}`;
+                try {
+                    const errorData = await response.json();
+                    errorText = errorData.message || errorText;
+                } catch (e) {
+                    errorText = response.statusText || errorText;
+                }
+                throw new Error(errorText);
             }
             const initialState = await response.json();
             if (initialState.success) {
@@ -275,7 +280,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         } catch (error) {
             console.error("开始游戏失败:", error);
-            messageArea.textContent = `开始游戏失败: ${error.message}`;
+            messageArea.textContent = `开始游戏失败: ${error.message || error.toString()}`;
             startGameButton.disabled = false;
         } finally {
             showLoading(false);
