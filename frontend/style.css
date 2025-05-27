@@ -1,7 +1,8 @@
+/* frontend/style.css */
 body {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-    background-color: #005000;
-    color: #f0f0f0;
+    background-color: #FFFFFF; /* 全局白色背景 */
+    color: #333333; /* 主要文字颜色 - 深灰色 */
     display: flex;
     justify-content: center;
     align-items: center;
@@ -28,20 +29,21 @@ body {
 }
 
 .player-area {
-    border: 2px solid #444;
-    border-radius: 10px;
+    border: 1px solid #cccccc;
+    border-radius: 8px;
     padding: 15px;
     margin: 10px;
-    background-color: rgba(0, 0, 0, 0.3);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    background-color: #f9f9f9; /* 区域浅灰色背景 */
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
     min-height: 160px;
-    width: calc(33.33% - 20px); /* 使三个对手区域大致均分 */
+    width: calc(33.33% - 20px);
     display: flex;
     flex-direction: column;
     align-items: center;
 }
 .human-player-area {
-    width: 90%; /* 主玩家区域更宽 */
+    width: 90%;
+    background-color: #f0f0f0; /* 玩家操作区域稍深一点的灰色 */
 }
 
 
@@ -52,24 +54,24 @@ body {
 }
 
 .play-area {
-    border: 2px dashed #888;
-    border-radius: 10px;
-    padding: 15px; /* 减小内边距 */
-    min-height: 180px; /* 增加最小高度以容纳信息 */
-    width: calc(34% - 20px); /* 中间区域也占约1/3 */
+    border: 2px dashed #bbbbbb;
+    border-radius: 8px;
+    padding: 15px;
+    min-height: 180px;
+    width: calc(34% - 20px);
     margin: 10px;
     display: flex;
     flex-direction: column;
     align-items: center;
-    background-color: rgba(0,70,0,0.6);
+    background-color: #e9e9e9; /* 出牌区背景 */
     box-sizing: border-box;
 }
 
 .last-played-player {
     font-size: 0.9em;
-    color: #ffc107; /* 橙黄色 */
+    color: #0056b3; /* 深蓝色 */
     margin-bottom: 8px;
-    min-height: 1.2em; /* 防止跳动 */
+    min-height: 1.2em;
 }
 
 .played-cards-display {
@@ -87,24 +89,24 @@ body {
     flex-wrap: wrap;
     padding-top: 10px;
     min-height: 110px;
-    width: 100%; /* 手牌区域占满父容器 */
+    width: 100%;
 }
 
 .card {
-    width: 65px; /* 稍微减小卡牌尺寸以容纳更多 */
+    width: 65px;
     height: 95px;
     background-size: contain;
     background-repeat: no-repeat;
     background-position: center;
-    border: 1px solid #333;
+    border: 1px solid #999999; /* 卡牌边框颜色 */
     border-radius: 6px;
-    margin: 0 -25px 0 0; /* 调整重叠 */
+    margin: 0 -25px 0 0;
     cursor: pointer;
-    transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
-    box-shadow: 3px 3px 6px rgba(0,0,0,0.4);
+    transition: transform 0.15s ease-out, box-shadow 0.15s ease-out; /* 加快动画 */
+    box-shadow: 2px 2px 4px rgba(0,0,0,0.15); /* 阴影调浅 */
 }
 
-.played-cards-display .card { /* 已打出的牌间距调整 */
+.played-cards-display .card {
     margin: 2px;
     cursor: default;
 }
@@ -115,17 +117,18 @@ body {
 }
 
 .card.selected {
-    transform: translateY(-20px) scale(1.05);
-    box-shadow: 0px 12px 20px rgba(0,0,0,0.6);
+    transform: translateY(-15px) scale(1.03); /* 选中时上移和放大调整 */
+    box-shadow: 0px 8px 12px rgba(0,0,0,0.2); /* 选中时阴影 */
     z-index: 10;
 }
 
 .opponent-area .card {
-    margin: 0 -45px 0 0; /* 对手牌更紧凑 */
-    width: 50px; /* 对手牌更小 */
+    margin: 0 -45px 0 0;
+    width: 50px;
     height: 75px;
     cursor: default;
-    box-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    border-color: #aaaaaa;
+    box-shadow: 1px 1px 2px rgba(0,0,0,0.1);
 }
 .opponent-area .card:last-child {
     margin-right: 0;
@@ -137,27 +140,31 @@ body {
 }
 
 .controls button {
-    padding: 12px 20px;
+    padding: 10px 18px; /* 按钮内边距调整 */
     margin: 0 8px;
-    font-size: 1.1em;
-    border-radius: 8px;
-    border: none;
+    font-size: 1em; /* 按钮字号调整 */
+    border-radius: 6px;
+    border: 1px solid #cccccc; /* 按钮边框 */
     cursor: pointer;
-    background-color: #e0e0e0;
-    color: #222;
+    background-color: #ffffff; /* 按钮白色背景 */
+    color: #333333; /* 按钮文字深灰色 */
     font-weight: bold;
-    transition: background-color 0.2s, transform 0.1s;
+    transition: background-color 0.1s, transform 0.05s; /* 加快动画 */
 }
 .controls button:disabled {
-    background-color: #999;
+    background-color: #e0e0e0; /* 禁用按钮背景 */
+    color: #999999; /* 禁用按钮文字颜色 */
+    border-color: #dddddd;
     cursor: not-allowed;
 }
 
 .controls button:not(:disabled):hover {
-    background-color: #c8c8c8;
+    background-color: #f0f0f0; /* 悬停时按钮背景 */
+    border-color: #bbbbbb;
 }
 .controls button:not(:disabled):active {
     transform: scale(0.98);
+    background-color: #e0e0e0; /* 点击时按钮背景 */
 }
 
 #message-area {
@@ -165,7 +172,7 @@ body {
     font-weight: bold;
     font-size: 1.1em;
     min-height: 25px;
-    color: #ffd700;
+    color: #d9534f; /* 消息区用警示红色 (可根据喜好调整) */
     text-align: center;
 }
 
@@ -173,19 +180,19 @@ h2 {
     margin-top: 0;
     margin-bottom: 10px;
     font-size: 1.2em;
-    color: #f5f5dc;
-    text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+    color: #555555; /* 标题颜色 */
     text-align: center;
 }
 
 #loading-indicator {
     position: fixed;
-    top: 20px;
+    top: 10px; /* 调整位置 */
     left: 50%;
     transform: translateX(-50%);
-    background-color: rgba(0,0,0,0.7);
+    background-color: rgba(50,50,50,0.85); /* 加载提示背景 */
     color: white;
-    padding: 10px 20px;
-    border-radius: 5px;
+    padding: 8px 15px;
+    border-radius: 4px;
     z-index: 1000;
+    font-size: 0.9em;
 }
