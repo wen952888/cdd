@@ -1,16 +1,16 @@
+// frontend/script.js
 document.addEventListener('DOMContentLoaded', () => {
-    const API_BASE_URL = 'https://wenge.cloudns.ch/api/'; // 相对于 frontend 目录
+    const API_BASE_URL = '../api/'; // 相对于 frontend 目录
 
-    // 与后端 game_logic.php 中的定义保持一致
     const SUITS_ORDER = ["diamonds", "clubs", "hearts", "spades"];
     const FILENAME_VALUES = {
         "3": "3", "4": "4", "5": "5", "6": "6", "7": "7", "8": "8", "9": "9", "10": "10",
         "J": "jack", "Q": "queen", "K": "king", "A": "ace", "2": "2"
     };
 
-    let localPlayerId = 'player1'; // 前端始终认为自己是player1，后端会映射
-    let selectedCards = []; // 存储卡牌对象
-    let currentGameState = null; // 存储从后端获取的完整游戏状态
+    let localPlayerId = 'player1';
+    let selectedCards = [];
+    let currentGameState = null;
 
     const playerElements = {
         player1: { hand: document.getElementById('player-1-hand'), countDisplay: document.getElementById('player-1-card-count'), isHuman: true, name: "玩家 1 (您)" },
@@ -31,11 +31,11 @@ document.addEventListener('DOMContentLoaded', () => {
         loadingIndicator.style.display = show ? 'block' : 'none';
     }
 
-    function getCardFilename(card) { // card 是后端传来的对象，如 {display: 'A', suit: 'spades'}
+    function getCardFilename(card) {
         const valuePart = FILENAME_VALUES[card.displayValue];
         if (!valuePart) {
             console.error("Invalid card displayValue for filename:", card.displayValue);
-            return 'images/cards/back.png'; // Fallback
+            return 'images/cards/back.png';
         }
         return `images/cards/${valuePart}_of_${card.suit}.png`;
     }
@@ -55,14 +55,15 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!playerArea) return;
 
         playerArea.hand.innerHTML = '';
+        const cardCount = handCards ? handCards.length : (currentGameState && currentGameState.playerCardCounts && currentGameState.playerCardCounts[playerId] !== undefined ? currentGameState.playerCardCounts[playerId] : 0);
         if (playerArea.countDisplay) {
-             playerArea.countDisplay.textContent = handCards ? handCards.length : (currentGameState && currentGameState.hands && currentGameState.hands[playerId] ? currentGameState.hands[playerId].length : 0);
+             playerArea.countDisplay.textContent = cardCount;
         }
 
-        if (!handCards || handCards.length === 0) return;
+        if (!handCards || cardCount === 0) return;
 
-        // 对人类玩家的手牌进行前端排序，方便查看（后端已排序，这里是视觉辅助）
-        if (isHuman && handCards) {
+
+        if (isHuman && handCards && Array.isArray(handCards)) { // 确保 handCards 是数组
             handCards.sort((a, b) => {
                 if (a.value === b.value) {
                     return SUITS_ORDER.indexOf(a.suit) - SUITS_ORDER.indexOf(b.suit);
@@ -71,44 +72,64 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
 
-        handCards.forEach(card => {
+        const isSidePlayer = playerId === 'player3' || playerId === 'player4';
+        
+        // 如果是模拟的牌背数组，则直接使用cardCount
+        const cardsToRender = (isHuman || !Array.isArray(handCards) || typeof handCards[0] === 'number') 
+                            ? Array(cardCount).fill({ displayValue: 'BACK', suit: 'none' }) 
+                            : handCards;
+
+        let zIndexCounter = cardsToRender.length; // 用于从高到低分配z-index
+
+        cardsToRender.forEach((card, index) => {
             const cardDiv = document.createElement('div');
             cardDiv.classList.add('card');
-            // 使用卡牌的唯一标识符，例如 "ace_spades"
-            const cardId = `${FILENAME_VALUES[card.displayValue]}_${card.suit}`;
-            cardDiv.dataset.cardId = cardId; // 用于识别
-            cardDiv.dataset.cardData = JSON.stringify(card); // 存储完整卡牌数据
+            
+            let cardId = `back_${index}`; // 默认ID
+            let cardDataForStorage = card;
 
-            if (isHuman) {
+            if (isHuman && card.displayValue !== 'BACK') {
+                cardId = `${FILENAME_VALUES[card.displayValue]}_${card.suit}`;
                 cardDiv.style.backgroundImage = `url(${getCardFilename(card)})`;
-                // 检查这张牌是否在selectedCards中 (比较对象引用或唯一ID)
                 if (selectedCards.find(sc => sc.displayValue === card.displayValue && sc.suit === card.suit)) {
                     cardDiv.classList.add('selected');
                 }
                 cardDiv.addEventListener('click', () => toggleCardSelection(card, cardDiv));
-            } else {
+            } else { // 对手牌或模拟牌背
                 cardDiv.style.backgroundImage = `url(images/cards/back.png)`;
+                if (isSidePlayer) {
+                    // 为了让HTML中后出现的牌（通常视觉上是“更靠前”或“最上面”的牌）有更高的z-index
+                    // 我们从一个较高的数字开始递减。
+                    // 或者，如果希望HTML中第一张牌在最上面，则从1开始递增。
+                    // 当前CSS的重叠方式（margin-left负值），HTML中后出现的牌会覆盖先出现的。
+                    // 如果要反转这个视觉效果，就需要调整z-index。
+                    // 例如，让第一张牌在最上面：
+                    // cardDiv.style.zIndex = cardsToRender.length - index;
+                    // 或者让最后一张牌在最上面（默认行为，但明确设置也可以）：
+                    cardDiv.style.zIndex = index + 1;
+                }
             }
+            cardDiv.dataset.cardId = cardId;
+            cardDiv.dataset.cardData = JSON.stringify(cardDataForStorage);
             playerArea.hand.appendChild(cardDiv);
         });
     }
 
     function renderAllHands(gameState) {
-        if (!gameState || !gameState.hands) return;
+        if (!gameState || !gameState.playerCardCounts) { // 依赖 playerCardCounts
+             console.warn("RenderAllHands: gameState or gameState.playerCardCounts is missing");
+             return;
+        }
         
-        renderPlayerHand(localPlayerId, gameState.hands[localPlayerId], true); // 渲染人类玩家
+        // 渲染人类玩家
+        renderPlayerHand(localPlayerId, gameState.hands?.[localPlayerId], true); 
         
         for (const playerId in playerElements) {
             if (playerId !== localPlayerId) { // 渲染对手
-                 // 对手的手牌在gameState.hands中是数量，或者如果后端愿意也可以给牌背信息
-                 // 此处我们简单地根据gameState.playerCardCounts来渲染牌背数量
-                let opponentHandMock = [];
-                if (gameState.playerCardCounts && gameState.playerCardCounts[playerId] !== undefined) {
-                    for (let i = 0; i < gameState.playerCardCounts[playerId]; i++) {
-                        opponentHandMock.push({ displayValue: 'BACK', suit: 'none' }); // 仅用于计数渲染牌背
-                    }
-                }
-                renderPlayerHand(playerId, opponentHandMock, false);
+                // 对手的手牌数量来自 gameState.playerCardCounts
+                const opponentCardCount = gameState.playerCardCounts[playerId] !== undefined ? gameState.playerCardCounts[playerId] : 0;
+                // 传递数量给 renderPlayerHand，它会据此创建牌背数组
+                renderPlayerHand(playerId, Array(opponentCardCount).fill({displayValue: 'BACK'}), false); 
             }
         }
     }
@@ -140,18 +161,18 @@ document.addEventListener('DOMContentLoaded', () => {
         const cardId = `${FILENAME_VALUES[cardData.displayValue]}_${cardData.suit}`;
         const index = selectedCards.findIndex(sc => FILENAME_VALUES[sc.displayValue] + '_' + sc.suit === cardId);
 
-        if (index > -1) { // 已选中，取消选中
+        if (index > -1) {
             selectedCards.splice(index, 1);
             cardDiv.classList.remove('selected');
-        } else { // 未选中，加入选中
-            selectedCards.push(cardData); // 存储完整的后端卡牌对象
+        } else {
+            selectedCards.push(cardData);
             cardDiv.classList.add('selected');
         }
     }
     
     function updateUIWithGameState(gameState) {
         currentGameState = gameState;
-        selectedCards = []; // 新状态来了，清空本地选择
+        selectedCards = []; 
 
         renderAllHands(gameState);
         renderPlayedCards(gameState.lastPlayedHand);
@@ -166,8 +187,8 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             playButton.disabled = gameState.currentPlayer !== localPlayerId;
             passButton.disabled = gameState.currentPlayer !== localPlayerId || 
-                                 (gameState.currentPlayer === gameState.roundLeadPlayer && (!gameState.lastPlayedHand || gameState.lastPlayedHand.cards.length === 0)); // 本轮首出不能直接PASS
-            startGameButton.disabled = false; // 允许中途开始新游戏
+                                 (gameState.currentPlayer === gameState.roundLeadPlayer && (!gameState.lastPlayedHand || gameState.lastPlayedHand.cards.length === 0));
+            startGameButton.disabled = false;
         }
     }
 
@@ -178,10 +199,10 @@ document.addEventListener('DOMContentLoaded', () => {
         passButton.disabled = true;
 
         const payload = {
-            gameId: currentGameState.gameId, // 如果后端使用gameId
+            gameId: currentGameState.gameId,
             playerId: localPlayerId,
             action: action,
-            cards: action === 'play' ? cards : [] // cards是对象数组 {displayValue: 'A', suit: 'spades', value: 14}
+            cards: action === 'play' ? cards : []
         };
 
         try {
@@ -201,7 +222,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 updateUIWithGameState(newState.gameState);
             } else {
                 messageArea.textContent = `错误: ${newState.message}`;
-                // 操作失败，恢复按钮状态（如果还是该玩家的回合）
                 if (currentGameState && currentGameState.currentPlayer === localPlayerId && !currentGameState.gameOver) {
                     playButton.disabled = false;
                     passButton.disabled = currentGameState.currentPlayer === currentGameState.roundLeadPlayer && (!currentGameState.lastPlayedHand || currentGameState.lastPlayedHand.cards.length === 0);
@@ -212,7 +232,7 @@ document.addEventListener('DOMContentLoaded', () => {
             messageArea.textContent = `操作失败: ${error.message}`;
             if (currentGameState && currentGameState.currentPlayer === localPlayerId && !currentGameState.gameOver) {
                  playButton.disabled = false;
-                 passButton.disabled = false; // 简单恢复
+                 passButton.disabled = false;
             }
         } finally {
             showLoading(false);
@@ -224,11 +244,10 @@ document.addEventListener('DOMContentLoaded', () => {
             messageArea.textContent = "请先选择要出的牌！";
             return;
         }
-        // 确保selectedCards中的牌与后端期望的格式一致
         const cardsToPlay = selectedCards.map(card => ({
             displayValue: card.displayValue,
             suit: card.suit,
-            value: card.value // 后端可能需要value进行排序或验证
+            value: card.value
         }));
         sendActionToServer('play', cardsToPlay);
     });
@@ -242,7 +261,7 @@ document.addEventListener('DOMContentLoaded', () => {
         startGameButton.disabled = true;
         messageArea.textContent = "正在开始新游戏...";
         try {
-            const response = await fetch(`${API_BASE_URL}deal.php`, { method: 'POST' }); // 使用POST以防GET缓存
+            const response = await fetch(`${API_BASE_URL}deal.php`, { method: 'POST' });
             if (!response.ok) {
                 const errorData = await response.json().catch(() => ({ message: `服务器错误: ${response.status}` }));
                 throw new Error(errorData.message || `请求失败: ${response.status}`);
@@ -263,7 +282,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // 初始加载时可以禁用操作按钮
     playButton.disabled = true;
     passButton.disabled = true;
 });
