@@ -95,6 +95,7 @@ body {
 .card {
     width: 65px;
     height: 95px;
+    background-color: #FFFFFF; /* 新增：确保卡牌背景为白色 */
     background-size: contain;
     background-repeat: no-repeat;
     background-position: center;
@@ -104,6 +105,7 @@ body {
     cursor: pointer;
     transition: transform 0.15s ease-out, box-shadow 0.15s ease-out; /* 加快动画 */
     box-shadow: 2px 2px 4px rgba(0,0,0,0.15); /* 阴影调浅 */
+    overflow: hidden; /* 如果图片略微超出边界，可以裁剪 */
 }
 
 .played-cards-display .card {
@@ -129,6 +131,7 @@ body {
     cursor: default;
     border-color: #aaaaaa;
     box-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+    /* 对于对手的牌（牌背），通常牌背图片是不透明的，所以这里的 background-color: #FFFFFF; 影响不大，但保持一致性也可以 */
 }
 .opponent-area .card:last-child {
     margin-right: 0;
