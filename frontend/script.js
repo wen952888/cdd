@@ -1,8 +1,6 @@
 // frontend/script.js
 document.addEventListener('DOMContentLoaded', () => {
-    // --- 核心修改点在这里 ---
     const API_BASE_URL = 'https://wenge.cloudns.ch/api/'; // 使用您的后端绝对URL
-    // --- 修改结束 ---
 
     const SUITS_ORDER = ["diamonds", "clubs", "hearts", "spades"];
     const FILENAME_VALUES = {
@@ -10,7 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
         "J": "jack", "Q": "queen", "K": "king", "A": "ace", "2": "2"
     };
 
-    let localPlayerId = 'player1';
+    let localPlayerId = 'player1'; // 前端始终认为自己是player1
     let selectedCards = [];
     let currentGameState = null;
 
@@ -46,17 +44,14 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!playerArea) return;
 
         playerArea.hand.innerHTML = '';
-        
         let cardCount;
         let cardsToRender;
 
-        if (isHuman && Array.isArray(handData)) {
+        if (isHuman && Array.isArray(handData) && handData.length > 0 && typeof handData[0] === 'object') {
             cardCount = handData.length;
             cardsToRender = [...handData];
             cardsToRender.sort((a, b) => {
-                if (a.value === b.value) {
-                    return SUITS_ORDER.indexOf(a.suit) - SUITS_ORDER.indexOf(b.suit);
-                }
+                if (a.value === b.value) return SUITS_ORDER.indexOf(a.suit) - SUITS_ORDER.indexOf(b.suit);
                 return a.value - b.value;
             });
         } else {
@@ -64,19 +59,16 @@ document.addEventListener('DOMContentLoaded', () => {
             cardsToRender = Array(cardCount).fill({ displayValue: 'BACK', suit: 'none' });
         }
 
-        if (playerArea.countDisplay) {
-             playerArea.countDisplay.textContent = cardCount;
-        }
-
-        if (cardCount === 0) return;
+        if (playerArea.countDisplay) playerArea.countDisplay.textContent = cardCount;
+        if (cardCount === 0 && !isHuman) return; // 对手没牌了就不渲染牌背了
 
         const isSidePlayer = playerId === 'player3' || playerId === 'player4';
 
         cardsToRender.forEach((card, index) => {
             const cardDiv = document.createElement('div');
             cardDiv.classList.add('card');
-            
             let cardId = `back_${playerId}_${index}`;
+
             if (isHuman && card.displayValue !== 'BACK') {
                 cardId = `${FILENAME_VALUES[card.displayValue]}_${card.suit}`;
                 cardDiv.style.backgroundImage = `url(${getCardFilename(card)})`;
@@ -86,9 +78,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 cardDiv.addEventListener('click', () => toggleCardSelection(card, cardDiv));
             } else {
                 cardDiv.style.backgroundImage = `url(${getCardFilename({displayValue: 'BACK'})})`;
-                if (isSidePlayer) {
-                    cardDiv.style.zIndex = index + 1;
-                }
+                if (isSidePlayer) cardDiv.style.zIndex = index + 1;
             }
             cardDiv.dataset.cardId = cardId;
             cardDiv.dataset.cardData = JSON.stringify(card);
@@ -98,15 +88,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function renderAllHands(gameState) {
         if (!gameState || !gameState.playerCardCounts) {
-             console.warn("RenderAllHands: gameState or playerCardCounts missing");
+             console.warn("RenderAllHands: gameState or playerCardCounts missing", gameState);
              return;
         }
-        
         renderPlayerHand(localPlayerId, gameState.hands?.[localPlayerId] || [], true); 
-        
         for (const playerId in playerElements) {
             if (playerId !== localPlayerId) {
-                const opponentCardCount = gameState.playerCardCounts[playerId] !== undefined ? gameState.playerCardCounts[playerId] : 0;
+                const opponentCardCount = gameState.playerCardCounts[playerId] ?? 0;
                 renderPlayerHand(playerId, opponentCardCount, false); 
             }
         }
@@ -115,7 +103,6 @@ document.addEventListener('DOMContentLoaded', () => {
     function renderPlayedCards(lastPlayed) {
         playedCardsDisplay.innerHTML = '';
         lastPlayedPlayerInfo.textContent = '';
-
         if (lastPlayed && lastPlayed.cards && lastPlayed.cards.length > 0) {
             lastPlayedPlayerInfo.textContent = `${playerElements[lastPlayed.playerId]?.name || lastPlayed.playerId} 打出:`;
             lastPlayed.cards.forEach(card => {
@@ -132,39 +119,29 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function toggleCardSelection(cardData, cardDiv) {
         if (currentGameState && currentGameState.currentPlayer !== localPlayerId) {
-            messageArea.textContent = "还没轮到您！";
-            return;
+            messageArea.textContent = "还没轮到您！"; return;
         }
         const cardIdentifier = `${cardData.displayValue}_${cardData.suit}`;
         const index = selectedCards.findIndex(sc => `${sc.displayValue}_${sc.suit}` === cardIdentifier);
-
         if (index > -1) {
-            selectedCards.splice(index, 1);
-            cardDiv.classList.remove('selected');
+            selectedCards.splice(index, 1); cardDiv.classList.remove('selected');
         } else {
-            selectedCards.push(cardData);
-            cardDiv.classList.add('selected');
+            selectedCards.push(cardData); cardDiv.classList.add('selected');
         }
     }
     
     function updateUIWithGameState(gameState) {
         currentGameState = gameState;
         selectedCards = []; 
-
         renderAllHands(gameState);
         renderPlayedCards(gameState.lastPlayedHand);
-
         messageArea.textContent = gameState.message || `轮到 ${playerElements[gameState.currentPlayer]?.name || gameState.currentPlayer}`;
-
         if (gameState.gameOver) {
             messageArea.textContent = `游戏结束！${playerElements[gameState.winner]?.name || gameState.winner} 获胜！ ${gameState.message || ''}`;
-            playButton.disabled = true;
-            passButton.disabled = true;
-            startGameButton.disabled = false;
+            playButton.disabled = true; passButton.disabled = true; startGameButton.disabled = false;
         } else {
             playButton.disabled = gameState.currentPlayer !== localPlayerId;
-            passButton.disabled = gameState.currentPlayer !== localPlayerId || 
-                                 (gameState.currentPlayer === gameState.roundLeadPlayer && (!gameState.lastPlayedHand || gameState.lastPlayedHand.cards.length === 0));
+            passButton.disabled = gameState.currentPlayer !== localPlayerId || (gameState.currentPlayer === gameState.roundLeadPlayer && (!gameState.lastPlayedHand || gameState.lastPlayedHand.cards.length === 0));
             startGameButton.disabled = false;
         }
     }
@@ -172,46 +149,47 @@ document.addEventListener('DOMContentLoaded', () => {
     async function sendActionToServer(action, cards = []) {
         if (!currentGameState || currentGameState.gameOver) return;
         showLoading(true);
-        playButton.disabled = true;
-        passButton.disabled = true;
-
+        playButton.disabled = true; passButton.disabled = true;
         const payload = {
-            playerId: localPlayerId,
-            action: action,
+            playerId: localPlayerId, action: action,
             cards: action === 'play' ? cards.map(c => ({ displayValue: c.displayValue, suit: c.suit, value: c.value })) : []
         };
-
+        let rawResponseTextForDebug = "";
         try {
             const response = await fetch(`${API_BASE_URL}submit_hand.php`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload), credentials: 'include' // 发送Cookie
             });
-
-            const responseText = await response.text();
+            rawResponseTextForDebug = await response.text();
             if (!response.ok) {
                 let errorMsg = `服务器错误 ${response.status}.`;
-                try { const errData = JSON.parse(responseText); errorMsg = errData.message || errorMsg; }
-                catch (e) { errorMsg += ` 响应: ${responseText.substring(0,100)}...`; }
+                try { const errData = JSON.parse(rawResponseTextForDebug); errorMsg = errData.message || errorMsg; }
+                catch (e) { errorMsg += ` 响应: ${rawResponseTextForDebug.substring(0,100)}...`; }
                 throw new Error(errorMsg);
             }
-            
-            const newState = JSON.parse(responseText);
+            const newState = JSON.parse(rawResponseTextForDebug);
             if (newState.success) {
                 updateUIWithGameState(newState.gameState);
             } else {
-                messageArea.textContent = `错误: ${newState.message}`;
-                if (currentGameState && currentGameState.currentPlayer === localPlayerId && !currentGameState.gameOver) {
+                messageArea.textContent = `操作失败: ${newState.message}`; // 从后端获取的错误信息
+                // 如果是session过期等特定错误，后端可能返回一个gameState来帮助前端恢复
+                if (newState.gameState && newState.gameState.currentPlayer) {
+                     updateUIWithGameState(newState.gameState); //尝试用返回的状态更新
+                } else if (currentGameState && currentGameState.currentPlayer === localPlayerId && !currentGameState.gameOver) {
                     playButton.disabled = false;
                     passButton.disabled = currentGameState.currentPlayer === currentGameState.roundLeadPlayer && (!currentGameState.lastPlayedHand || currentGameState.lastPlayedHand.cards.length === 0);
                 }
             }
         } catch (error) {
-            console.error("操作失败:", error);
-            messageArea.textContent = `操作失败: ${error.message || error.toString()}`;
+            console.error("操作失败时捕获的错误:", error);
+            if (error instanceof SyntaxError) {
+                 messageArea.textContent = `操作失败: 服务器返回无效数据。`;
+                 console.error("原始响应 (导致JSON解析失败):", rawResponseTextForDebug);
+            } else {
+                messageArea.textContent = `操作失败: ${error.message || '未知错误。'}`;
+            }
             if (currentGameState && currentGameState.currentPlayer === localPlayerId && !currentGameState.gameOver) {
-                 playButton.disabled = false;
-                 passButton.disabled = false;
+                 playButton.disabled = false; passButton.disabled = false;
             }
         } finally {
             showLoading(false);
@@ -219,41 +197,27 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     playButton.addEventListener('click', () => {
-        if (selectedCards.length === 0) {
-            messageArea.textContent = "请先选择要出的牌！";
-            return;
-        }
+        if (selectedCards.length === 0) { messageArea.textContent = "请先选择要出的牌！"; return; }
         sendActionToServer('play', selectedCards);
     });
-
-    passButton.addEventListener('click', () => {
-        sendActionToServer('pass');
-    });
+    passButton.addEventListener('click', () => sendActionToServer('pass'));
 
     startGameButton.addEventListener('click', async () => {
-        showLoading(true);
-        startGameButton.disabled = true;
-        messageArea.textContent = "正在开始新游戏...";
+        showLoading(true); startGameButton.disabled = true; messageArea.textContent = "正在开始新游戏...";
         let rawResponseTextForDebug = "";
-
         try {
-            const response = await fetch(`${API_BASE_URL}deal.php`, { method: 'GET' }); // 使用了上面定义的绝对URL
-            
-            rawResponseTextForDebug = await response.text(); 
-
+            const response = await fetch(`${API_BASE_URL}deal.php`, {
+                method: 'GET',
+                credentials: 'include' // 发送Cookie
+            });
+            rawResponseTextForDebug = await response.text();
             if (!response.ok) {
                 let errorMsg = `服务器错误 ${response.status}.`;
-                // 尝试解析错误信息，如果后端返回JSON格式的错误
-                try { 
-                    const errData = JSON.parse(rawResponseTextForDebug); 
-                    errorMsg = errData.message || errorMsg; 
-                } catch (e) { // 如果不是JSON，显示部分原始文本
-                    errorMsg += ` 响应内容: ${rawResponseTextForDebug.substring(0,200)}...`; 
-                }
+                try { const errData = JSON.parse(rawResponseTextForDebug); errorMsg = errData.message || errorMsg; }
+                catch (e) { errorMsg += ` 响应内容: ${rawResponseTextForDebug.substring(0,200)}...`; }
                 throw new Error(errorMsg);
             }
-            
-            const initialState = JSON.parse(rawResponseTextForDebug); // 尝试解析为JSON
+            const initialState = JSON.parse(rawResponseTextForDebug);
             if (initialState.success) {
                 updateUIWithGameState(initialState.gameState);
             } else {
@@ -262,14 +226,11 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         } catch (error) {
             console.error("开始游戏时发生捕获的错误:", error);
-            if (error instanceof SyntaxError) { // 特别捕获JSON解析错误
+            if (error instanceof SyntaxError) {
                  messageArea.textContent = `开始游戏失败: 服务器返回无效数据 (非JSON)。请直接访问后端API URL检查响应。`;
                  console.error("原始响应 (导致JSON解析失败):", rawResponseTextForDebug);
             } else {
                  messageArea.textContent = `开始游戏失败: ${error.message || '未知网络或脚本错误。'}`;
-            }
-            if (rawResponseTextForDebug && !(error instanceof SyntaxError)) { // 如果不是解析错误但有原始文本，也打印
-                console.error("原始响应文本（调试用）:", rawResponseTextForDebug);
             }
             startGameButton.disabled = false;
         } finally {
@@ -277,6 +238,5 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    playButton.disabled = true;
-    passButton.disabled = true;
+    playButton.disabled = true; passButton.disabled = true;
 });
